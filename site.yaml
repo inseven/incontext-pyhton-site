@@ -1,0 +1,20 @@
+config:
+  title: InContext
+  date_format: "%B %-d, %Y"
+  date_format_short: "%B %-d"
+  url: "https://jbmorley.co.uk"
+paths: []
+build_steps:
+- task: process_files
+  args:
+    handlers:
+    - when: '(.*/)?\.DS_Store'
+      then: ignore
+    - when: '(.*/)?\..*'
+      then: ignore
+    - when: '(.*/)?.*~'
+      then: ignore
+    - when: '(.*/)?.*\.markdown'
+      then: import_markdown
+    - when: '.*'
+      then: copy_file
