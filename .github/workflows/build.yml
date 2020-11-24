@@ -1,0 +1,54 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+
+  documentation:
+      
+    runs-on: Ubuntu-20.04
+    
+    steps:
+      
+    - name: Wait for other builds to finish
+      uses: softprops/turnstyle@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+        
+    - name: Checkout incontext
+      uses: actions/checkout@v2
+      with:
+        repository: jbmorley/incontext
+        path: incontext
+        ref: main
+        token: ${{ secrets.TOKEN }}
+
+    - name: Checkout source
+      uses: actions/checkout@v2
+      with:
+        path: site
+        
+    - name: Checkout gh-pages branch
+      uses: actions/checkout@v2
+      with:
+        path: gh-pages
+        ref: gh-pages
+        
+    - name: Build the site
+      run: |
+        rm -r gh-pages/*
+        cp -R site/content/docs/* gh-pages
+
+    - name: Commit the site to gh-pages
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Update auto-generated documentation
+        repository: gh-pages
+        branch: gh-pages
