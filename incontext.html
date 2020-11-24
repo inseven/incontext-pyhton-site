@@ -160,9 +160,9 @@ class InContext(object):
 
     def get_task(self, name):
         &#34;&#34;&#34;
-        Returns the task named `name`.
+        Returns the task associated with `name`.
         
-        Raises `KeyError` otherwise.
+        Raises `KeyError` if no task has been registered with `name`.
         &#34;&#34;&#34;
         return self.tasks[name]
 
@@ -368,9 +368,9 @@ if __name__ == &#34;__main__&#34;:
 
     def get_task(self, name):
         &#34;&#34;&#34;
-        Returns the task named `name`.
+        Returns the task associated with `name`.
         
-        Raises `KeyError` otherwise.
+        Raises `KeyError` if no task has been registered with `name`.
         &#34;&#34;&#34;
         return self.tasks[name]
 
@@ -557,17 +557,17 @@ must return a new callable which will be called if the the command is selected f
 <span>def <span class="ident">get_task</span></span>(<span>self, name)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Returns the task named <code>name</code>.</p>
-<p>Raises <code>KeyError</code> otherwise.</p></div>
+<div class="desc"><p>Returns the task associated with <code>name</code>.</p>
+<p>Raises <code>KeyError</code> if no task has been registered with <code>name</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_task(self, name):
     &#34;&#34;&#34;
-    Returns the task named `name`.
+    Returns the task associated with `name`.
     
-    Raises `KeyError` otherwise.
+    Raises `KeyError` if no task has been registered with `name`.
     &#34;&#34;&#34;
     return self.tasks[name]</code></pre>
 </details>
