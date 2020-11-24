@@ -121,6 +121,12 @@ class InContext(object):
                 logging.debug(&#34;Ignoring &#39;%s&#39;...&#34;, plugin_name)
 
     def add_argument(self, *args, **kwargs):
+        &#34;&#34;&#34;
+        Add a global command-line argument.
+        
+        Primarily intended to be used by configuration providers to allow them to specify a path to a configuration
+        file, or configuration override.
+        &#34;&#34;&#34;
         self.parser.add_argument(*args, **kwargs)
 
     def add_command(self, name, function, help=&#34;&#34;):
@@ -335,6 +341,12 @@ if __name__ == &#34;__main__&#34;:
                 logging.debug(&#34;Ignoring &#39;%s&#39;...&#34;, plugin_name)
 
     def add_argument(self, *args, **kwargs):
+        &#34;&#34;&#34;
+        Add a global command-line argument.
+        
+        Primarily intended to be used by configuration providers to allow them to specify a path to a configuration
+        file, or configuration override.
+        &#34;&#34;&#34;
         self.parser.add_argument(*args, **kwargs)
 
     def add_command(self, name, function, help=&#34;&#34;):
@@ -423,12 +435,20 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">add_argument</span></span>(<span>self, *args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Add a global command-line argument.</p>
+<p>Primarily intended to be used by configuration providers to allow them to specify a path to a configuration
+file, or configuration override.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_argument(self, *args, **kwargs):
+    &#34;&#34;&#34;
+    Add a global command-line argument.
+    
+    Primarily intended to be used by configuration providers to allow them to specify a path to a configuration
+    file, or configuration override.
+    &#34;&#34;&#34;
     self.parser.add_argument(*args, **kwargs)</code></pre>
 </details>
 </dd>
