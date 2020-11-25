@@ -12,7 +12,7 @@ Most existing static site generators do a great job with text content, but treat
 2. Clone the repository:
 
    ```bash
-   git clone git@github.com:jbmorley/incontext.git
+   git clone git@github.com:inseven/incontext.git
    ```
    
 3. Add InContext to your path:
