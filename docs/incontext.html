@@ -63,6 +63,24 @@ logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format=&#3
 
 sys.path.append(PLUGINS_DIRECTORY)
 
+# Global plugin state.
+# This might behave in a slightly unexpected way as it&#39;s not truly global due to the way plugins are loaded--each
+# plugin has its own instance of the incontext module, with it&#39;s own global plugin state. When the plugin is loaded
+# the loading instance if InContext copies that plugin&#39;s global plugin state for later use.
+# Doing it this way allows for the far more lightweight decorator approach to registering plugins.
+CONTEXT_FUNCTIONS = {}
+
+
+def context_function(name):
+    &#34;&#34;&#34;
+    Register a new Jinja2 context function for use when rendering the site.
+    &#34;&#34;&#34;
+    def decorator(f):
+        CONTEXT_FUNCTIONS[name] = f
+        return f
+    return decorator
+
+
 class Configuration(object):
 
     def __init__(self):
@@ -99,6 +117,7 @@ class InContext(object):
         self.configuration_providers = {}
         self.configuration = Configuration()
         self.commands = {}
+        self._context_functions =  dict(CONTEXT_FUNCTIONS)
 
         # Load the plugins.
         for plugin in glob.glob(os.path.join(self.plugins_directory, &#34;*.py&#34;)):
@@ -114,11 +133,24 @@ class InContext(object):
 
         # Initialize the plugins.
         for plugin_name, plugin_instance in self.plugins.items():
+            
+            # Load the classic method-based plugins.
             if hasattr(plugin_instance, &#39;initialize_plugin&#39;):
-                logging.debug(&#34;Initializing &#39;%s&#39;...&#34;, plugin_name)
+                logging.debug(&#34;Initializing legacy plugin &#39;%s&#39;...&#34;, plugin_name)
                 plugin_instance.initialize_plugin(self)
-            else:
-                logging.debug(&#34;Ignoring &#39;%s&#39;...&#34;, plugin_name)
+
+            # Load the decorator-based plugins by copying in their &#39;global&#39; state.
+            if hasattr(plugin_instance, &#39;incontext&#39;):
+                logging.debug(&#34;Initializing plugin &#39;%s&#39;...&#34;, plugin_name)
+                for name, f in plugin_instance.incontext.CONTEXT_FUNCTIONS.items():
+                    self._context_functions[name] = f
+                
+    @property
+    def context_functions(self):
+        &#34;&#34;&#34;
+        Return a dictionary of additional context functions that will be available to the Jinja templating at render time.
+        &#34;&#34;&#34;
+        return self._context_functions
 
     def add_argument(self, *args, **kwargs):
         &#34;&#34;&#34;
@@ -229,6 +261,25 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="incontext.context_function"><code class="name flex">
+<span>def <span class="ident">context_function</span></span>(<span>name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register a new Jinja2 context function for use when rendering the site.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def context_function(name):
+    &#34;&#34;&#34;
+    Register a new Jinja2 context function for use when rendering the site.
+    &#34;&#34;&#34;
+    def decorator(f):
+        CONTEXT_FUNCTIONS[name] = f
+        return f
+    return decorator</code></pre>
+</details>
+</dd>
 <dt id="incontext.main"><code class="name flex">
 <span>def <span class="ident">main</span></span>(<span>)</span>
 </code></dt>
@@ -319,6 +370,7 @@ if __name__ == &#34;__main__&#34;:
         self.configuration_providers = {}
         self.configuration = Configuration()
         self.commands = {}
+        self._context_functions =  dict(CONTEXT_FUNCTIONS)
 
         # Load the plugins.
         for plugin in glob.glob(os.path.join(self.plugins_directory, &#34;*.py&#34;)):
@@ -334,11 +386,24 @@ if __name__ == &#34;__main__&#34;:
 
         # Initialize the plugins.
         for plugin_name, plugin_instance in self.plugins.items():
+            
+            # Load the classic method-based plugins.
             if hasattr(plugin_instance, &#39;initialize_plugin&#39;):
-                logging.debug(&#34;Initializing &#39;%s&#39;...&#34;, plugin_name)
+                logging.debug(&#34;Initializing legacy plugin &#39;%s&#39;...&#34;, plugin_name)
                 plugin_instance.initialize_plugin(self)
-            else:
-                logging.debug(&#34;Ignoring &#39;%s&#39;...&#34;, plugin_name)
+
+            # Load the decorator-based plugins by copying in their &#39;global&#39; state.
+            if hasattr(plugin_instance, &#39;incontext&#39;):
+                logging.debug(&#34;Initializing plugin &#39;%s&#39;...&#34;, plugin_name)
+                for name, f in plugin_instance.incontext.CONTEXT_FUNCTIONS.items():
+                    self._context_functions[name] = f
+                
+    @property
+    def context_functions(self):
+        &#34;&#34;&#34;
+        Return a dictionary of additional context functions that will be available to the Jinja templating at render time.
+        &#34;&#34;&#34;
+        return self._context_functions
 
     def add_argument(self, *args, **kwargs):
         &#34;&#34;&#34;
@@ -429,6 +494,24 @@ if __name__ == &#34;__main__&#34;:
             exit(1)
         options.fn(options)</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="incontext.InContext.context_functions"><code class="name">var <span class="ident">context_functions</span></code></dt>
+<dd>
+<div class="desc"><p>Return a dictionary of additional context functions that will be available to the Jinja templating at render time.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def context_functions(self):
+    &#34;&#34;&#34;
+    Return a dictionary of additional context functions that will be available to the Jinja templating at render time.
+    &#34;&#34;&#34;
+    return self._context_functions</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="incontext.InContext.add_argument"><code class="name flex">
@@ -648,6 +731,7 @@ must return a new callable which will be called if the the command is selected f
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="incontext.context_function" href="#incontext.context_function">context_function</a></code></li>
 <li><code><a title="incontext.main" href="#incontext.main">main</a></code></li>
 </ul>
 </li>
@@ -667,6 +751,7 @@ must return a new callable which will be called if the the command is selected f
 <li><code><a title="incontext.InContext.add_configuration_provider" href="#incontext.InContext.add_configuration_provider">add_configuration_provider</a></code></li>
 <li><code><a title="incontext.InContext.add_handler" href="#incontext.InContext.add_handler">add_handler</a></code></li>
 <li><code><a title="incontext.InContext.add_task" href="#incontext.InContext.add_task">add_task</a></code></li>
+<li><code><a title="incontext.InContext.context_functions" href="#incontext.InContext.context_functions">context_functions</a></code></li>
 <li><code><a title="incontext.InContext.get_handler" href="#incontext.InContext.get_handler">get_handler</a></code></li>
 <li><code><a title="incontext.InContext.get_task" href="#incontext.InContext.get_task">get_task</a></code></li>
 <li><code><a title="incontext.InContext.run" href="#incontext.InContext.run">run</a></code></li>
