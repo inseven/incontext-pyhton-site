@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.1" />
+<title>build API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>build</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright (c) 2016-2020 InSeven Limited
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the &#34;Software&#34;), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import codecs
+import functools
+import importlib.util
+import json
+import logging
+import os
+import re
+import shutil
+import subprocess
+
+import fnmatch
+import yaml
+
+import converters
+import gallery
+import paths
+import store
+import tracker
+import utils
+
+
+DOCUMENT_STORE = &#34;DOCUMENT_STORE&#34;
+
+
+def initialize_plugin(incontext):
+    incontext.add_argument(&#34;--set&#34;, type=str, help=&#34;override configuration parameters&#34;)
+    incontext.add_command(&#34;build&#34;, command_build, help=&#34;build the website&#34;)
+    incontext.add_command(&#34;clean&#34;, command_clean, help=&#34;remove the build directory&#34;)
+    incontext.add_configuration_provider(&#34;site&#34;, configuration_provider_site)
+    incontext.add_handler(&#34;import_markdown&#34;, import_markdown)
+    incontext.add_task(&#34;process_files&#34;, process_files)
+
+
+class PropertyDictionary(object):
+
+    def __init__(self, dictionary):
+        self._dictionary = dictionary
+
+    def __getattr__(self, name):
+        return self._dictionary[name]
+
+    def keys(self):
+        return self._dictionary.keys()
+
+    def __getitem__(self, key):
+        return self._dictionary[key]
+
+
+class SiteConfiguration(object):
+
+    def __init__(self, path, overrides={}):
+        self._path = os.path.abspath(path)
+        self._root = os.path.dirname(self._path)
+        self._overrides = overrides
+        self._loaded = False
+            
+    def _load_configuration(self):
+        if self._loaded:
+            return
+        self._loaded = True
+        with open(self._path) as fh:
+            self._config = yaml.load(fh, Loader=yaml.SafeLoader)
+        for key, value in self._overrides.items():
+            logging.info(&#34;%s=%s&#34; % (key, value))
+            keys = key.split(&#34;.&#34;)
+            destination = self._config
+            for key in keys[:-1]:
+                destination = destination[key]
+            destination[keys[-1]] = value
+
+    @property
+    def root(self):
+        return self._root
+
+    @property
+    def build_steps(self):
+        self._load_configuration()
+        return self._config[&#34;build_steps&#34;]
+
+    @property
+    def config(self):
+        self._load_configuration()
+        return self._config[&#34;config&#34;]
+
+    @property
+    def paths(self):
+        self._load_configuration()
+        paths = {
+            &#34;content&#34;: &#34;content&#34;,
+            &#34;build&#34;: &#34;build&#34;,
+            &#34;templates&#34;: &#34;templates&#34;,
+        }
+        paths.update(self._config[&#34;paths&#34;])
+        # TODO: Ensure the paths are under the root.
+        return PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
+                                   for name, path in paths.items()})
+
+    @property
+    def destination(self):
+        self._load_configuration()
+        return PropertyDictionary({
+            &#34;root_directory&#34;: self.paths.build,
+            &#34;files_directory&#34;: os.path.join(self.paths.build, &#34;files&#34;),
+            &#34;store_path&#34;: os.path.join(self.paths.build, &#34;store.sqlite&#34;),
+        })
+
+
+def touch(path):
+    with open(path, &#39;a&#39;):
+        os.utime(path)
+
+
+def configuration_provider_site(incontext, options):
+    overrides = {}
+
+    # Process overrides from the environment.
+    try:
+        environment_config = os.environ[&#34;INCONTEXT_CONFIG&#34;]
+        environment_sets = environment_config.split(&#34;;&#34;)
+        overrides = {key: value for key, value in [set.split(&#34;=&#34;, 1) for set in environment_sets]}
+    except KeyError:
+        pass
+
+    # Process overrides from the command line.
+    if options.set:
+        sets = [options.set]
+        for key, value in [set.split(&#34;=&#34;, 1) for set in sets]:
+            overrides[key] = value
+
+    return SiteConfiguration(os.path.join(os.path.abspath(options.site), &#34;site.yaml&#34;), overrides)
+
+
+def process_files(incontext, options, handlers):
+    document_store = store.DocumentStore(incontext.configuration.site.destination.store_path)
+    incontext.environment[DOCUMENT_STORE] = document_store
+
+    logging.info(&#34;Generating intermediates...&#34;)
+    phase1 = Phase(os.path.join(incontext.configuration.site.destination.root_directory, &#34;phase-1-generate-intermediates.json&#34;),
+                   incontext.configuration.site.paths.content,
+                   document_store)
+    for task in handlers:
+        fn = incontext.get_handler(task[&#34;then&#34;])
+        args = task[&#34;args&#34;] if &#34;args&#34; in task else {}
+        phase1.add_task(task[&#39;when&#39;], fn(incontext,
+                                         from_directory=incontext.configuration.site.paths.content,
+                                         to_directory=incontext.configuration.site.destination.files_directory,
+                                         **args))
+    phase1.process()
+
+    # Renders are dependent on the templates, so we hash all the templates and add this into the hash for the page
+    # renders to ensure everything is re-rendered whenever a template changes. It should be possible to track the
+    # templates used in render in the future if we need to make this faster.
+    templates = [os.path.join(*paths) for paths in utils.find_files(incontext.configuration.site.paths.templates)]
+    template_mtimes = [os.path.getmtime(path) for path in templates]
+    template_hash = utils.hash_items(template_mtimes)
+
+    logging.info(&#34;Render content cache...&#34;)
+    cache_path = os.path.join(incontext.configuration.site.destination.root_directory, &#34;phase-6-render-content.json&#34;)
+    render_change_tracker = tracker.ChangeTracker(cache_path)
+    website = Website(incontext=incontext)
+    for document in website.documents():
+        def render_outer(document):
+            def render(url):
+                path, queries, hashes = website.render(document=document)
+                return {&#34;files&#34;: [path],
+                        &#34;queries&#34;: queries,
+                        &#34;mtime&#34;: utils.hash_items([template_hash, document.hash] + hashes)}
+            return render
+        queries = {}
+        try:
+            queries = render_change_tracker.get_info(path=document.url)[&#34;queries&#34;]
+        except KeyError:
+            pass
+        hash = utils.hash_items([template_hash, document.hash] + document.evaluate_queries(queries))
+        render_change_tracker.add(path=document.url, create=render_outer(document), mtime=hash)
+    render_change_tracker.commit(cleanup(root=incontext.configuration.site.destination.root_directory,
+                                         document_store=document_store))
+
+    touch(incontext.configuration.site.destination.store_path)
+
+
+class Website(object):
+
+    def __init__(self, incontext):
+        self.incontext = incontext
+        self.service_directory = paths.SERVICE_DIR
+        self.templates_path = incontext.configuration.site.paths.templates
+        self.service_path = os.path.join(self.service_directory, &#34;website.py&#34;)
+        self.files_directory = incontext.configuration.site.destination.files_directory
+        with utils.Chdir(self.service_directory):
+            website_spec = importlib.util.spec_from_file_location(&#34;website&#34;, self.service_path)
+            website = importlib.util.module_from_spec(website_spec)
+            website_spec.loader.exec_module(website)
+            self.website = website
+            for name, f in incontext.context_functions.items():
+                self.website.app.jinja_env.globals.update(**{name: f})
+            self.website.initialize(templates_path=self.templates_path,
+                                    store_path=incontext.configuration.site.destination.store_path,
+                                    config=incontext.configuration.site.config)
+
+    def documents(self):
+        with utils.Chdir(self.service_directory):
+            return self.website.app.jinja_env.site.posts()
+
+    def render(self, document):
+        with utils.Chdir(self.service_directory) as current_directory, self.website.app.test_request_context():
+            logging.info(&#34;[render] %s&#34;, document.url)
+            response, query_tracker = self.website.documents(path=document.url)
+            hashes = [hash for query, hash in query_tracker.queries.items()]
+            _, extension = os.path.splitext(document.template)
+            destination_directory = os.path.join(self.files_directory, document.url[1:])
+            destination = os.path.join(destination_directory, &#34;index&#34; + extension)
+            utils.makedirs(destination_directory)
+            with open(destination, &#34;wb&#34;) as fh:
+                fh.write(response.data)
+            return destination, query_tracker.queries, hashes
+
+
+def command_build(incontext, parser):
+
+    def do_build(options):
+
+        # Create the build directory.
+        utils.makedirs(incontext.configuration.site.destination.root_directory)
+
+        # Run the build tasks.
+        for task in incontext.configuration.site.build_steps:
+            identifier, args = task[&#34;task&#34;], task[&#34;args&#34;] if &#34;args&#34; in task else {}
+            logging.info(&#34;Running task &#39;%s&#39;...&#34; % identifier)
+            incontext.get_task(identifier)(incontext, options, **args)
+
+    return do_build
+
+
+def command_clean(incontext, parser):
+
+    def do_clean(options):
+
+        build_dir = incontext.configuration.site.destination.root_directory
+        if not os.path.exists(build_dir):
+            logging.info(&#34;Nothing to do.&#34;)
+            return
+
+        logging.info(&#34;Removing &#39;%s&#39;...&#34; % build_dir)
+        shutil.rmtree(build_dir)
+
+    return do_clean
+
+
+def import_markdown(incontext, from_directory, to_directory, default_category=&#39;general&#39;):
+
+    @functools.wraps(import_markdown)
+    def inner(path):
+        root, dirname, basename = utils.tripple(from_directory, path)
+        document = converters.frontmatter_document(root,
+                                                   os.path.join(dirname, basename),
+                                                   default_category=default_category)
+
+        files = []
+
+        # Thumbnail.
+        try:
+            if isinstance(document[&#34;thumbnail&#34;], str):  # work-around for legacy photo handling
+                thumbnail_src = os.path.normpath(os.path.join(from_directory, dirname, document[&#34;thumbnail&#34;]))
+                name, ext = os.path.splitext(basename)
+                thumbnail_basename = &#34;%s-thumbnail.jpg&#34; % (name, )
+
+                # Ensure the destination directory exists.
+                # This is designed to fail if the destination path exists, but is not a directory.
+                target_directory = os.path.join(to_directory, dirname)
+                utils.makedirs(target_directory)
+
+                document.metadata[&#39;thumbnail&#39;] = gallery.resize(thumbnail_src,
+                                                                to_directory,
+                                                                dirname,
+                                                                thumbnail_basename,
+                                                                (None, 500),
+                                                                2)
+                files.append(os.path.join(to_directory, dirname, thumbnail_basename))
+        except KeyError:
+            pass
+
+        incontext.environment[DOCUMENT_STORE].add(document)
+        return {&#39;files&#39;: files, &#39;urls&#39;: [document.url]}
+
+    return inner
+
+
+def cleanup(root, document_store):
+    def inner(info):
+        if &#39;files&#39; in info:
+            for file in info[&#39;files&#39;]:
+                if isinstance(file, str) and os.path.exists(file):
+                    logging.info(&#34;[clean] %s&#34; % os.path.relpath(file, root))
+                    os.remove(file)
+        if &#39;urls&#39; in info:
+            for url in info[&#39;urls&#39;]:
+                logging.info(&#34;[clean] %s&#34; % url)
+                document_store.delete(url)
+    return inner
+
+
+class Phase(object):
+
+    def __init__(self, cache, root, document_store):
+        self.cache = cache
+        self.root = root
+        self.document_store = document_store
+        self.tasks = []
+        self.tracker = tracker.ChangeTracker(self.cache)
+
+    def add_task(self, pattern, task):
+        self.tasks.append((pattern, task))
+
+    @property
+    def paths(self):
+        return self.tracker.paths
+
+    def process(self):
+        for root, dirname, basename in utils.find_files(self.root):
+            relpath = os.path.join(dirname, basename)
+            for pattern, task in self.tasks:
+                if re.search(&#34;^%s$&#34; % pattern, relpath, re.IGNORECASE):
+                    def debug_task(task, relpath):
+                        @functools.wraps(task)
+                        def inner(path):
+                            logging.info(&#34;[%s] %s&#34; % (task.__name__, relpath))
+                            return task(path)
+                        return inner
+                    self.tracker.add(os.path.join(root, dirname, basename), debug_task(task, relpath))
+                    break
+        self.tracker.commit(cleanup(self.root, self.document_store))</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="build.cleanup"><code class="name flex">
+<span>def <span class="ident">cleanup</span></span>(<span>root, document_store)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cleanup(root, document_store):
+    def inner(info):
+        if &#39;files&#39; in info:
+            for file in info[&#39;files&#39;]:
+                if isinstance(file, str) and os.path.exists(file):
+                    logging.info(&#34;[clean] %s&#34; % os.path.relpath(file, root))
+                    os.remove(file)
+        if &#39;urls&#39; in info:
+            for url in info[&#39;urls&#39;]:
+                logging.info(&#34;[clean] %s&#34; % url)
+                document_store.delete(url)
+    return inner</code></pre>
+</details>
+</dd>
+<dt id="build.command_build"><code class="name flex">
+<span>def <span class="ident">command_build</span></span>(<span>incontext, parser)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def command_build(incontext, parser):
+
+    def do_build(options):
+
+        # Create the build directory.
+        utils.makedirs(incontext.configuration.site.destination.root_directory)
+
+        # Run the build tasks.
+        for task in incontext.configuration.site.build_steps:
+            identifier, args = task[&#34;task&#34;], task[&#34;args&#34;] if &#34;args&#34; in task else {}
+            logging.info(&#34;Running task &#39;%s&#39;...&#34; % identifier)
+            incontext.get_task(identifier)(incontext, options, **args)
+
+    return do_build</code></pre>
+</details>
+</dd>
+<dt id="build.command_clean"><code class="name flex">
+<span>def <span class="ident">command_clean</span></span>(<span>incontext, parser)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def command_clean(incontext, parser):
+
+    def do_clean(options):
+
+        build_dir = incontext.configuration.site.destination.root_directory
+        if not os.path.exists(build_dir):
+            logging.info(&#34;Nothing to do.&#34;)
+            return
+
+        logging.info(&#34;Removing &#39;%s&#39;...&#34; % build_dir)
+        shutil.rmtree(build_dir)
+
+    return do_clean</code></pre>
+</details>
+</dd>
+<dt id="build.configuration_provider_site"><code class="name flex">
+<span>def <span class="ident">configuration_provider_site</span></span>(<span>incontext, options)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def configuration_provider_site(incontext, options):
+    overrides = {}
+
+    # Process overrides from the environment.
+    try:
+        environment_config = os.environ[&#34;INCONTEXT_CONFIG&#34;]
+        environment_sets = environment_config.split(&#34;;&#34;)
+        overrides = {key: value for key, value in [set.split(&#34;=&#34;, 1) for set in environment_sets]}
+    except KeyError:
+        pass
+
+    # Process overrides from the command line.
+    if options.set:
+        sets = [options.set]
+        for key, value in [set.split(&#34;=&#34;, 1) for set in sets]:
+            overrides[key] = value
+
+    return SiteConfiguration(os.path.join(os.path.abspath(options.site), &#34;site.yaml&#34;), overrides)</code></pre>
+</details>
+</dd>
+<dt id="build.import_markdown"><code class="name flex">
+<span>def <span class="ident">import_markdown</span></span>(<span>incontext, from_directory, to_directory, default_category='general')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def import_markdown(incontext, from_directory, to_directory, default_category=&#39;general&#39;):
+
+    @functools.wraps(import_markdown)
+    def inner(path):
+        root, dirname, basename = utils.tripple(from_directory, path)
+        document = converters.frontmatter_document(root,
+                                                   os.path.join(dirname, basename),
+                                                   default_category=default_category)
+
+        files = []
+
+        # Thumbnail.
+        try:
+            if isinstance(document[&#34;thumbnail&#34;], str):  # work-around for legacy photo handling
+                thumbnail_src = os.path.normpath(os.path.join(from_directory, dirname, document[&#34;thumbnail&#34;]))
+                name, ext = os.path.splitext(basename)
+                thumbnail_basename = &#34;%s-thumbnail.jpg&#34; % (name, )
+
+                # Ensure the destination directory exists.
+                # This is designed to fail if the destination path exists, but is not a directory.
+                target_directory = os.path.join(to_directory, dirname)
+                utils.makedirs(target_directory)
+
+                document.metadata[&#39;thumbnail&#39;] = gallery.resize(thumbnail_src,
+                                                                to_directory,
+                                                                dirname,
+                                                                thumbnail_basename,
+                                                                (None, 500),
+                                                                2)
+                files.append(os.path.join(to_directory, dirname, thumbnail_basename))
+        except KeyError:
+            pass
+
+        incontext.environment[DOCUMENT_STORE].add(document)
+        return {&#39;files&#39;: files, &#39;urls&#39;: [document.url]}
+
+    return inner</code></pre>
+</details>
+</dd>
+<dt id="build.initialize_plugin"><code class="name flex">
+<span>def <span class="ident">initialize_plugin</span></span>(<span>incontext)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initialize_plugin(incontext):
+    incontext.add_argument(&#34;--set&#34;, type=str, help=&#34;override configuration parameters&#34;)
+    incontext.add_command(&#34;build&#34;, command_build, help=&#34;build the website&#34;)
+    incontext.add_command(&#34;clean&#34;, command_clean, help=&#34;remove the build directory&#34;)
+    incontext.add_configuration_provider(&#34;site&#34;, configuration_provider_site)
+    incontext.add_handler(&#34;import_markdown&#34;, import_markdown)
+    incontext.add_task(&#34;process_files&#34;, process_files)</code></pre>
+</details>
+</dd>
+<dt id="build.process_files"><code class="name flex">
+<span>def <span class="ident">process_files</span></span>(<span>incontext, options, handlers)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_files(incontext, options, handlers):
+    document_store = store.DocumentStore(incontext.configuration.site.destination.store_path)
+    incontext.environment[DOCUMENT_STORE] = document_store
+
+    logging.info(&#34;Generating intermediates...&#34;)
+    phase1 = Phase(os.path.join(incontext.configuration.site.destination.root_directory, &#34;phase-1-generate-intermediates.json&#34;),
+                   incontext.configuration.site.paths.content,
+                   document_store)
+    for task in handlers:
+        fn = incontext.get_handler(task[&#34;then&#34;])
+        args = task[&#34;args&#34;] if &#34;args&#34; in task else {}
+        phase1.add_task(task[&#39;when&#39;], fn(incontext,
+                                         from_directory=incontext.configuration.site.paths.content,
+                                         to_directory=incontext.configuration.site.destination.files_directory,
+                                         **args))
+    phase1.process()
+
+    # Renders are dependent on the templates, so we hash all the templates and add this into the hash for the page
+    # renders to ensure everything is re-rendered whenever a template changes. It should be possible to track the
+    # templates used in render in the future if we need to make this faster.
+    templates = [os.path.join(*paths) for paths in utils.find_files(incontext.configuration.site.paths.templates)]
+    template_mtimes = [os.path.getmtime(path) for path in templates]
+    template_hash = utils.hash_items(template_mtimes)
+
+    logging.info(&#34;Render content cache...&#34;)
+    cache_path = os.path.join(incontext.configuration.site.destination.root_directory, &#34;phase-6-render-content.json&#34;)
+    render_change_tracker = tracker.ChangeTracker(cache_path)
+    website = Website(incontext=incontext)
+    for document in website.documents():
+        def render_outer(document):
+            def render(url):
+                path, queries, hashes = website.render(document=document)
+                return {&#34;files&#34;: [path],
+                        &#34;queries&#34;: queries,
+                        &#34;mtime&#34;: utils.hash_items([template_hash, document.hash] + hashes)}
+            return render
+        queries = {}
+        try:
+            queries = render_change_tracker.get_info(path=document.url)[&#34;queries&#34;]
+        except KeyError:
+            pass
+        hash = utils.hash_items([template_hash, document.hash] + document.evaluate_queries(queries))
+        render_change_tracker.add(path=document.url, create=render_outer(document), mtime=hash)
+    render_change_tracker.commit(cleanup(root=incontext.configuration.site.destination.root_directory,
+                                         document_store=document_store))
+
+    touch(incontext.configuration.site.destination.store_path)</code></pre>
+</details>
+</dd>
+<dt id="build.touch"><code class="name flex">
+<span>def <span class="ident">touch</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def touch(path):
+    with open(path, &#39;a&#39;):
+        os.utime(path)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="build.Phase"><code class="flex name class">
+<span>class <span class="ident">Phase</span></span>
+<span>(</span><span>cache, root, document_store)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Phase(object):
+
+    def __init__(self, cache, root, document_store):
+        self.cache = cache
+        self.root = root
+        self.document_store = document_store
+        self.tasks = []
+        self.tracker = tracker.ChangeTracker(self.cache)
+
+    def add_task(self, pattern, task):
+        self.tasks.append((pattern, task))
+
+    @property
+    def paths(self):
+        return self.tracker.paths
+
+    def process(self):
+        for root, dirname, basename in utils.find_files(self.root):
+            relpath = os.path.join(dirname, basename)
+            for pattern, task in self.tasks:
+                if re.search(&#34;^%s$&#34; % pattern, relpath, re.IGNORECASE):
+                    def debug_task(task, relpath):
+                        @functools.wraps(task)
+                        def inner(path):
+                            logging.info(&#34;[%s] %s&#34; % (task.__name__, relpath))
+                            return task(path)
+                        return inner
+                    self.tracker.add(os.path.join(root, dirname, basename), debug_task(task, relpath))
+                    break
+        self.tracker.commit(cleanup(self.root, self.document_store))</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="build.Phase.paths"><code class="name">var <span class="ident">paths</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def paths(self):
+    return self.tracker.paths</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="build.Phase.add_task"><code class="name flex">
+<span>def <span class="ident">add_task</span></span>(<span>self, pattern, task)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_task(self, pattern, task):
+    self.tasks.append((pattern, task))</code></pre>
+</details>
+</dd>
+<dt id="build.Phase.process"><code class="name flex">
+<span>def <span class="ident">process</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process(self):
+    for root, dirname, basename in utils.find_files(self.root):
+        relpath = os.path.join(dirname, basename)
+        for pattern, task in self.tasks:
+            if re.search(&#34;^%s$&#34; % pattern, relpath, re.IGNORECASE):
+                def debug_task(task, relpath):
+                    @functools.wraps(task)
+                    def inner(path):
+                        logging.info(&#34;[%s] %s&#34; % (task.__name__, relpath))
+                        return task(path)
+                    return inner
+                self.tracker.add(os.path.join(root, dirname, basename), debug_task(task, relpath))
+                break
+    self.tracker.commit(cleanup(self.root, self.document_store))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="build.PropertyDictionary"><code class="flex name class">
+<span>class <span class="ident">PropertyDictionary</span></span>
+<span>(</span><span>dictionary)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PropertyDictionary(object):
+
+    def __init__(self, dictionary):
+        self._dictionary = dictionary
+
+    def __getattr__(self, name):
+        return self._dictionary[name]
+
+    def keys(self):
+        return self._dictionary.keys()
+
+    def __getitem__(self, key):
+        return self._dictionary[key]</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="build.PropertyDictionary.keys"><code class="name flex">
+<span>def <span class="ident">keys</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def keys(self):
+    return self._dictionary.keys()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="build.SiteConfiguration"><code class="flex name class">
+<span>class <span class="ident">SiteConfiguration</span></span>
+<span>(</span><span>path, overrides={})</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SiteConfiguration(object):
+
+    def __init__(self, path, overrides={}):
+        self._path = os.path.abspath(path)
+        self._root = os.path.dirname(self._path)
+        self._overrides = overrides
+        self._loaded = False
+            
+    def _load_configuration(self):
+        if self._loaded:
+            return
+        self._loaded = True
+        with open(self._path) as fh:
+            self._config = yaml.load(fh, Loader=yaml.SafeLoader)
+        for key, value in self._overrides.items():
+            logging.info(&#34;%s=%s&#34; % (key, value))
+            keys = key.split(&#34;.&#34;)
+            destination = self._config
+            for key in keys[:-1]:
+                destination = destination[key]
+            destination[keys[-1]] = value
+
+    @property
+    def root(self):
+        return self._root
+
+    @property
+    def build_steps(self):
+        self._load_configuration()
+        return self._config[&#34;build_steps&#34;]
+
+    @property
+    def config(self):
+        self._load_configuration()
+        return self._config[&#34;config&#34;]
+
+    @property
+    def paths(self):
+        self._load_configuration()
+        paths = {
+            &#34;content&#34;: &#34;content&#34;,
+            &#34;build&#34;: &#34;build&#34;,
+            &#34;templates&#34;: &#34;templates&#34;,
+        }
+        paths.update(self._config[&#34;paths&#34;])
+        # TODO: Ensure the paths are under the root.
+        return PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
+                                   for name, path in paths.items()})
+
+    @property
+    def destination(self):
+        self._load_configuration()
+        return PropertyDictionary({
+            &#34;root_directory&#34;: self.paths.build,
+            &#34;files_directory&#34;: os.path.join(self.paths.build, &#34;files&#34;),
+            &#34;store_path&#34;: os.path.join(self.paths.build, &#34;store.sqlite&#34;),
+        })</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="build.SiteConfiguration.build_steps"><code class="name">var <span class="ident">build_steps</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def build_steps(self):
+    self._load_configuration()
+    return self._config[&#34;build_steps&#34;]</code></pre>
+</details>
+</dd>
+<dt id="build.SiteConfiguration.config"><code class="name">var <span class="ident">config</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def config(self):
+    self._load_configuration()
+    return self._config[&#34;config&#34;]</code></pre>
+</details>
+</dd>
+<dt id="build.SiteConfiguration.destination"><code class="name">var <span class="ident">destination</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def destination(self):
+    self._load_configuration()
+    return PropertyDictionary({
+        &#34;root_directory&#34;: self.paths.build,
+        &#34;files_directory&#34;: os.path.join(self.paths.build, &#34;files&#34;),
+        &#34;store_path&#34;: os.path.join(self.paths.build, &#34;store.sqlite&#34;),
+    })</code></pre>
+</details>
+</dd>
+<dt id="build.SiteConfiguration.paths"><code class="name">var <span class="ident">paths</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def paths(self):
+    self._load_configuration()
+    paths = {
+        &#34;content&#34;: &#34;content&#34;,
+        &#34;build&#34;: &#34;build&#34;,
+        &#34;templates&#34;: &#34;templates&#34;,
+    }
+    paths.update(self._config[&#34;paths&#34;])
+    # TODO: Ensure the paths are under the root.
+    return PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
+                               for name, path in paths.items()})</code></pre>
+</details>
+</dd>
+<dt id="build.SiteConfiguration.root"><code class="name">var <span class="ident">root</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def root(self):
+    return self._root</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="build.Website"><code class="flex name class">
+<span>class <span class="ident">Website</span></span>
+<span>(</span><span>incontext)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Website(object):
+
+    def __init__(self, incontext):
+        self.incontext = incontext
+        self.service_directory = paths.SERVICE_DIR
+        self.templates_path = incontext.configuration.site.paths.templates
+        self.service_path = os.path.join(self.service_directory, &#34;website.py&#34;)
+        self.files_directory = incontext.configuration.site.destination.files_directory
+        with utils.Chdir(self.service_directory):
+            website_spec = importlib.util.spec_from_file_location(&#34;website&#34;, self.service_path)
+            website = importlib.util.module_from_spec(website_spec)
+            website_spec.loader.exec_module(website)
+            self.website = website
+            for name, f in incontext.context_functions.items():
+                self.website.app.jinja_env.globals.update(**{name: f})
+            self.website.initialize(templates_path=self.templates_path,
+                                    store_path=incontext.configuration.site.destination.store_path,
+                                    config=incontext.configuration.site.config)
+
+    def documents(self):
+        with utils.Chdir(self.service_directory):
+            return self.website.app.jinja_env.site.posts()
+
+    def render(self, document):
+        with utils.Chdir(self.service_directory) as current_directory, self.website.app.test_request_context():
+            logging.info(&#34;[render] %s&#34;, document.url)
+            response, query_tracker = self.website.documents(path=document.url)
+            hashes = [hash for query, hash in query_tracker.queries.items()]
+            _, extension = os.path.splitext(document.template)
+            destination_directory = os.path.join(self.files_directory, document.url[1:])
+            destination = os.path.join(destination_directory, &#34;index&#34; + extension)
+            utils.makedirs(destination_directory)
+            with open(destination, &#34;wb&#34;) as fh:
+                fh.write(response.data)
+            return destination, query_tracker.queries, hashes</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="build.Website.documents"><code class="name flex">
+<span>def <span class="ident">documents</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def documents(self):
+    with utils.Chdir(self.service_directory):
+        return self.website.app.jinja_env.site.posts()</code></pre>
+</details>
+</dd>
+<dt id="build.Website.render"><code class="name flex">
+<span>def <span class="ident">render</span></span>(<span>self, document)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def render(self, document):
+    with utils.Chdir(self.service_directory) as current_directory, self.website.app.test_request_context():
+        logging.info(&#34;[render] %s&#34;, document.url)
+        response, query_tracker = self.website.documents(path=document.url)
+        hashes = [hash for query, hash in query_tracker.queries.items()]
+        _, extension = os.path.splitext(document.template)
+        destination_directory = os.path.join(self.files_directory, document.url[1:])
+        destination = os.path.join(destination_directory, &#34;index&#34; + extension)
+        utils.makedirs(destination_directory)
+        with open(destination, &#34;wb&#34;) as fh:
+            fh.write(response.data)
+        return destination, query_tracker.queries, hashes</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="build.cleanup" href="#build.cleanup">cleanup</a></code></li>
+<li><code><a title="build.command_build" href="#build.command_build">command_build</a></code></li>
+<li><code><a title="build.command_clean" href="#build.command_clean">command_clean</a></code></li>
+<li><code><a title="build.configuration_provider_site" href="#build.configuration_provider_site">configuration_provider_site</a></code></li>
+<li><code><a title="build.import_markdown" href="#build.import_markdown">import_markdown</a></code></li>
+<li><code><a title="build.initialize_plugin" href="#build.initialize_plugin">initialize_plugin</a></code></li>
+<li><code><a title="build.process_files" href="#build.process_files">process_files</a></code></li>
+<li><code><a title="build.touch" href="#build.touch">touch</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="build.Phase" href="#build.Phase">Phase</a></code></h4>
+<ul class="">
+<li><code><a title="build.Phase.add_task" href="#build.Phase.add_task">add_task</a></code></li>
+<li><code><a title="build.Phase.paths" href="#build.Phase.paths">paths</a></code></li>
+<li><code><a title="build.Phase.process" href="#build.Phase.process">process</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="build.PropertyDictionary" href="#build.PropertyDictionary">PropertyDictionary</a></code></h4>
+<ul class="">
+<li><code><a title="build.PropertyDictionary.keys" href="#build.PropertyDictionary.keys">keys</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="build.SiteConfiguration" href="#build.SiteConfiguration">SiteConfiguration</a></code></h4>
+<ul class="">
+<li><code><a title="build.SiteConfiguration.build_steps" href="#build.SiteConfiguration.build_steps">build_steps</a></code></li>
+<li><code><a title="build.SiteConfiguration.config" href="#build.SiteConfiguration.config">config</a></code></li>
+<li><code><a title="build.SiteConfiguration.destination" href="#build.SiteConfiguration.destination">destination</a></code></li>
+<li><code><a title="build.SiteConfiguration.paths" href="#build.SiteConfiguration.paths">paths</a></code></li>
+<li><code><a title="build.SiteConfiguration.root" href="#build.SiteConfiguration.root">root</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="build.Website" href="#build.Website">Website</a></code></h4>
+<ul class="">
+<li><code><a title="build.Website.documents" href="#build.Website.documents">documents</a></code></li>
+<li><code><a title="build.Website.render" href="#build.Website.render">render</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+</footer>
+</body>
+</html>

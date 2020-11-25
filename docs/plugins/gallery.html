@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.1" />
+<title>gallery API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>gallery</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright (c) 2016-2020 InSeven Limited
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the &#34;Software&#34;), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import argparse
+import codecs
+import datetime
+import functools
+import glob
+import io
+import json
+import logging
+import os
+import os.path
+import re
+import shutil
+import subprocess
+import sys
+import time
+
+import dateutil
+import frontmatter
+import pyheif
+import whatimage
+
+from PIL import Image, ExifTags
+
+import converters
+import store
+import utils
+
+
+def initialize_plugin(incontext):
+    incontext.add_handler(&#34;import_photo&#34;, import_photo)
+
+
+def import_photo(incontext, from_directory, to_directory, category, title_from_filename=True):
+
+    @functools.wraps(import_photo)
+    def inner(path):
+        root, dirname, basename = utils.tripple(from_directory, path)
+        return process_image(incontext, from_directory, to_directory, dirname, basename, category=category, title_from_filename=title_from_filename)
+
+    return inner
+
+
+def generate_identifier(basename):
+    return os.path.splitext(basename)[0]
+
+
+def load_metadata(path):
+
+    default = {&#34;version&#34;: 0}
+    try:
+        fm = frontmatter.load(path)
+        dictionary = fm.metadata
+        try:
+            dictionary[&#34;content&#34;] = fm.content
+        except AttributeError:
+            pass
+        return dictionary
+    except IOError:
+        return default
+    except ValueError:
+        return default
+
+
+def exif(path):
+    data = json.loads(subprocess.check_output([&#34;exiftool&#34;, &#34;-j&#34;, &#34;-c&#34;, &#34;%.10f&#34;, path]).decode(&#39;utf-8&#39;))[0]
+
+    # Load data from an EXIF sidecar if it exists.
+    basename, ext = os.path.splitext(path)
+    sidecar_path = basename + &#34;.exif&#34;
+    logging.debug(&#34;Checking for EXIF sidecar at &#39;%s&#39;...&#34;, sidecar_path)
+    if os.path.exists(sidecar_path):
+        with open(sidecar_path, &#34;r&#34;) as fh:
+            sidecar = json.loads(fh.read())
+            for key, value in sidecar.items():
+                data[key] = value
+
+    for field in [&#34;CreationDate&#34;, &#34;DateTimeOriginal&#34;, &#34;ContentCreateDate&#34;, &#34;FileModifyDate&#34;]:
+        if field in data:
+            data[field] = dateutil.parser.parse(data[field].replace(&#34;:&#34;, &#34;-&#34;, 2))
+
+    for field in [&#34;GPSLatitude&#34;, &#34;GPSLongitude&#34;]:
+        if field in data:
+            components = data[field].split(&#34; &#34;)
+            value = float(components[0])
+            if len(components) &gt; 1:
+                direction = components[1]
+                if direction == &#34;W&#34;:
+                    value = value * -1
+            data[field] = value
+
+    return data
+
+
+class MissingDate(Exception):
+    pass
+
+
+class MissingLocation(Exception):
+    pass
+
+
+def load_image(path):
+    &#34;&#34;&#34;
+    Safe method for loading PIL.Image instances with additional support for HEIF files.
+    &#34;&#34;&#34;
+
+    # Check to see if we need to do special-case HEIF handling.
+    # If we do, then we convert the file to an in-memory JPEG, that can then be opened using PIL.
+    with open(path, &#39;rb&#39;) as fh:
+        image_data = fh.read()
+        format = whatimage.identify_image(image_data)
+        if format in [&#39;heic&#39;, &#39;avif&#39;]:
+            heif_image = pyheif.read_heif(image_data)
+            pi = Image.frombytes(mode=heif_image.mode, size=heif_image.size, data=heif_image.data)
+            exif = None
+            for metadata in heif_image.metadata or []:
+                if metadata[&#39;type&#39;] == &#39;Exif&#39;:
+                    exif = metadata[&#39;data&#39;]
+            stream = io.BytesIO()
+            pi.save(stream, format=&#34;jpeg&#34;, exif=exif)
+            return Image.open(stream)
+
+    return Image.open(path)
+
+
+def get_orientation(exif):
+    try:
+        exif = dict(exif.items())
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == &#39;Orientation&#39;:
+                break
+        return exif[orientation]
+    except:
+        logging.debug(&#34;Unable to get get EXIF data&#34;)
+        pass
+    return 1
+
+
+def get_size(source, scale):
+    with load_image(source) as img:
+        width, height = img.size
+        try:
+            exif = dict(img._getexif().items())
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == &#39;Orientation&#39;:
+                    break
+            if exif[orientation] == 6 or exif[orientation] == 8:
+                (width, height) = (height, width)
+        except:
+            pass
+        return {&#34;width&#34;: width / scale, &#34;height&#34;: height / scale}
+
+
+def get_details(root, dirname, basename, scale):
+    details = get_size(os.path.join(root, dirname, basename), scale)
+    details[&#34;filename&#34;] = basename
+    details[&#34;url&#34;] = os.path.join(&#34;/&#34;, dirname, basename)
+    return details
+
+
+def imagemagick_resize(source, destination, size):
+    convert_path = &#39;convert&#39;
+    try:
+        convert_path = os.environ[&#39;INCONTEXT_CONVERT_PATH&#39;]
+    except KeyError:
+        pass
+
+    command = [convert_path,
+               &#39;-verbose&#39;,
+               &#39;-quality&#39;, &#39;75&#39;,
+               &#39;-auto-orient&#39;,
+               &#39;-resize&#39;, size,
+               source,
+               destination]
+    try:
+        logging.debug(&#34;Running command &#39;%s&#39;...&#34;, utils.safe_command(command))
+        result = subprocess.run(command,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        logging.debug(result)
+    except subprocess.CalledProcessError as e:
+        logging.error(&#34;Failed to run command &#39;%s&#39; with error &#39;%s&#39; (%s).&#34;,
+                      &#34; &#34;.utils.safe_command(command), e.output, e)
+        raise e
+
+
+def gifsicle_resize(source, destination, size):
+    &#34;&#34;&#34;
+    Resize a gif using the `gifsicle` command line utility (see [](https://www.lcdf.org/gifsicle/)).
+    
+    Resizing using animated gifs using ImageMagick will often produce very large output files and, in the case of
+    incrementally encoded images, result in completely broken output.
+    &#34;&#34;&#34;
+    command = [&#39;gifsicle&#39;,
+               &#39;--resize&#39;, size,
+               &#39;--colors&#39;, &#39;256&#39;,
+               source]
+    try:
+        logging.debug(&#34;Running command &#39;%s&#39;...&#34;, utils.safe_command(command))
+        result = subprocess.check_output(command)
+        with open(destination, &#39;wb&#39;) as fh:
+            fh.write(result)
+    except subprocess.CalledProcessError as e:
+        logging.error(&#34;Failed to run command &#39;%s&#39; with error &#39;%s&#39; (%s).&#34;,
+                      &#34; &#34;.utils.safe_command(command), e.output, e)
+        raise e
+
+
+EXTENSION_TO_FORMAT = {
+    &#34;.png&#34;: &#34;png&#34;,
+    &#34;.jpg&#34;: &#34;jpeg&#34;,
+    &#34;.jpeg&#34;: &#34;jpeg&#34;,
+    &#34;.gif&#34;: &#34;gif&#34;,
+    &#34;.tiff&#34;: &#34;tiff&#34;,
+}
+
+IMAGEMAGICK_WHITELIST = [
+    &#34;.gif&#34;,
+]
+
+IMAGE_RESIZE_HANDLERS = {
+    &#34;.gif&#34;: gifsicle_resize
+}
+
+def get_ext(path):
+    return os.path.splitext(path)[1].lower()
+
+
+def resize(source, dest_root, dest_dirname, dest_basename, size, scale):
+
+    # Unfortunately HEIC files are not broadly supported, so we always need to ensure these
+    # are converted to JPEG files on the fly. We therefore fix-up the destination filename.
+    (name, ext) = os.path.splitext(dest_basename)
+    if ext == &#34;.heic&#34;:
+        ext = &#34;.jpeg&#34;
+    dest_basename = &#34;&#34;.join([name, ext])
+
+    is_heic = get_ext(source) == &#34;.heic&#34;
+
+    with load_image(source) as image:
+
+        # Get the exif from the image before performing any processing.
+        exif = None
+        try:
+            exif = image._getexif()
+        except:
+            pass
+
+        (source_width, source_height) = image.size
+        logging.debug(&#34;Image source dimensions = %sx%s&#34;, source_width, source_height)
+
+        # Determine the target dimensions.
+        source_ratio = source_width / source_height
+        (destination_width, destination_height) = size
+        if destination_width is None and destination_height is None:
+            (destination_width, destination_height) = (source_width, source_height)
+        elif destination_width is None:
+            destination_width = int(destination_height * source_ratio)
+        elif destination_height is None:
+            destination_height = int(destination_width / source_ratio)
+
+        # Never make images larger.
+        destination_width = min(destination_width, source_width)
+        destination_height = min(destination_height, source_height)
+
+        logging.debug(&#34;Image target dimensions = %sx%s&#34;, destination_width, destination_height)
+
+        # Check to see if a resize is required.
+        should_resize = True
+        if source_width &lt;= destination_width or source_height &lt;= destination_height:
+            should_resize = False
+
+        # Perform the resize.
+        destination = os.path.join(dest_root, dest_dirname, dest_basename)
+        if should_resize:
+            image = image.resize((destination_width, destination_height), resample=Image.LANCZOS)
+
+        # Use ImageMagick&#39;s convert command if permitted as this can perform faster/better for some image types.
+        if ext in IMAGE_RESIZE_HANDLERS:
+            IMAGE_RESIZE_HANDLERS[ext](source,
+                                       os.path.join(dest_root, dest_dirname, dest_basename),
+                                       f&#34;{destination_width}x{destination_height}&#34;)
+        else:
+            # Auto-orient the image (unless it&#39;s a heic file as apparently that doesn&#39;t need it).
+            if exif is not None and not is_heic:
+                orientation = get_orientation(exif)
+                logging.debug(f&#34;EXIF orientation = {orientation}&#34;)
+                if orientation == 3:
+                    logging.debug(&#34;Correcting image orientation (rotate 180 degrees)&#34;)
+                    image = image.transpose(Image.ROTATE_180)
+                elif orientation == 6:
+                    logging.debug(&#34;Correcting image orientation (rotate 270 degrees)&#34;)
+                    image = image.transpose(Image.ROTATE_270)
+                elif orientation == 8:
+                    logging.debug(&#34;Correcting image orientation (rotate 90 degrees)&#34;)
+                    image = image.transpose(Image.ROTATE_90)
+
+            # Save the image.
+            image.save(destination, EXTENSION_TO_FORMAT[ext.lower()], quality=75)
+
+    return get_details(dest_root, dest_dirname, dest_basename, scale)
+
+
+def generate_thumbnail(source, dest_root, dest_dirname, dest_basename, size, source_scale, scale):
+    destination = os.path.join(dest_root, dest_dirname, dest_basename)
+    return resize(source, dest_root, dest_dirname, dest_basename, size, scale)
+
+
+def get_image_data(root, dirname, basename):
+    with Image.open(os.path.join(root, dirname, basename)) as img:
+        width, height = img.size
+        return {&#34;filename&#34;: basename, &#34;width&#34;: width, &#34;height&#34;: height}
+
+
+def first_value_or_none(dictionary, keys):
+    for key in keys:
+        try:
+            return dictionary[key]
+        except KeyError:
+            pass
+    return None
+
+
+def process_image(incontext, root, destination, dirname, basename, category, title_from_filename=True):
+    source_path = os.path.join(root, dirname, basename)
+    identifier = generate_identifier(basename)
+    destination_dir = os.path.join(destination, dirname)
+    destination_path = os.path.join(destination_dir, basename)
+    markdown_path = os.path.join(destination_dir, &#34;%s.markdown&#34; % identifier)
+    name, ext = os.path.splitext(basename)
+    utils.makedirs(destination_dir)
+
+    metadata = load_metadata(markdown_path)
+
+    DEFAULT_PROFILES = {
+        &#34;image&#34;: {
+            &#34;width&#34;: 1600,
+            &#34;scale&#34;: 1
+        },
+        &#34;thumbnail&#34;: {
+            &#34;height&#34;: 240,
+            &#34;scale&#34;: 2
+        },
+    }
+
+    EQUIRECTANGULAR_PROFILES = {
+        &#34;image&#34;: {
+            &#34;width&#34;: 10000,
+            &#34;scale&#34;: 1
+        },
+        &#34;thumbnail&#34;: {
+            &#34;height&#34;: 240,
+            &#34;scale&#34;: 2
+        },
+    }
+
+    # Use the common path parsing from converters to ensure we pick up information like the title, etc.
+    metadata = converters.parse_path(os.path.join(dirname, basename), title_from_filename=title_from_filename)
+
+    # Read data from the EXIF and add it to the metadata
+
+    exif_data = exif(source_path)
+
+    # Select title with priority: Title, ObjectName
+    if &#34;ObjectName&#34; in exif_data:
+        metadata[&#34;title&#34;] = exif_data[&#34;ObjectName&#34;]
+    if &#34;Title&#34; in exif_data:
+        metadata[&#34;title&#34;] = exif_data[&#34;Title&#34;]
+
+    metadata[&#34;content&#34;] = first_value_or_none(exif_data, [&#34;ImageDescription&#34;, &#34;Description&#34;, &#34;ArtworkContentDescription&#34;])
+
+    if &#34;DateTimeOriginal&#34; in exif_data:
+        metadata[&#34;date&#34;] = exif_data[&#34;DateTimeOriginal&#34;]
+
+    if &#34;ProjectionType&#34; in exif_data:
+        metadata[&#34;projection&#34;] = exif_data[&#34;ProjectionType&#34;]
+        logging.debug(f&#34;projection = {metadata[&#39;projection&#39;]}&#34;)
+
+    # Read the location from the exif.
+    if &#34;GPSLatitude&#34; in exif_data and &#34;GPSLongitude&#34; in exif_data:
+        metadata[&#34;location&#34;] = {&#34;latitude&#34;: exif_data[&#34;GPSLatitude&#34;], &#34;longitude&#34;: exif_data[&#34;GPSLongitude&#34;]}
+
+    # Determine which profiles to use; we use a different profile for equirectangular projections.
+    # TODO: In an ideal world we would allow all of this special case behaviour to be configured in site.yaml
+    #       so there are no custom modifications required to the script.
+    profiles = DEFAULT_PROFILES
+    if &#34;projection&#34; in metadata and metadata[&#34;projection&#34;] == &#34;equirectangular&#34;:
+        profiles = EQUIRECTANGULAR_PROFILES
+
+    # Generate the various different image sizes.
+    # TODO: Consider making this common code for all images.
+    for profile_name, profile_details in profiles.items():
+
+        filename = &#34;%s-%s%s&#34; % (identifier, profile_name.replace(&#34;_&#34;, &#34;-&#34;), ext)
+        if profile_name == &#34;image&#34;:
+            filename = &#34;%s%s&#34; % (identifier, ext)
+
+        scale = 1
+        if &#34;scale&#34; in profile_details:
+            scale = profile_details[&#34;scale&#34;]
+        width = None
+        if &#34;width&#34; in profile_details:
+            width = profile_details[&#34;width&#34;]
+        height = None
+        if &#34;height&#34; in profile_details:
+            height = profile_details[&#34;height&#34;]
+
+        source_scale = metadata[&#34;scale&#34;] if metadata[&#34;scale&#34;] is not None else 1
+
+        # TODO: Rename generate_thumbnail.
+        metadata[profile_name] = generate_thumbnail(source_path, destination, dirname, filename, (width, height), source_scale, scale)
+
+    # Configure the page details.
+    metadata[&#34;category&#34;] = category
+    metadata[&#34;template&#34;] = &#34;photo.html&#34;  # TODO: Pass this in as a default.
+    metadata[&#34;path&#34;] = converters.ensure_leading_slash(os.path.join(dirname, basename))
+
+    metadata_document = store.Document(metadata[&#39;url&#39;], metadata, os.path.getmtime(source_path))
+    incontext.environment[&#34;DOCUMENT_STORE&#34;].add(metadata_document)
+
+    files = [markdown_path] + [os.path.join(destination, dirname, metadata[f][&#34;filename&#34;]) for f in profiles.keys()]
+    files = [os.path.join(destination, dirname, metadata[f][&#34;filename&#34;]) for f in profiles.keys()]
+    return {&#39;files&#39;: files, &#39;urls&#39;: [metadata[&#39;url&#39;]]}</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="gallery.exif"><code class="name flex">
+<span>def <span class="ident">exif</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exif(path):
+    data = json.loads(subprocess.check_output([&#34;exiftool&#34;, &#34;-j&#34;, &#34;-c&#34;, &#34;%.10f&#34;, path]).decode(&#39;utf-8&#39;))[0]
+
+    # Load data from an EXIF sidecar if it exists.
+    basename, ext = os.path.splitext(path)
+    sidecar_path = basename + &#34;.exif&#34;
+    logging.debug(&#34;Checking for EXIF sidecar at &#39;%s&#39;...&#34;, sidecar_path)
+    if os.path.exists(sidecar_path):
+        with open(sidecar_path, &#34;r&#34;) as fh:
+            sidecar = json.loads(fh.read())
+            for key, value in sidecar.items():
+                data[key] = value
+
+    for field in [&#34;CreationDate&#34;, &#34;DateTimeOriginal&#34;, &#34;ContentCreateDate&#34;, &#34;FileModifyDate&#34;]:
+        if field in data:
+            data[field] = dateutil.parser.parse(data[field].replace(&#34;:&#34;, &#34;-&#34;, 2))
+
+    for field in [&#34;GPSLatitude&#34;, &#34;GPSLongitude&#34;]:
+        if field in data:
+            components = data[field].split(&#34; &#34;)
+            value = float(components[0])
+            if len(components) &gt; 1:
+                direction = components[1]
+                if direction == &#34;W&#34;:
+                    value = value * -1
+            data[field] = value
+
+    return data</code></pre>
+</details>
+</dd>
+<dt id="gallery.first_value_or_none"><code class="name flex">
+<span>def <span class="ident">first_value_or_none</span></span>(<span>dictionary, keys)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def first_value_or_none(dictionary, keys):
+    for key in keys:
+        try:
+            return dictionary[key]
+        except KeyError:
+            pass
+    return None</code></pre>
+</details>
+</dd>
+<dt id="gallery.generate_identifier"><code class="name flex">
+<span>def <span class="ident">generate_identifier</span></span>(<span>basename)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_identifier(basename):
+    return os.path.splitext(basename)[0]</code></pre>
+</details>
+</dd>
+<dt id="gallery.generate_thumbnail"><code class="name flex">
+<span>def <span class="ident">generate_thumbnail</span></span>(<span>source, dest_root, dest_dirname, dest_basename, size, source_scale, scale)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_thumbnail(source, dest_root, dest_dirname, dest_basename, size, source_scale, scale):
+    destination = os.path.join(dest_root, dest_dirname, dest_basename)
+    return resize(source, dest_root, dest_dirname, dest_basename, size, scale)</code></pre>
+</details>
+</dd>
+<dt id="gallery.get_details"><code class="name flex">
+<span>def <span class="ident">get_details</span></span>(<span>root, dirname, basename, scale)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_details(root, dirname, basename, scale):
+    details = get_size(os.path.join(root, dirname, basename), scale)
+    details[&#34;filename&#34;] = basename
+    details[&#34;url&#34;] = os.path.join(&#34;/&#34;, dirname, basename)
+    return details</code></pre>
+</details>
+</dd>
+<dt id="gallery.get_ext"><code class="name flex">
+<span>def <span class="ident">get_ext</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_ext(path):
+    return os.path.splitext(path)[1].lower()</code></pre>
+</details>
+</dd>
+<dt id="gallery.get_image_data"><code class="name flex">
+<span>def <span class="ident">get_image_data</span></span>(<span>root, dirname, basename)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_image_data(root, dirname, basename):
+    with Image.open(os.path.join(root, dirname, basename)) as img:
+        width, height = img.size
+        return {&#34;filename&#34;: basename, &#34;width&#34;: width, &#34;height&#34;: height}</code></pre>
+</details>
+</dd>
+<dt id="gallery.get_orientation"><code class="name flex">
+<span>def <span class="ident">get_orientation</span></span>(<span>exif)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_orientation(exif):
+    try:
+        exif = dict(exif.items())
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == &#39;Orientation&#39;:
+                break
+        return exif[orientation]
+    except:
+        logging.debug(&#34;Unable to get get EXIF data&#34;)
+        pass
+    return 1</code></pre>
+</details>
+</dd>
+<dt id="gallery.get_size"><code class="name flex">
+<span>def <span class="ident">get_size</span></span>(<span>source, scale)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_size(source, scale):
+    with load_image(source) as img:
+        width, height = img.size
+        try:
+            exif = dict(img._getexif().items())
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == &#39;Orientation&#39;:
+                    break
+            if exif[orientation] == 6 or exif[orientation] == 8:
+                (width, height) = (height, width)
+        except:
+            pass
+        return {&#34;width&#34;: width / scale, &#34;height&#34;: height / scale}</code></pre>
+</details>
+</dd>
+<dt id="gallery.gifsicle_resize"><code class="name flex">
+<span>def <span class="ident">gifsicle_resize</span></span>(<span>source, destination, size)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Resize a gif using the <code>gifsicle</code> command line utility (see <a href="https://www.lcdf.org/gifsicle/"></a>).</p>
+<p>Resizing using animated gifs using ImageMagick will often produce very large output files and, in the case of
+incrementally encoded images, result in completely broken output.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gifsicle_resize(source, destination, size):
+    &#34;&#34;&#34;
+    Resize a gif using the `gifsicle` command line utility (see [](https://www.lcdf.org/gifsicle/)).
+    
+    Resizing using animated gifs using ImageMagick will often produce very large output files and, in the case of
+    incrementally encoded images, result in completely broken output.
+    &#34;&#34;&#34;
+    command = [&#39;gifsicle&#39;,
+               &#39;--resize&#39;, size,
+               &#39;--colors&#39;, &#39;256&#39;,
+               source]
+    try:
+        logging.debug(&#34;Running command &#39;%s&#39;...&#34;, utils.safe_command(command))
+        result = subprocess.check_output(command)
+        with open(destination, &#39;wb&#39;) as fh:
+            fh.write(result)
+    except subprocess.CalledProcessError as e:
+        logging.error(&#34;Failed to run command &#39;%s&#39; with error &#39;%s&#39; (%s).&#34;,
+                      &#34; &#34;.utils.safe_command(command), e.output, e)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="gallery.imagemagick_resize"><code class="name flex">
+<span>def <span class="ident">imagemagick_resize</span></span>(<span>source, destination, size)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def imagemagick_resize(source, destination, size):
+    convert_path = &#39;convert&#39;
+    try:
+        convert_path = os.environ[&#39;INCONTEXT_CONVERT_PATH&#39;]
+    except KeyError:
+        pass
+
+    command = [convert_path,
+               &#39;-verbose&#39;,
+               &#39;-quality&#39;, &#39;75&#39;,
+               &#39;-auto-orient&#39;,
+               &#39;-resize&#39;, size,
+               source,
+               destination]
+    try:
+        logging.debug(&#34;Running command &#39;%s&#39;...&#34;, utils.safe_command(command))
+        result = subprocess.run(command,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        logging.debug(result)
+    except subprocess.CalledProcessError as e:
+        logging.error(&#34;Failed to run command &#39;%s&#39; with error &#39;%s&#39; (%s).&#34;,
+                      &#34; &#34;.utils.safe_command(command), e.output, e)
+        raise e</code></pre>
+</details>
+</dd>
+<dt id="gallery.import_photo"><code class="name flex">
+<span>def <span class="ident">import_photo</span></span>(<span>incontext, from_directory, to_directory, category, title_from_filename=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def import_photo(incontext, from_directory, to_directory, category, title_from_filename=True):
+
+    @functools.wraps(import_photo)
+    def inner(path):
+        root, dirname, basename = utils.tripple(from_directory, path)
+        return process_image(incontext, from_directory, to_directory, dirname, basename, category=category, title_from_filename=title_from_filename)
+
+    return inner</code></pre>
+</details>
+</dd>
+<dt id="gallery.initialize_plugin"><code class="name flex">
+<span>def <span class="ident">initialize_plugin</span></span>(<span>incontext)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initialize_plugin(incontext):
+    incontext.add_handler(&#34;import_photo&#34;, import_photo)</code></pre>
+</details>
+</dd>
+<dt id="gallery.load_image"><code class="name flex">
+<span>def <span class="ident">load_image</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Safe method for loading PIL.Image instances with additional support for HEIF files.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_image(path):
+    &#34;&#34;&#34;
+    Safe method for loading PIL.Image instances with additional support for HEIF files.
+    &#34;&#34;&#34;
+
+    # Check to see if we need to do special-case HEIF handling.
+    # If we do, then we convert the file to an in-memory JPEG, that can then be opened using PIL.
+    with open(path, &#39;rb&#39;) as fh:
+        image_data = fh.read()
+        format = whatimage.identify_image(image_data)
+        if format in [&#39;heic&#39;, &#39;avif&#39;]:
+            heif_image = pyheif.read_heif(image_data)
+            pi = Image.frombytes(mode=heif_image.mode, size=heif_image.size, data=heif_image.data)
+            exif = None
+            for metadata in heif_image.metadata or []:
+                if metadata[&#39;type&#39;] == &#39;Exif&#39;:
+                    exif = metadata[&#39;data&#39;]
+            stream = io.BytesIO()
+            pi.save(stream, format=&#34;jpeg&#34;, exif=exif)
+            return Image.open(stream)
+
+    return Image.open(path)</code></pre>
+</details>
+</dd>
+<dt id="gallery.load_metadata"><code class="name flex">
+<span>def <span class="ident">load_metadata</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_metadata(path):
+
+    default = {&#34;version&#34;: 0}
+    try:
+        fm = frontmatter.load(path)
+        dictionary = fm.metadata
+        try:
+            dictionary[&#34;content&#34;] = fm.content
+        except AttributeError:
+            pass
+        return dictionary
+    except IOError:
+        return default
+    except ValueError:
+        return default</code></pre>
+</details>
+</dd>
+<dt id="gallery.process_image"><code class="name flex">
+<span>def <span class="ident">process_image</span></span>(<span>incontext, root, destination, dirname, basename, category, title_from_filename=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_image(incontext, root, destination, dirname, basename, category, title_from_filename=True):
+    source_path = os.path.join(root, dirname, basename)
+    identifier = generate_identifier(basename)
+    destination_dir = os.path.join(destination, dirname)
+    destination_path = os.path.join(destination_dir, basename)
+    markdown_path = os.path.join(destination_dir, &#34;%s.markdown&#34; % identifier)
+    name, ext = os.path.splitext(basename)
+    utils.makedirs(destination_dir)
+
+    metadata = load_metadata(markdown_path)
+
+    DEFAULT_PROFILES = {
+        &#34;image&#34;: {
+            &#34;width&#34;: 1600,
+            &#34;scale&#34;: 1
+        },
+        &#34;thumbnail&#34;: {
+            &#34;height&#34;: 240,
+            &#34;scale&#34;: 2
+        },
+    }
+
+    EQUIRECTANGULAR_PROFILES = {
+        &#34;image&#34;: {
+            &#34;width&#34;: 10000,
+            &#34;scale&#34;: 1
+        },
+        &#34;thumbnail&#34;: {
+            &#34;height&#34;: 240,
+            &#34;scale&#34;: 2
+        },
+    }
+
+    # Use the common path parsing from converters to ensure we pick up information like the title, etc.
+    metadata = converters.parse_path(os.path.join(dirname, basename), title_from_filename=title_from_filename)
+
+    # Read data from the EXIF and add it to the metadata
+
+    exif_data = exif(source_path)
+
+    # Select title with priority: Title, ObjectName
+    if &#34;ObjectName&#34; in exif_data:
+        metadata[&#34;title&#34;] = exif_data[&#34;ObjectName&#34;]
+    if &#34;Title&#34; in exif_data:
+        metadata[&#34;title&#34;] = exif_data[&#34;Title&#34;]
+
+    metadata[&#34;content&#34;] = first_value_or_none(exif_data, [&#34;ImageDescription&#34;, &#34;Description&#34;, &#34;ArtworkContentDescription&#34;])
+
+    if &#34;DateTimeOriginal&#34; in exif_data:
+        metadata[&#34;date&#34;] = exif_data[&#34;DateTimeOriginal&#34;]
+
+    if &#34;ProjectionType&#34; in exif_data:
+        metadata[&#34;projection&#34;] = exif_data[&#34;ProjectionType&#34;]
+        logging.debug(f&#34;projection = {metadata[&#39;projection&#39;]}&#34;)
+
+    # Read the location from the exif.
+    if &#34;GPSLatitude&#34; in exif_data and &#34;GPSLongitude&#34; in exif_data:
+        metadata[&#34;location&#34;] = {&#34;latitude&#34;: exif_data[&#34;GPSLatitude&#34;], &#34;longitude&#34;: exif_data[&#34;GPSLongitude&#34;]}
+
+    # Determine which profiles to use; we use a different profile for equirectangular projections.
+    # TODO: In an ideal world we would allow all of this special case behaviour to be configured in site.yaml
+    #       so there are no custom modifications required to the script.
+    profiles = DEFAULT_PROFILES
+    if &#34;projection&#34; in metadata and metadata[&#34;projection&#34;] == &#34;equirectangular&#34;:
+        profiles = EQUIRECTANGULAR_PROFILES
+
+    # Generate the various different image sizes.
+    # TODO: Consider making this common code for all images.
+    for profile_name, profile_details in profiles.items():
+
+        filename = &#34;%s-%s%s&#34; % (identifier, profile_name.replace(&#34;_&#34;, &#34;-&#34;), ext)
+        if profile_name == &#34;image&#34;:
+            filename = &#34;%s%s&#34; % (identifier, ext)
+
+        scale = 1
+        if &#34;scale&#34; in profile_details:
+            scale = profile_details[&#34;scale&#34;]
+        width = None
+        if &#34;width&#34; in profile_details:
+            width = profile_details[&#34;width&#34;]
+        height = None
+        if &#34;height&#34; in profile_details:
+            height = profile_details[&#34;height&#34;]
+
+        source_scale = metadata[&#34;scale&#34;] if metadata[&#34;scale&#34;] is not None else 1
+
+        # TODO: Rename generate_thumbnail.
+        metadata[profile_name] = generate_thumbnail(source_path, destination, dirname, filename, (width, height), source_scale, scale)
+
+    # Configure the page details.
+    metadata[&#34;category&#34;] = category
+    metadata[&#34;template&#34;] = &#34;photo.html&#34;  # TODO: Pass this in as a default.
+    metadata[&#34;path&#34;] = converters.ensure_leading_slash(os.path.join(dirname, basename))
+
+    metadata_document = store.Document(metadata[&#39;url&#39;], metadata, os.path.getmtime(source_path))
+    incontext.environment[&#34;DOCUMENT_STORE&#34;].add(metadata_document)
+
+    files = [markdown_path] + [os.path.join(destination, dirname, metadata[f][&#34;filename&#34;]) for f in profiles.keys()]
+    files = [os.path.join(destination, dirname, metadata[f][&#34;filename&#34;]) for f in profiles.keys()]
+    return {&#39;files&#39;: files, &#39;urls&#39;: [metadata[&#39;url&#39;]]}</code></pre>
+</details>
+</dd>
+<dt id="gallery.resize"><code class="name flex">
+<span>def <span class="ident">resize</span></span>(<span>source, dest_root, dest_dirname, dest_basename, size, scale)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def resize(source, dest_root, dest_dirname, dest_basename, size, scale):
+
+    # Unfortunately HEIC files are not broadly supported, so we always need to ensure these
+    # are converted to JPEG files on the fly. We therefore fix-up the destination filename.
+    (name, ext) = os.path.splitext(dest_basename)
+    if ext == &#34;.heic&#34;:
+        ext = &#34;.jpeg&#34;
+    dest_basename = &#34;&#34;.join([name, ext])
+
+    is_heic = get_ext(source) == &#34;.heic&#34;
+
+    with load_image(source) as image:
+
+        # Get the exif from the image before performing any processing.
+        exif = None
+        try:
+            exif = image._getexif()
+        except:
+            pass
+
+        (source_width, source_height) = image.size
+        logging.debug(&#34;Image source dimensions = %sx%s&#34;, source_width, source_height)
+
+        # Determine the target dimensions.
+        source_ratio = source_width / source_height
+        (destination_width, destination_height) = size
+        if destination_width is None and destination_height is None:
+            (destination_width, destination_height) = (source_width, source_height)
+        elif destination_width is None:
+            destination_width = int(destination_height * source_ratio)
+        elif destination_height is None:
+            destination_height = int(destination_width / source_ratio)
+
+        # Never make images larger.
+        destination_width = min(destination_width, source_width)
+        destination_height = min(destination_height, source_height)
+
+        logging.debug(&#34;Image target dimensions = %sx%s&#34;, destination_width, destination_height)
+
+        # Check to see if a resize is required.
+        should_resize = True
+        if source_width &lt;= destination_width or source_height &lt;= destination_height:
+            should_resize = False
+
+        # Perform the resize.
+        destination = os.path.join(dest_root, dest_dirname, dest_basename)
+        if should_resize:
+            image = image.resize((destination_width, destination_height), resample=Image.LANCZOS)
+
+        # Use ImageMagick&#39;s convert command if permitted as this can perform faster/better for some image types.
+        if ext in IMAGE_RESIZE_HANDLERS:
+            IMAGE_RESIZE_HANDLERS[ext](source,
+                                       os.path.join(dest_root, dest_dirname, dest_basename),
+                                       f&#34;{destination_width}x{destination_height}&#34;)
+        else:
+            # Auto-orient the image (unless it&#39;s a heic file as apparently that doesn&#39;t need it).
+            if exif is not None and not is_heic:
+                orientation = get_orientation(exif)
+                logging.debug(f&#34;EXIF orientation = {orientation}&#34;)
+                if orientation == 3:
+                    logging.debug(&#34;Correcting image orientation (rotate 180 degrees)&#34;)
+                    image = image.transpose(Image.ROTATE_180)
+                elif orientation == 6:
+                    logging.debug(&#34;Correcting image orientation (rotate 270 degrees)&#34;)
+                    image = image.transpose(Image.ROTATE_270)
+                elif orientation == 8:
+                    logging.debug(&#34;Correcting image orientation (rotate 90 degrees)&#34;)
+                    image = image.transpose(Image.ROTATE_90)
+
+            # Save the image.
+            image.save(destination, EXTENSION_TO_FORMAT[ext.lower()], quality=75)
+
+    return get_details(dest_root, dest_dirname, dest_basename, scale)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="gallery.MissingDate"><code class="flex name class">
+<span>class <span class="ident">MissingDate</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Common base class for all non-exit exceptions.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MissingDate(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="gallery.MissingLocation"><code class="flex name class">
+<span>class <span class="ident">MissingLocation</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Common base class for all non-exit exceptions.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MissingLocation(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="gallery.exif" href="#gallery.exif">exif</a></code></li>
+<li><code><a title="gallery.first_value_or_none" href="#gallery.first_value_or_none">first_value_or_none</a></code></li>
+<li><code><a title="gallery.generate_identifier" href="#gallery.generate_identifier">generate_identifier</a></code></li>
+<li><code><a title="gallery.generate_thumbnail" href="#gallery.generate_thumbnail">generate_thumbnail</a></code></li>
+<li><code><a title="gallery.get_details" href="#gallery.get_details">get_details</a></code></li>
+<li><code><a title="gallery.get_ext" href="#gallery.get_ext">get_ext</a></code></li>
+<li><code><a title="gallery.get_image_data" href="#gallery.get_image_data">get_image_data</a></code></li>
+<li><code><a title="gallery.get_orientation" href="#gallery.get_orientation">get_orientation</a></code></li>
+<li><code><a title="gallery.get_size" href="#gallery.get_size">get_size</a></code></li>
+<li><code><a title="gallery.gifsicle_resize" href="#gallery.gifsicle_resize">gifsicle_resize</a></code></li>
+<li><code><a title="gallery.imagemagick_resize" href="#gallery.imagemagick_resize">imagemagick_resize</a></code></li>
+<li><code><a title="gallery.import_photo" href="#gallery.import_photo">import_photo</a></code></li>
+<li><code><a title="gallery.initialize_plugin" href="#gallery.initialize_plugin">initialize_plugin</a></code></li>
+<li><code><a title="gallery.load_image" href="#gallery.load_image">load_image</a></code></li>
+<li><code><a title="gallery.load_metadata" href="#gallery.load_metadata">load_metadata</a></code></li>
+<li><code><a title="gallery.process_image" href="#gallery.process_image">process_image</a></code></li>
+<li><code><a title="gallery.resize" href="#gallery.resize">resize</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="gallery.MissingDate" href="#gallery.MissingDate">MissingDate</a></code></h4>
+</li>
+<li>
+<h4><code><a title="gallery.MissingLocation" href="#gallery.MissingLocation">MissingLocation</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+</footer>
+</body>
+</html>

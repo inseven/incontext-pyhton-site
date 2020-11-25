@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
-<title>paths API documentation</title>
+<title>default_handlers API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>paths</code></h1>
+<h1 class="title">Module <code>default_handlers</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -46,12 +46,49 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os.path
+import functools
+import os
+import shutil
+import utils
 
-SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(SCRIPTS_DIR)
-TESTS_DIR = os.path.join(SCRIPTS_DIR, &#34;tests&#34;)
-SERVICE_DIR = os.path.join(SCRIPTS_DIR, &#34;service&#34;)</code></pre>
+
+def initialize_plugin(incontext):
+    incontext.add_handler(&#34;ignore&#34;, ignore)
+    incontext.add_handler(&#34;copy_file&#34;, copy_file)
+    incontext.add_handler(&#34;preprocess_stylesheet&#34;, preprocess_stylesheet)
+
+
+def ignore(incontext, from_directory, to_directory):
+    @functools.wraps(ignore)
+    def inner(path):
+        return {&#39;files&#39;: []}
+    return inner
+
+
+def copy_file(incontext, from_directory, to_directory):
+    @functools.wraps(copy_file)
+    def inner(path):
+        root, dirname, basename = utils.tripple(from_directory, path)
+        destination = os.path.join(to_directory, dirname, basename)
+        utils.makedirs(os.path.join(to_directory, dirname))
+        shutil.copy(path, destination)
+        return {&#39;files&#39;: [destination]}
+    return inner
+
+
+def preprocess_stylesheet(incontext, from_directory, to_directory, path=None):
+    @functools.wraps(preprocess_stylesheet)
+    def inner(source):
+        if path is not None:
+            source = path
+        root, dirname, basename = utils.tripple(from_directory, source)
+        destination = os.path.join(to_directory, dirname, os.path.splitext(basename)[0] + &#34;.css&#34;)
+        if path is not None:
+            destination = os.path.join(to_directory, os.path.splitext(path)[0] + &#34;.css&#34;)
+        utils.makedirs(os.path.dirname(destination))
+        utils.sass(os.path.join(from_directory, source), destination)
+        return {&#39;files&#39;: [destination]}
+    return inner</code></pre>
 </details>
 </section>
 <section>
@@ -59,6 +96,84 @@ SERVICE_DIR = os.path.join(SCRIPTS_DIR, &#34;service&#34;)</code></pre>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="default_handlers.copy_file"><code class="name flex">
+<span>def <span class="ident">copy_file</span></span>(<span>incontext, from_directory, to_directory)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def copy_file(incontext, from_directory, to_directory):
+    @functools.wraps(copy_file)
+    def inner(path):
+        root, dirname, basename = utils.tripple(from_directory, path)
+        destination = os.path.join(to_directory, dirname, basename)
+        utils.makedirs(os.path.join(to_directory, dirname))
+        shutil.copy(path, destination)
+        return {&#39;files&#39;: [destination]}
+    return inner</code></pre>
+</details>
+</dd>
+<dt id="default_handlers.ignore"><code class="name flex">
+<span>def <span class="ident">ignore</span></span>(<span>incontext, from_directory, to_directory)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ignore(incontext, from_directory, to_directory):
+    @functools.wraps(ignore)
+    def inner(path):
+        return {&#39;files&#39;: []}
+    return inner</code></pre>
+</details>
+</dd>
+<dt id="default_handlers.initialize_plugin"><code class="name flex">
+<span>def <span class="ident">initialize_plugin</span></span>(<span>incontext)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initialize_plugin(incontext):
+    incontext.add_handler(&#34;ignore&#34;, ignore)
+    incontext.add_handler(&#34;copy_file&#34;, copy_file)
+    incontext.add_handler(&#34;preprocess_stylesheet&#34;, preprocess_stylesheet)</code></pre>
+</details>
+</dd>
+<dt id="default_handlers.preprocess_stylesheet"><code class="name flex">
+<span>def <span class="ident">preprocess_stylesheet</span></span>(<span>incontext, from_directory, to_directory, path=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def preprocess_stylesheet(incontext, from_directory, to_directory, path=None):
+    @functools.wraps(preprocess_stylesheet)
+    def inner(source):
+        if path is not None:
+            source = path
+        root, dirname, basename = utils.tripple(from_directory, source)
+        destination = os.path.join(to_directory, dirname, os.path.splitext(basename)[0] + &#34;.css&#34;)
+        if path is not None:
+            destination = os.path.join(to_directory, os.path.splitext(path)[0] + &#34;.css&#34;)
+        utils.makedirs(os.path.dirname(destination))
+        utils.sass(os.path.join(from_directory, source), destination)
+        return {&#39;files&#39;: [destination]}
+    return inner</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -69,6 +184,14 @@ SERVICE_DIR = os.path.join(SCRIPTS_DIR, &#34;service&#34;)</code></pre>
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="default_handlers.copy_file" href="#default_handlers.copy_file">copy_file</a></code></li>
+<li><code><a title="default_handlers.ignore" href="#default_handlers.ignore">ignore</a></code></li>
+<li><code><a title="default_handlers.initialize_plugin" href="#default_handlers.initialize_plugin">initialize_plugin</a></code></li>
+<li><code><a title="default_handlers.preprocess_stylesheet" href="#default_handlers.preprocess_stylesheet">preprocess_stylesheet</a></code></li>
+</ul>
+</li>
 </ul>
 </nav>
 </main>
