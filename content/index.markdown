@@ -30,3 +30,9 @@ Most existing static site generators do a great job with text content, but treat
 # Documentation
 
 You can find documentation [here](docs).
+
+# Contributing
+
+InContext is open source and we're always happy to receive contributions.
+
+Check out the [open issues](https://github.com/inseven/incontext/issues) for somewhere to start.
