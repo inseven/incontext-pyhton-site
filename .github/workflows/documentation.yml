@@ -13,6 +13,11 @@ jobs:
     runs-on: Ubuntu-20.04
     
     steps:
+
+    - name: Wait for other builds to finish
+      uses: softprops/turnstyle@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
       
     - name: Set up Python
       uses: actions/setup-python@v2
