@@ -5,7 +5,7 @@ template: page.html
 
 # Introduction
 
-Everything in InContext, even the build process itself, is a plugin, and plugins themselves can provide plugin interfaces (but that's getting carried away). There are a number of different plugin types that are important to know about:
+Everything in InContext (even the build process itself) is a plugin. There are a number of different plugin types that are useful to know about:
 
 - Handlers
 - Commands
