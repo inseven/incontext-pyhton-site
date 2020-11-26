@@ -31,6 +31,13 @@ Most existing static site generators do a great job with text content, but treat
 
 You can find documentation [here](docs).
 
+# Design Principals
+
+To keep things simple, InContext follows some basic design principals:
+
+- No media type is more important than any other; images are just as important as text, as video, etc.
+- Every URL has a corresponding file backing it in the content directory of the site.
+
 # Contributing
 
 InContext is open source and we're always happy to receive contributions.
