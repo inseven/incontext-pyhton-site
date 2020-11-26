@@ -33,5 +33,5 @@ def now():
 This can be used as follows:
 
 ```
-<p>Rendered at {{ now() }}.</p>
+<p>Rendered at {{ "{{" }} now() {{ "}}" }}.</p>
 ```
