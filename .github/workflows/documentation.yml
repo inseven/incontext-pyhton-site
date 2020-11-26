@@ -45,13 +45,14 @@ jobs:
 
     - name: Commit documentation
       uses: stefanzweifel/git-auto-commit-action@v4
+      id: auto-commit
       with:
         commit_message: Update auto-generated documentation
         repository: site
         branch: main
         
     - name: Trigger rebuild
-      if: steps.git-auto-commit-action.outputs.changes_detected == 'true'
+      if: steps.auto-commit.outputs.changes_detected == 'true'
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.ACCESS_TOKEN }}
