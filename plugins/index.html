@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="last-modified" content="Thu Nov 26 11:50:40 2020" />
+    <meta http-equiv="last-modified" content="Thu Nov 26 11:55:32 2020" />
 
     <title>Plugins &mdash; InContext</title>
 
@@ -40,7 +40,8 @@
     </header>
 
     <article class="post-content">
-        <div><p>Everything in InContext, even the build process itself, is a plugin, and plugins themselves can provide plugin interfaces (but that’s getting carried away). There are a number of different plugin types that are important to know about:</p>
+        <div><h1><a id="introduction" href></a>Introduction</h1>
+<p>Everything in InContext, even the build process itself, is a plugin, and plugins themselves can provide plugin interfaces (but that’s getting carried away). There are a number of different plugin types that are important to know about:</p>
 
 <ul>
 <li>Handlers</li>
@@ -48,7 +49,7 @@
 <li>Context Functions</li>
 <li>Filters</li>
 </ul>
-<h1><a id="introduction" href></a>Introduction</h1>
+
 <p>Plugins are simply Python modules that live in the <code>plugins</code> directory in the InContext source tree. InContext supports two different mechanisms for loading plugins: using <a href="#decorators">decorators</a>, and using a <a href="#plugin-initializer">plugin initializer</a>.</p>
 <h2><a id="decorators" href></a>Decorators</h2><h2><a id="plugin-initializer" href></a>Plugin Initializer</h2><h1><a id="context-functions" href></a>Context Functions</h1>
 <p>Context functions are extensions to the Jinja 2 templating engine which can expose rich functionality to your templates.</p>
@@ -62,7 +63,7 @@ def now():
 
 <p>This can be used as follows:</p>
 
-<pre><code>&lt;p&gt;Rendered at 2020-11-26 16:55:01.421315+00:00.&lt;/p&gt;
+<pre><code>&lt;p&gt;Rendered at 2020-11-26 16:59:48.154989+00:00.&lt;/p&gt;
 </code></pre>
 </div>
     </article>
