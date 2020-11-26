@@ -42,3 +42,10 @@ jobs:
         commit_message: Update auto-generated documentation
         repository: site
         branch: main
+        
+    - name: Trigger rebuild
+      if: steps.auto-commit-action.outputs.changes_detected == 'true'
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.ACCESS_TOKEN }}
+        event-type: build
