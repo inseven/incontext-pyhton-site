@@ -57,6 +57,17 @@ import incontext
 
 @incontext.context_function(name=&#34;now&#34;)
 def now():
+    &#34;&#34;&#34;
+    Return the current date in UTC.
+    
+    ```
+    {% set d = now() %}
+    {{ d }}
+    ```
+    
+    This ensures the date has an associated timezone so it can be compared with other dates with timezone (as are found
+    in fully specified [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) dates.
+    &#34;&#34;&#34;
     return datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 
 
@@ -109,13 +120,29 @@ def generate_uuid():
 <span>def <span class="ident">now</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return the current date in UTC.</p>
+<pre><code>{% set d = now() %}
+{{ d }}
+</code></pre>
+<p>This ensures the date has an associated timezone so it can be compared with other dates with timezone (as are found
+in fully specified <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> dates.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@incontext.context_function(name=&#34;now&#34;)
 def now():
+    &#34;&#34;&#34;
+    Return the current date in UTC.
+    
+    ```
+    {% set d = now() %}
+    {{ d }}
+    ```
+    
+    This ensures the date has an associated timezone so it can be compared with other dates with timezone (as are found
+    in fully specified [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) dates.
+    &#34;&#34;&#34;
     return datetime.datetime.utcnow().replace(tzinfo=pytz.utc)</code></pre>
 </details>
 </dd>
