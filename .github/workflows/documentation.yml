@@ -3,6 +3,8 @@ name: Update documentation
 on:
   schedule:
     - cron: '*/15 * * * *'
+  repository_dispatch:
+    types: [ update-documentation ]
     
 jobs:
 
