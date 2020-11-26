@@ -74,13 +74,28 @@ def now():
     ```
     
     This ensures the date has an associated timezone so it can be compared with other dates with timezone (as are found
-    in fully specified [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) dates.
+    in fully specified [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) dates).
     &#34;&#34;&#34;
     return datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 
 
 @incontext.context_function(name=&#34;generate_uuid&#34;)
 def generate_uuid():
+    &#34;&#34;&#34;
+    Return a new UUID.
+    
+    Intended to make it easy to generate unique identifiers when writing inline HTML and JavaScript.
+    
+    For example,
+
+    ```
+    {% set uuid = generate_uuid() %}
+    &lt;div id=&#34;{{ uuid }}&#34;&gt;
+        Your content here.
+    &lt;/div&gt;
+    &lt;button onclick=&#34;toggleVisibility(&#39;{{ uuid }}&#39;)&#34;&gt;Toggle Content&lt;/button&gt;
+    ```
+    &#34;&#34;&#34;
     return str(uuid.uuid1())
     
 
@@ -143,13 +158,36 @@ def date(timestr):
 <span>def <span class="ident">generate_uuid</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return a new UUID.</p>
+<p>Intended to make it easy to generate unique identifiers when writing inline HTML and JavaScript.</p>
+<p>For example,</p>
+<pre><code>{% set uuid = generate_uuid() %}
+&lt;div id=&quot;{{ uuid }}&quot;&gt;
+    Your content here.
+&lt;/div&gt;
+&lt;button onclick=&quot;toggleVisibility('{{ uuid }}')&quot;&gt;Toggle Content&lt;/button&gt;
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@incontext.context_function(name=&#34;generate_uuid&#34;)
 def generate_uuid():
+    &#34;&#34;&#34;
+    Return a new UUID.
+    
+    Intended to make it easy to generate unique identifiers when writing inline HTML and JavaScript.
+    
+    For example,
+
+    ```
+    {% set uuid = generate_uuid() %}
+    &lt;div id=&#34;{{ uuid }}&#34;&gt;
+        Your content here.
+    &lt;/div&gt;
+    &lt;button onclick=&#34;toggleVisibility(&#39;{{ uuid }}&#39;)&#34;&gt;Toggle Content&lt;/button&gt;
+    ```
+    &#34;&#34;&#34;
     return str(uuid.uuid1())</code></pre>
 </details>
 </dd>
@@ -166,7 +204,7 @@ def generate_uuid():
 {{ d }}
 </code></pre>
 <p>This ensures the date has an associated timezone so it can be compared with other dates with timezone (as are found
-in fully specified <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> dates.</p></div>
+in fully specified <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> dates).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -190,7 +228,7 @@ def now():
     ```
     
     This ensures the date has an associated timezone so it can be compared with other dates with timezone (as are found
-    in fully specified [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) dates.
+    in fully specified [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) dates).
     &#34;&#34;&#34;
     return datetime.datetime.utcnow().replace(tzinfo=pytz.utc)</code></pre>
 </details>
