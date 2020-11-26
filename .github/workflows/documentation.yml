@@ -55,5 +55,5 @@ jobs:
       if: steps.auto-commit.outputs.changes_detected == 'true'
       uses: peter-evans/repository-dispatch@v1
       with:
-        token: ${{ secrets.ACCESS_TOKEN }}
+        token: ${{ secrets.TOKEN }}
         event-type: build
