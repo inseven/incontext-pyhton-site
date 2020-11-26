@@ -85,9 +85,9 @@ def generate_uuid():
     
 
 @incontext.context_function(name=&#34;date&#34;)
-def date(date):
+def date(timestr):
     &#34;&#34;&#34;
-    Initialize a date (with timezone) corresponding with a specific string representation.
+    Return a date corresponding with a specific string representation, `timestr`.
     
     For example,
     
@@ -98,7 +98,7 @@ def date(date):
     
     Like `now`, this guarantees that the returned date has an associated timezone to allow safe comparison.
     &#34;&#34;&#34;
-    return dateutil.parser.parse(date).replace(tzinfo=pytz.utc)</code></pre>
+    return dateutil.parser.parse(timestr).replace(tzinfo=pytz.utc)</code></pre>
 </details>
 </section>
 <section>
@@ -109,10 +109,10 @@ def date(date):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="context_functions.date"><code class="name flex">
-<span>def <span class="ident">date</span></span>(<span>date)</span>
+<span>def <span class="ident">date</span></span>(<span>timestr)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Initialize a date (with timezone) corresponding with a specific string representation.</p>
+<div class="desc"><p>Return a date corresponding with a specific string representation, <code>timestr</code>.</p>
 <p>For example,</p>
 <pre><code>{% set d = date(&quot;1982-12-28&quot;) %}
 {{ d }}
@@ -123,9 +123,9 @@ def date(date):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@incontext.context_function(name=&#34;date&#34;)
-def date(date):
+def date(timestr):
     &#34;&#34;&#34;
-    Initialize a date (with timezone) corresponding with a specific string representation.
+    Return a date corresponding with a specific string representation, `timestr`.
     
     For example,
     
@@ -136,7 +136,7 @@ def date(date):
     
     Like `now`, this guarantees that the returned date has an associated timezone to allow safe comparison.
     &#34;&#34;&#34;
-    return dateutil.parser.parse(date).replace(tzinfo=pytz.utc)</code></pre>
+    return dateutil.parser.parse(timestr).replace(tzinfo=pytz.utc)</code></pre>
 </details>
 </dd>
 <dt id="context_functions.generate_uuid"><code class="name flex">
