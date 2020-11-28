@@ -46,21 +46,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import subprocess
 
+import incontext
 import paths
 
 
-def initialize_plugin(incontext):
-    incontext.add_command(&#34;tests&#34;, command_tests, help=&#34;Test the utilities.&#34;)
-
-
-def command_tests(incontext, parser):
-
-    def do_tests(options):
-        subprocess.check_call([&#34;nosetests&#34;, &#34;-v&#34;, paths.TESTS_DIR])
-
-    return do_tests</code></pre>
+@incontext.command(&#34;tests&#34;, help=&#34;Run the tests&#34;)
+def command_tests(incontext, options):
+    environment = dict(os.environ)
+    environment[&#34;PYTHONPATH&#34;] = paths.SCRIPTS_DIR
+    subprocess.check_call([&#34;nosetests&#34;, &#34;-v&#34;, paths.TESTS_DIR], env=environment)</code></pre>
 </details>
 </section>
 <section>
@@ -71,7 +68,7 @@ def command_tests(incontext, parser):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="tests.command_tests"><code class="name flex">
-<span>def <span class="ident">command_tests</span></span>(<span>incontext, parser)</span>
+<span>def <span class="ident">command_tests</span></span>(<span>incontext, options)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -79,25 +76,11 @@ def command_tests(incontext, parser):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def command_tests(incontext, parser):
-
-    def do_tests(options):
-        subprocess.check_call([&#34;nosetests&#34;, &#34;-v&#34;, paths.TESTS_DIR])
-
-    return do_tests</code></pre>
-</details>
-</dd>
-<dt id="tests.initialize_plugin"><code class="name flex">
-<span>def <span class="ident">initialize_plugin</span></span>(<span>incontext)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def initialize_plugin(incontext):
-    incontext.add_command(&#34;tests&#34;, command_tests, help=&#34;Test the utilities.&#34;)</code></pre>
+<pre><code class="python">@incontext.command(&#34;tests&#34;, help=&#34;Run the tests&#34;)
+def command_tests(incontext, options):
+    environment = dict(os.environ)
+    environment[&#34;PYTHONPATH&#34;] = paths.SCRIPTS_DIR
+    subprocess.check_call([&#34;nosetests&#34;, &#34;-v&#34;, paths.TESTS_DIR], env=environment)</code></pre>
 </details>
 </dd>
 </dl>
@@ -114,7 +97,6 @@ def command_tests(incontext, parser):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="tests.command_tests" href="#tests.command_tests">command_tests</a></code></li>
-<li><code><a title="tests.initialize_plugin" href="#tests.initialize_plugin">initialize_plugin</a></code></li>
 </ul>
 </li>
 </ul>

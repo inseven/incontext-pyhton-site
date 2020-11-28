@@ -49,26 +49,92 @@
 # SOFTWARE.
 
 import argparse
+import collections
 import glob
 import importlib
 import logging
 import os
 import sys
 
-SCRIPT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
-PLUGINS_DIRECTORY = os.path.join(SCRIPT_DIRECTORY, &#34;plugins&#34;)
+import paths
 
 verbose = &#39;--verbose&#39; in sys.argv[1:] or &#39;-v&#39; in sys.argv[1:]
 logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format=&#34;[%(levelname)s] %(message)s&#34;)
 
-sys.path.append(PLUGINS_DIRECTORY)
+PLUGIN_TYPE_CONTEXT_FUNCTION = &#34;context_function&#34;
+PLUGIN_TYPE_COMMAND = &#34;command&#34;
 
-# Global plugin state.
-# This might behave in a slightly unexpected way as it&#39;s not truly global due to the way plugins are loaded--each
-# plugin has its own instance of the incontext module, with it&#39;s own global plugin state. When the plugin is loaded
-# the loading instance if InContext copies that plugin&#39;s global plugin state for later use.
-# Doing it this way allows for the far more lightweight decorator approach to registering plugins.
-CONTEXT_FUNCTIONS = {}
+CALLBACK_TYPE_SETUP = &#34;setup&#34;
+CALLBACK_TYPE_STANDALONE = &#34;standalone&#34;
+
+
+class _CommandPlugin(object):
+    
+    def __init__(self, name, help, callback, callback_type, arguments=[]):
+        self.name = name
+        self.help = help
+        self.callback = callback
+        self.callback_type = callback_type
+        self.arguments = arguments
+        
+    def configure(self, incontext, parser):
+        if self.callback_type == CALLBACK_TYPE_SETUP:
+            return self.callback(incontext, parser)
+        elif self.callback_type == CALLBACK_TYPE_STANDALONE:
+            for argument in self.arguments:
+                parser.add_argument(*(argument.args), **(argument.kwargs))
+            def callback(options):
+                return self.callback(incontext, options)
+            return callback
+        raise AssertionError(&#34;Unknown command callback type.&#34;)
+
+
+class Argument(object):
+    
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
+
+class _Plugins(object):
+    &#34;&#34;&#34;
+    Centralised mechanism for storing references to plugins by type.
+    
+    InContext allows for plugins to be registered either module-wide (via to `incontext` decorators), or by providing
+    an implementation of the `initialize_plugin` function and registering plugins directly with the `InContext`
+    instance passed in. In both of these situations, registered plugins are stored in an instance of the `_Plugins` class.
+    
+    Instances of the `incontext` have a module-scoped instance of `_Plugins` (`incontext._PLUGINS`) which is added to the
+    runtime instance using the `extend` method when plugins are loaded.
+    &#34;&#34;&#34;
+    
+    def __init__(self):
+        self._plugins_by_type = collections.defaultdict(dict)
+        
+    def add_plugin(self, plugin_type, name, plugin):
+        self._plugins_by_type[plugin_type][name] = plugin
+        
+    def plugin_types():
+        return self._plugins_by_type.values()
+        
+    def plugins(self, plugin_type):
+        return self._plugins_by_type[plugin_type]
+        
+    def extend(self, plugins):
+        &#34;&#34;&#34;
+        Add all of the plugins in `plugins` (type `_Plugins`) to the current instance.
+        &#34;&#34;&#34;
+        for plugin_type, plugin_plugins in plugins._plugins_by_type.items():
+            for name, plugin in plugin_plugins.items():
+                self.add_plugin(plugin_type, name, plugin)
+                
+                
+_PLUGINS = _Plugins()
+&#34;&#34;&#34;
+Module-scoped plugin instances (used with decorator-based plugin registration).
+
+Should not be manipulated directly.
+&#34;&#34;&#34;
 
 
 def context_function(name=None):
@@ -78,7 +144,21 @@ def context_function(name=None):
     If `name` is not specified, the function name is used.
     &#34;&#34;&#34;
     def decorator(f):
-        CONTEXT_FUNCTIONS[name if name is not None else f.__name__] = f
+        _PLUGINS.add_plugin(PLUGIN_TYPE_CONTEXT_FUNCTION, name if name is not None else f.__name__, f)
+        return f
+    return decorator
+
+
+def command(name, help=None, arguments=[]):
+    &#34;&#34;&#34;
+    Register a new command.
+    &#34;&#34;&#34;
+    def decorator(f):
+        _PLUGINS.add_plugin(PLUGIN_TYPE_COMMAND, name, _CommandPlugin(name=name,
+                                                                      help=help,
+                                                                      callback=f,
+                                                                      callback_type=CALLBACK_TYPE_STANDALONE,
+                                                                      arguments=arguments))
         return f
     return decorator
 
@@ -110,7 +190,6 @@ class InContext(object):
         @type plugins_directory: str
         &#34;&#34;&#34;
         self.plugins_directory = os.path.abspath(plugins_directory)
-        self.plugins = {}
         self.handlers = {}
         self.tasks = {}
         self.environment = {}
@@ -118,13 +197,17 @@ class InContext(object):
         self.subparsers = []
         self.configuration_providers = {}
         self.configuration = Configuration()
-        self.commands = {}
-        self._context_functions =  dict(CONTEXT_FUNCTIONS)
+        self.plugins = _PLUGINS
+        &#34;&#34;&#34;
+        Returns the registered plugins stored in a `_Plugins` instance.
+        &#34;&#34;&#34;
 
         # Load the plugins.
+        sys.path.append(self.plugins_directory)
+        plugins = {}
         for plugin in glob.glob(os.path.join(self.plugins_directory, &#34;*.py&#34;)):
             identifier = os.path.splitext(os.path.relpath(plugin, self.plugins_directory))[0].replace(&#39;/&#39;, &#39;_&#39;)
-            self.plugins[identifier] = importlib.import_module(identifier, plugin)
+            plugins[identifier] = importlib.import_module(identifier, plugin)
 
         # Create the argument parser.
         self.parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, description=&#34;Generate website.&#34;)
@@ -134,7 +217,7 @@ class InContext(object):
         self.subparsers = self.parser.add_subparsers(help=&#34;command to run&#34;)
 
         # Initialize the plugins.
-        for plugin_name, plugin_instance in self.plugins.items():
+        for plugin_name, plugin_instance in plugins.items():
             
             # Load the classic method-based plugins.
             if hasattr(plugin_instance, &#39;initialize_plugin&#39;):
@@ -144,15 +227,14 @@ class InContext(object):
             # Load the decorator-based plugins by copying in their &#39;global&#39; state.
             if hasattr(plugin_instance, &#39;incontext&#39;):
                 logging.debug(&#34;Initializing plugin &#39;%s&#39;...&#34;, plugin_name)
-                for name, f in plugin_instance.incontext.CONTEXT_FUNCTIONS.items():
-                    self._context_functions[name] = f
+                self.plugins.extend(plugin_instance.incontext._PLUGINS)
                 
     @property
     def context_functions(self):
         &#34;&#34;&#34;
         Return a dictionary of additional context functions that will be available to the Jinja templating at render time.
         &#34;&#34;&#34;
-        return self._context_functions
+        return self.plugins.plugins(PLUGIN_TYPE_CONTEXT_FUNCTION)
 
     def add_argument(self, *args, **kwargs):
         &#34;&#34;&#34;
@@ -178,14 +260,10 @@ class InContext(object):
         @param help: The help string that describes the command to be printed when the user passes the &#39;--help&#39; flag.
         @type help: str
         &#34;&#34;&#34;
-        parser = self.subparsers.add_parser(name, help=help)
-        fn = function(self, parser)
-        parser.set_defaults(fn=fn)
-
-        def command_runner(**kwargs):
-            fn(Namespace(**kwargs))
-
-        self.commands[name] = command_runner
+        self.plugins.add_plugin(PLUGIN_TYPE_COMMAND, name, _CommandPlugin(name=name,
+                                                                          help=help,
+                                                                          callback=function,
+                                                                          callback_type=CALLBACK_TYPE_SETUP))
 
     def add_configuration_provider(self, name, function):
         &#34;&#34;&#34;
@@ -231,11 +309,21 @@ class InContext(object):
         &#34;&#34;&#34;
         return self.handlers[name]
 
-    def run(self):
+    def run(self, args):
         &#34;&#34;&#34;
         Parse the command line arguments and execute the requested command.
         &#34;&#34;&#34;
-        options = self.parser.parse_args()
+        
+        # Prepare the commands for running.
+        for command_plugin in self.plugins.plugins(PLUGIN_TYPE_COMMAND).values():
+            parser = self.subparsers.add_parser(command_plugin.name, help=help)
+            fn = command_plugin.configure(self, parser)
+            parser.set_defaults(fn=fn)
+            def command_runner(**kwargs):
+                fn(Namespace(**kwargs))
+
+        # Parse the arguments.       
+        options = self.parser.parse_args(args)
         for name, configuration_provider in self.configuration_providers.items():
             self.configuration.add(name, configuration_provider(self, options))
         if &#39;fn&#39; not in options:
@@ -248,8 +336,8 @@ def main():
     &#34;&#34;&#34;
     Entry-point for the command line. Should not be called directly.
     &#34;&#34;&#34;
-    instance = InContext(plugins_directory=PLUGINS_DIRECTORY)
-    instance.run()
+    instance = InContext(plugins_directory=paths.PLUGINS_DIR)
+    instance.run(sys.argv[1:])
 
 
 if __name__ == &#34;__main__&#34;:
@@ -263,6 +351,29 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="incontext.command"><code class="name flex">
+<span>def <span class="ident">command</span></span>(<span>name, help=None, arguments=[])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register a new command.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def command(name, help=None, arguments=[]):
+    &#34;&#34;&#34;
+    Register a new command.
+    &#34;&#34;&#34;
+    def decorator(f):
+        _PLUGINS.add_plugin(PLUGIN_TYPE_COMMAND, name, _CommandPlugin(name=name,
+                                                                      help=help,
+                                                                      callback=f,
+                                                                      callback_type=CALLBACK_TYPE_STANDALONE,
+                                                                      arguments=arguments))
+        return f
+    return decorator</code></pre>
+</details>
+</dd>
 <dt id="incontext.context_function"><code class="name flex">
 <span>def <span class="ident">context_function</span></span>(<span>name=None)</span>
 </code></dt>
@@ -280,7 +391,7 @@ if __name__ == &#34;__main__&#34;:
     If `name` is not specified, the function name is used.
     &#34;&#34;&#34;
     def decorator(f):
-        CONTEXT_FUNCTIONS[name if name is not None else f.__name__] = f
+        _PLUGINS.add_plugin(PLUGIN_TYPE_CONTEXT_FUNCTION, name if name is not None else f.__name__, f)
         return f
     return decorator</code></pre>
 </details>
@@ -298,8 +409,8 @@ if __name__ == &#34;__main__&#34;:
     &#34;&#34;&#34;
     Entry-point for the command line. Should not be called directly.
     &#34;&#34;&#34;
-    instance = InContext(plugins_directory=PLUGINS_DIRECTORY)
-    instance.run()</code></pre>
+    instance = InContext(plugins_directory=paths.PLUGINS_DIR)
+    instance.run(sys.argv[1:])</code></pre>
 </details>
 </dd>
 </dl>
@@ -307,6 +418,23 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="incontext.Argument"><code class="flex name class">
+<span>class <span class="ident">Argument</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Argument(object):
+    
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs</code></pre>
+</details>
+</dd>
 <dt id="incontext.Configuration"><code class="flex name class">
 <span>class <span class="ident">Configuration</span></span>
 </code></dt>
@@ -366,7 +494,6 @@ if __name__ == &#34;__main__&#34;:
         @type plugins_directory: str
         &#34;&#34;&#34;
         self.plugins_directory = os.path.abspath(plugins_directory)
-        self.plugins = {}
         self.handlers = {}
         self.tasks = {}
         self.environment = {}
@@ -374,13 +501,17 @@ if __name__ == &#34;__main__&#34;:
         self.subparsers = []
         self.configuration_providers = {}
         self.configuration = Configuration()
-        self.commands = {}
-        self._context_functions =  dict(CONTEXT_FUNCTIONS)
+        self.plugins = _PLUGINS
+        &#34;&#34;&#34;
+        Returns the registered plugins stored in a `_Plugins` instance.
+        &#34;&#34;&#34;
 
         # Load the plugins.
+        sys.path.append(self.plugins_directory)
+        plugins = {}
         for plugin in glob.glob(os.path.join(self.plugins_directory, &#34;*.py&#34;)):
             identifier = os.path.splitext(os.path.relpath(plugin, self.plugins_directory))[0].replace(&#39;/&#39;, &#39;_&#39;)
-            self.plugins[identifier] = importlib.import_module(identifier, plugin)
+            plugins[identifier] = importlib.import_module(identifier, plugin)
 
         # Create the argument parser.
         self.parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, description=&#34;Generate website.&#34;)
@@ -390,7 +521,7 @@ if __name__ == &#34;__main__&#34;:
         self.subparsers = self.parser.add_subparsers(help=&#34;command to run&#34;)
 
         # Initialize the plugins.
-        for plugin_name, plugin_instance in self.plugins.items():
+        for plugin_name, plugin_instance in plugins.items():
             
             # Load the classic method-based plugins.
             if hasattr(plugin_instance, &#39;initialize_plugin&#39;):
@@ -400,15 +531,14 @@ if __name__ == &#34;__main__&#34;:
             # Load the decorator-based plugins by copying in their &#39;global&#39; state.
             if hasattr(plugin_instance, &#39;incontext&#39;):
                 logging.debug(&#34;Initializing plugin &#39;%s&#39;...&#34;, plugin_name)
-                for name, f in plugin_instance.incontext.CONTEXT_FUNCTIONS.items():
-                    self._context_functions[name] = f
+                self.plugins.extend(plugin_instance.incontext._PLUGINS)
                 
     @property
     def context_functions(self):
         &#34;&#34;&#34;
         Return a dictionary of additional context functions that will be available to the Jinja templating at render time.
         &#34;&#34;&#34;
-        return self._context_functions
+        return self.plugins.plugins(PLUGIN_TYPE_CONTEXT_FUNCTION)
 
     def add_argument(self, *args, **kwargs):
         &#34;&#34;&#34;
@@ -434,14 +564,10 @@ if __name__ == &#34;__main__&#34;:
         @param help: The help string that describes the command to be printed when the user passes the &#39;--help&#39; flag.
         @type help: str
         &#34;&#34;&#34;
-        parser = self.subparsers.add_parser(name, help=help)
-        fn = function(self, parser)
-        parser.set_defaults(fn=fn)
-
-        def command_runner(**kwargs):
-            fn(Namespace(**kwargs))
-
-        self.commands[name] = command_runner
+        self.plugins.add_plugin(PLUGIN_TYPE_COMMAND, name, _CommandPlugin(name=name,
+                                                                          help=help,
+                                                                          callback=function,
+                                                                          callback_type=CALLBACK_TYPE_SETUP))
 
     def add_configuration_provider(self, name, function):
         &#34;&#34;&#34;
@@ -487,11 +613,21 @@ if __name__ == &#34;__main__&#34;:
         &#34;&#34;&#34;
         return self.handlers[name]
 
-    def run(self):
+    def run(self, args):
         &#34;&#34;&#34;
         Parse the command line arguments and execute the requested command.
         &#34;&#34;&#34;
-        options = self.parser.parse_args()
+        
+        # Prepare the commands for running.
+        for command_plugin in self.plugins.plugins(PLUGIN_TYPE_COMMAND).values():
+            parser = self.subparsers.add_parser(command_plugin.name, help=help)
+            fn = command_plugin.configure(self, parser)
+            parser.set_defaults(fn=fn)
+            def command_runner(**kwargs):
+                fn(Namespace(**kwargs))
+
+        # Parse the arguments.       
+        options = self.parser.parse_args(args)
         for name, configuration_provider in self.configuration_providers.items():
             self.configuration.add(name, configuration_provider(self, options))
         if &#39;fn&#39; not in options:
@@ -513,8 +649,12 @@ def context_functions(self):
     &#34;&#34;&#34;
     Return a dictionary of additional context functions that will be available to the Jinja templating at render time.
     &#34;&#34;&#34;
-    return self._context_functions</code></pre>
+    return self.plugins.plugins(PLUGIN_TYPE_CONTEXT_FUNCTION)</code></pre>
 </details>
+</dd>
+<dt id="incontext.InContext.plugins"><code class="name">var <span class="ident">plugins</span></code></dt>
+<dd>
+<div class="desc"><p>Returns the registered plugins stored in a <code>_Plugins</code> instance.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -573,14 +713,10 @@ must return a new callable which will be called if the the command is selected f
     @param help: The help string that describes the command to be printed when the user passes the &#39;--help&#39; flag.
     @type help: str
     &#34;&#34;&#34;
-    parser = self.subparsers.add_parser(name, help=help)
-    fn = function(self, parser)
-    parser.set_defaults(fn=fn)
-
-    def command_runner(**kwargs):
-        fn(Namespace(**kwargs))
-
-    self.commands[name] = command_runner</code></pre>
+    self.plugins.add_plugin(PLUGIN_TYPE_COMMAND, name, _CommandPlugin(name=name,
+                                                                      help=help,
+                                                                      callback=function,
+                                                                      callback_type=CALLBACK_TYPE_SETUP))</code></pre>
 </details>
 </dd>
 <dt id="incontext.InContext.add_configuration_provider"><code class="name flex">
@@ -687,7 +823,7 @@ must return a new callable which will be called if the the command is selected f
 </details>
 </dd>
 <dt id="incontext.InContext.run"><code class="name flex">
-<span>def <span class="ident">run</span></span>(<span>self)</span>
+<span>def <span class="ident">run</span></span>(<span>self, args)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parse the command line arguments and execute the requested command.</p></div>
@@ -695,11 +831,21 @@ must return a new callable which will be called if the the command is selected f
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run(self):
+<pre><code class="python">def run(self, args):
     &#34;&#34;&#34;
     Parse the command line arguments and execute the requested command.
     &#34;&#34;&#34;
-    options = self.parser.parse_args()
+    
+    # Prepare the commands for running.
+    for command_plugin in self.plugins.plugins(PLUGIN_TYPE_COMMAND).values():
+        parser = self.subparsers.add_parser(command_plugin.name, help=help)
+        fn = command_plugin.configure(self, parser)
+        parser.set_defaults(fn=fn)
+        def command_runner(**kwargs):
+            fn(Namespace(**kwargs))
+
+    # Parse the arguments.       
+    options = self.parser.parse_args(args)
     for name, configuration_provider in self.configuration_providers.items():
         self.configuration.add(name, configuration_provider(self, options))
     if &#39;fn&#39; not in options:
@@ -736,12 +882,16 @@ must return a new callable which will be called if the the command is selected f
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="incontext.command" href="#incontext.command">command</a></code></li>
 <li><code><a title="incontext.context_function" href="#incontext.context_function">context_function</a></code></li>
 <li><code><a title="incontext.main" href="#incontext.main">main</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="incontext.Argument" href="#incontext.Argument">Argument</a></code></h4>
+</li>
 <li>
 <h4><code><a title="incontext.Configuration" href="#incontext.Configuration">Configuration</a></code></h4>
 <ul class="">
@@ -759,6 +909,7 @@ must return a new callable which will be called if the the command is selected f
 <li><code><a title="incontext.InContext.context_functions" href="#incontext.InContext.context_functions">context_functions</a></code></li>
 <li><code><a title="incontext.InContext.get_handler" href="#incontext.InContext.get_handler">get_handler</a></code></li>
 <li><code><a title="incontext.InContext.get_task" href="#incontext.InContext.get_task">get_task</a></code></li>
+<li><code><a title="incontext.InContext.plugins" href="#incontext.InContext.plugins">plugins</a></code></li>
 <li><code><a title="incontext.InContext.run" href="#incontext.InContext.run">run</a></code></li>
 </ul>
 </li>

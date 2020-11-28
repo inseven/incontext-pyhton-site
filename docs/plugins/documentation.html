@@ -49,10 +49,12 @@
 import subprocess
 
 import glob
+import logging
 import os
 
 import jinja2
 
+import incontext
 import paths
 import utils
 
@@ -74,38 +76,40 @@ INDEX_TEMPLATE = &#34;&#34;&#34;
 &#34;&#34;&#34;
 
 
-def initialize_plugin(incontext):
-    incontext.add_command(&#34;build-documentation&#34;, command_build_documentation, help=&#34;Build the documentation.&#34;)
-
-
-def command_build_documentation(incontext, parser):
-    parser.add_argument(&#34;output&#34;, help=&#34;output directory&#34;)
-
-    def do_tests(options):
-        documentation_directory = os.path.abspath(options.output)
+@incontext.command(&#34;build-documentation&#34;, help=&#34;Build the documentation.&#34;,
+                   arguments=[
+                       incontext.Argument(&#34;output&#34;, help=&#34;output directory&#34;),
+                   ])
+def command_build_documentation(incontext, options):
+    documentation_directory = os.path.abspath(options.output)
+    
+    with utils.Chdir(paths.SCRIPTS_DIR):
         
-        with utils.Chdir(paths.SCRIPTS_DIR):
-            
-            # Look up the python files to document.
-            files = glob.glob(&#34;*.py&#34;) + glob.glob(&#34;plugins/*.py&#34;)
-            modules = [os.path.splitext(f)[0] for f in files]
-            
-            # Generate the Python documentation.
-            for f in files:
-                output_directory = os.path.join(documentation_directory, os.path.dirname(f))
-                utils.makedirs(output_directory)
-                subprocess.check_call([&#34;pdoc&#34;, 
-                                       &#34;--html&#34;,
-                                       &#34;--output-dir&#34;, output_directory,
-                                       &#34;--force&#34;,
-                                       f])
-                                  
-            # Create an index page.
-            with open(os.path.join(documentation_directory, &#34;index.html&#34;), &#34;w&#34;) as fh:
-                template = jinja2.Template(INDEX_TEMPLATE)
-                fh.write(template.render(modules=modules))
-
-    return do_tests</code></pre>
+        # Look up the python files to document.
+        files = glob.glob(&#34;*.py&#34;) + glob.glob(&#34;plugins/*.py&#34;)
+        modules = [os.path.splitext(f)[0] for f in files]
+        
+        # Generate the Python documentation.
+        for f in files:
+            logging.info(&#34;Generating documentation for &#39;%s&#39;...&#34;, f)
+            output_directory = os.path.join(documentation_directory, os.path.dirname(f))
+            utils.makedirs(output_directory)
+            result = subprocess.run([&#34;pdoc&#34;, 
+                                     &#34;--html&#34;,
+                                     &#34;--output-dir&#34;, output_directory,
+                                     &#34;--force&#34;,
+                                     f],
+                                    capture_output=True)
+            logging.debug(result.stdout)
+            if result.returncode:
+                exit(result.stderr)
+            elif result.stderr:
+                logging.warning(result.stderr)
+                              
+        # Create an index page.
+        with open(os.path.join(documentation_directory, &#34;index.html&#34;), &#34;w&#34;) as fh:
+            template = jinja2.Template(INDEX_TEMPLATE)
+            fh.write(template.render(modules=modules))</code></pre>
 </details>
 </section>
 <section>
@@ -116,7 +120,7 @@ def command_build_documentation(incontext, parser):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="documentation.command_build_documentation"><code class="name flex">
-<span>def <span class="ident">command_build_documentation</span></span>(<span>incontext, parser)</span>
+<span>def <span class="ident">command_build_documentation</span></span>(<span>incontext, options)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -124,47 +128,40 @@ def command_build_documentation(incontext, parser):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def command_build_documentation(incontext, parser):
-    parser.add_argument(&#34;output&#34;, help=&#34;output directory&#34;)
-
-    def do_tests(options):
-        documentation_directory = os.path.abspath(options.output)
+<pre><code class="python">@incontext.command(&#34;build-documentation&#34;, help=&#34;Build the documentation.&#34;,
+                   arguments=[
+                       incontext.Argument(&#34;output&#34;, help=&#34;output directory&#34;),
+                   ])
+def command_build_documentation(incontext, options):
+    documentation_directory = os.path.abspath(options.output)
+    
+    with utils.Chdir(paths.SCRIPTS_DIR):
         
-        with utils.Chdir(paths.SCRIPTS_DIR):
-            
-            # Look up the python files to document.
-            files = glob.glob(&#34;*.py&#34;) + glob.glob(&#34;plugins/*.py&#34;)
-            modules = [os.path.splitext(f)[0] for f in files]
-            
-            # Generate the Python documentation.
-            for f in files:
-                output_directory = os.path.join(documentation_directory, os.path.dirname(f))
-                utils.makedirs(output_directory)
-                subprocess.check_call([&#34;pdoc&#34;, 
-                                       &#34;--html&#34;,
-                                       &#34;--output-dir&#34;, output_directory,
-                                       &#34;--force&#34;,
-                                       f])
-                                  
-            # Create an index page.
-            with open(os.path.join(documentation_directory, &#34;index.html&#34;), &#34;w&#34;) as fh:
-                template = jinja2.Template(INDEX_TEMPLATE)
-                fh.write(template.render(modules=modules))
-
-    return do_tests</code></pre>
-</details>
-</dd>
-<dt id="documentation.initialize_plugin"><code class="name flex">
-<span>def <span class="ident">initialize_plugin</span></span>(<span>incontext)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def initialize_plugin(incontext):
-    incontext.add_command(&#34;build-documentation&#34;, command_build_documentation, help=&#34;Build the documentation.&#34;)</code></pre>
+        # Look up the python files to document.
+        files = glob.glob(&#34;*.py&#34;) + glob.glob(&#34;plugins/*.py&#34;)
+        modules = [os.path.splitext(f)[0] for f in files]
+        
+        # Generate the Python documentation.
+        for f in files:
+            logging.info(&#34;Generating documentation for &#39;%s&#39;...&#34;, f)
+            output_directory = os.path.join(documentation_directory, os.path.dirname(f))
+            utils.makedirs(output_directory)
+            result = subprocess.run([&#34;pdoc&#34;, 
+                                     &#34;--html&#34;,
+                                     &#34;--output-dir&#34;, output_directory,
+                                     &#34;--force&#34;,
+                                     f],
+                                    capture_output=True)
+            logging.debug(result.stdout)
+            if result.returncode:
+                exit(result.stderr)
+            elif result.stderr:
+                logging.warning(result.stderr)
+                              
+        # Create an index page.
+        with open(os.path.join(documentation_directory, &#34;index.html&#34;), &#34;w&#34;) as fh:
+            template = jinja2.Template(INDEX_TEMPLATE)
+            fh.write(template.render(modules=modules))</code></pre>
 </details>
 </dd>
 </dl>
@@ -181,7 +178,6 @@ def command_build_documentation(incontext, parser):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="documentation.command_build_documentation" href="#documentation.command_build_documentation">command_build_documentation</a></code></li>
-<li><code><a title="documentation.initialize_plugin" href="#documentation.initialize_plugin">initialize_plugin</a></code></li>
 </ul>
 </li>
 </ul>

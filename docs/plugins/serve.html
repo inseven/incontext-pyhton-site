@@ -60,6 +60,7 @@ import webbrowser
 import watchdog.events
 import watchdog.observers
 
+import incontext
 import paths
 
 
@@ -89,11 +90,6 @@ def watch_directory(paths, callback):
         observer.schedule(CallbackEventHandler(callback=callback), path, recursive=True)
     observer.start()
     return observer
-
-
-def initialize_plugin(incontext):
-    incontext.add_command(&#34;watch&#34;, command_watch, help=&#34;watch for changes and automatically build the website&#34;)
-    incontext.add_command(&#34;serve&#34;, command_serve, help=&#34;serve a local copy of the site using a Docker nginx container&#34;)
 
 
 class Builder(threading.Thread):
@@ -132,27 +128,6 @@ class Builder(threading.Thread):
                     logging.error(&#34;Failed: %s&#34;, e)
 
 
-def command_watch(incontext, parser):
-    def do_watch(options):
-        builder = Builder(incontext)
-        builder.start()
-        logging.info(&#34;Watching directory...&#34;)
-        observer = watch_directory([incontext.configuration.site.paths.content,
-                                    incontext.configuration.site.paths.templates],
-                                   builder.schedule)
-        logging.info(&#34;Performing initial build...&#34;)
-        builder.schedule()
-        try:
-            while True:
-                time.sleep(0.2)
-        except KeyboardInterrupt:
-            builder.stop()
-            observer.stop()
-        observer.join()
-        builder.join()
-    return do_watch
-
-
 def docker(command):
     prefix = []
     if sys.platform == &#34;linux&#34;:
@@ -160,18 +135,37 @@ def docker(command):
     return subprocess.run(prefix + [&#34;docker&#34;] + command)
 
 
+@incontext.command(&#34;watch&#34;, help=&#34;watch for changes and automatically build the website&#34;)
+def command_watch(incontext, options):
+    builder = Builder(incontext)
+    builder.start()
+    logging.info(&#34;Watching directory...&#34;)
+    observer = watch_directory([incontext.configuration.site.paths.content,
+                                incontext.configuration.site.paths.templates],
+                               builder.schedule)
+    logging.info(&#34;Performing initial build...&#34;)
+    builder.schedule()
+    try:
+        while True:
+            time.sleep(0.2)
+    except KeyboardInterrupt:
+        builder.stop()
+        observer.stop()
+    observer.join()
+    builder.join()
+
+
+@incontext.command(&#34;serve&#34;, help=&#34;serve a local copy of the site using a Docker nginx container&#34;)
 def command_serve(incontext, parser):
-    def do_serve(options):
-        container = &#34;incontext-nginx&#34;
-        docker([&#34;rm&#34;, &#34;--force&#34;, container])
-        docker([&#34;run&#34;, &#34;--name&#34;, container,
-                &#34;--restart&#34;, &#34;always&#34;,
-                &#34;-d&#34;,
-                &#34;-p&#34;, &#34;80:80&#34;,
-                &#34;-v&#34;, f&#34;{incontext.configuration.site.destination.files_directory}:/usr/share/nginx/html&#34;,
-                &#34;-v&#34;, f&#34;{os.path.join(paths.ROOT_DIR, &#39;nginx.conf&#39;)}:/etc/nginx/conf.d/default.conf&#34;,
-                &#34;nginx&#34;])
-    return do_serve</code></pre>
+    container = &#34;incontext-nginx&#34;
+    docker([&#34;rm&#34;, &#34;--force&#34;, container])
+    docker([&#34;run&#34;, &#34;--name&#34;, container,
+            &#34;--restart&#34;, &#34;always&#34;,
+            &#34;-d&#34;,
+            &#34;-p&#34;, &#34;80:80&#34;,
+            &#34;-v&#34;, f&#34;{incontext.configuration.site.destination.files_directory}:/usr/share/nginx/html&#34;,
+            &#34;-v&#34;, f&#34;{os.path.join(paths.ROOT_DIR, &#39;nginx.conf&#39;)}:/etc/nginx/conf.d/default.conf&#34;,
+            &#34;nginx&#34;])</code></pre>
 </details>
 </section>
 <section>
@@ -190,22 +184,21 @@ def command_serve(incontext, parser):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def command_serve(incontext, parser):
-    def do_serve(options):
-        container = &#34;incontext-nginx&#34;
-        docker([&#34;rm&#34;, &#34;--force&#34;, container])
-        docker([&#34;run&#34;, &#34;--name&#34;, container,
-                &#34;--restart&#34;, &#34;always&#34;,
-                &#34;-d&#34;,
-                &#34;-p&#34;, &#34;80:80&#34;,
-                &#34;-v&#34;, f&#34;{incontext.configuration.site.destination.files_directory}:/usr/share/nginx/html&#34;,
-                &#34;-v&#34;, f&#34;{os.path.join(paths.ROOT_DIR, &#39;nginx.conf&#39;)}:/etc/nginx/conf.d/default.conf&#34;,
-                &#34;nginx&#34;])
-    return do_serve</code></pre>
+<pre><code class="python">@incontext.command(&#34;serve&#34;, help=&#34;serve a local copy of the site using a Docker nginx container&#34;)
+def command_serve(incontext, parser):
+    container = &#34;incontext-nginx&#34;
+    docker([&#34;rm&#34;, &#34;--force&#34;, container])
+    docker([&#34;run&#34;, &#34;--name&#34;, container,
+            &#34;--restart&#34;, &#34;always&#34;,
+            &#34;-d&#34;,
+            &#34;-p&#34;, &#34;80:80&#34;,
+            &#34;-v&#34;, f&#34;{incontext.configuration.site.destination.files_directory}:/usr/share/nginx/html&#34;,
+            &#34;-v&#34;, f&#34;{os.path.join(paths.ROOT_DIR, &#39;nginx.conf&#39;)}:/etc/nginx/conf.d/default.conf&#34;,
+            &#34;nginx&#34;])</code></pre>
 </details>
 </dd>
 <dt id="serve.command_watch"><code class="name flex">
-<span>def <span class="ident">command_watch</span></span>(<span>incontext, parser)</span>
+<span>def <span class="ident">command_watch</span></span>(<span>incontext, options)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -213,25 +206,24 @@ def command_serve(incontext, parser):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def command_watch(incontext, parser):
-    def do_watch(options):
-        builder = Builder(incontext)
-        builder.start()
-        logging.info(&#34;Watching directory...&#34;)
-        observer = watch_directory([incontext.configuration.site.paths.content,
-                                    incontext.configuration.site.paths.templates],
-                                   builder.schedule)
-        logging.info(&#34;Performing initial build...&#34;)
-        builder.schedule()
-        try:
-            while True:
-                time.sleep(0.2)
-        except KeyboardInterrupt:
-            builder.stop()
-            observer.stop()
-        observer.join()
-        builder.join()
-    return do_watch</code></pre>
+<pre><code class="python">@incontext.command(&#34;watch&#34;, help=&#34;watch for changes and automatically build the website&#34;)
+def command_watch(incontext, options):
+    builder = Builder(incontext)
+    builder.start()
+    logging.info(&#34;Watching directory...&#34;)
+    observer = watch_directory([incontext.configuration.site.paths.content,
+                                incontext.configuration.site.paths.templates],
+                               builder.schedule)
+    logging.info(&#34;Performing initial build...&#34;)
+    builder.schedule()
+    try:
+        while True:
+            time.sleep(0.2)
+    except KeyboardInterrupt:
+        builder.stop()
+        observer.stop()
+    observer.join()
+    builder.join()</code></pre>
 </details>
 </dd>
 <dt id="serve.docker"><code class="name flex">
@@ -248,20 +240,6 @@ def command_serve(incontext, parser):
     if sys.platform == &#34;linux&#34;:
         prefix = [&#34;sudo&#34;]
     return subprocess.run(prefix + [&#34;docker&#34;] + command)</code></pre>
-</details>
-</dd>
-<dt id="serve.initialize_plugin"><code class="name flex">
-<span>def <span class="ident">initialize_plugin</span></span>(<span>incontext)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def initialize_plugin(incontext):
-    incontext.add_command(&#34;watch&#34;, command_watch, help=&#34;watch for changes and automatically build the website&#34;)
-    incontext.add_command(&#34;serve&#34;, command_serve, help=&#34;serve a local copy of the site using a Docker nginx container&#34;)</code></pre>
 </details>
 </dd>
 <dt id="serve.watch_directory"><code class="name flex">
@@ -535,7 +513,6 @@ Event representing file/directory movement.
 <li><code><a title="serve.command_serve" href="#serve.command_serve">command_serve</a></code></li>
 <li><code><a title="serve.command_watch" href="#serve.command_watch">command_watch</a></code></li>
 <li><code><a title="serve.docker" href="#serve.docker">docker</a></code></li>
-<li><code><a title="serve.initialize_plugin" href="#serve.initialize_plugin">initialize_plugin</a></code></li>
 <li><code><a title="serve.watch_directory" href="#serve.watch_directory">watch_directory</a></code></li>
 </ul>
 </li>
