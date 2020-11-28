@@ -61,6 +61,7 @@ import yaml
 
 import converters
 import gallery
+import incontext
 import paths
 import store
 import tracker
@@ -72,26 +73,9 @@ DOCUMENT_STORE = &#34;DOCUMENT_STORE&#34;
 
 def initialize_plugin(incontext):
     incontext.add_argument(&#34;--set&#34;, type=str, help=&#34;override configuration parameters&#34;)
-    incontext.add_command(&#34;build&#34;, command_build, help=&#34;build the website&#34;)
-    incontext.add_command(&#34;clean&#34;, command_clean, help=&#34;remove the build directory&#34;)
     incontext.add_configuration_provider(&#34;site&#34;, configuration_provider_site)
     incontext.add_handler(&#34;import_markdown&#34;, import_markdown)
     incontext.add_task(&#34;process_files&#34;, process_files)
-
-
-class PropertyDictionary(object):
-
-    def __init__(self, dictionary):
-        self._dictionary = dictionary
-
-    def __getattr__(self, name):
-        return self._dictionary[name]
-
-    def keys(self):
-        return self._dictionary.keys()
-
-    def __getitem__(self, key):
-        return self._dictionary[key]
 
 
 class SiteConfiguration(object):
@@ -139,14 +123,14 @@ class SiteConfiguration(object):
             &#34;templates&#34;: &#34;templates&#34;,
         }
         paths.update(self._config[&#34;paths&#34;])
-        # TODO: Ensure the paths are under the root.
-        return PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
-                                   for name, path in paths.items()})
+        # TODO: Ensure the paths in site.yaml are under the root (https://github.com/inseven/incontext/issues/60)
+        return utils.PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
+                                         for name, path in paths.items()})
 
     @property
     def destination(self):
         self._load_configuration()
-        return PropertyDictionary({
+        return utils.PropertyDictionary({
             &#34;root_directory&#34;: self.paths.build,
             &#34;files_directory&#34;: os.path.join(self.paths.build, &#34;files&#34;),
             &#34;store_path&#34;: os.path.join(self.paths.build, &#34;store.sqlite&#34;),
@@ -264,35 +248,29 @@ class Website(object):
             return destination, query_tracker.queries, hashes
 
 
-def command_build(incontext, parser):
+@incontext.command(&#34;build&#34;, help=&#34;build the website&#34;)
+def command_build(incontext, options):
 
-    def do_build(options):
+    # Create the build directory.
+    utils.makedirs(incontext.configuration.site.destination.root_directory)
 
-        # Create the build directory.
-        utils.makedirs(incontext.configuration.site.destination.root_directory)
-
-        # Run the build tasks.
-        for task in incontext.configuration.site.build_steps:
-            identifier, args = task[&#34;task&#34;], task[&#34;args&#34;] if &#34;args&#34; in task else {}
-            logging.info(&#34;Running task &#39;%s&#39;...&#34; % identifier)
-            incontext.get_task(identifier)(incontext, options, **args)
-
-    return do_build
+    # Run the build tasks.
+    for task in incontext.configuration.site.build_steps:
+        identifier, args = task[&#34;task&#34;], task[&#34;args&#34;] if &#34;args&#34; in task else {}
+        logging.info(&#34;Running task &#39;%s&#39;...&#34; % identifier)
+        incontext.get_task(identifier)(incontext, options, **args)
 
 
-def command_clean(incontext, parser):
+@incontext.command(&#34;clean&#34;, help=&#34;remove the build directory&#34;)
+def command_clean(incontext, options):
 
-    def do_clean(options):
+    build_dir = incontext.configuration.site.destination.root_directory
+    if not os.path.exists(build_dir):
+        logging.info(&#34;Nothing to do.&#34;)
+        return
 
-        build_dir = incontext.configuration.site.destination.root_directory
-        if not os.path.exists(build_dir):
-            logging.info(&#34;Nothing to do.&#34;)
-            return
-
-        logging.info(&#34;Removing &#39;%s&#39;...&#34; % build_dir)
-        shutil.rmtree(build_dir)
-
-    return do_clean
+    logging.info(&#34;Removing &#39;%s&#39;...&#34; % build_dir)
+    shutil.rmtree(build_dir)
 
 
 def import_markdown(incontext, from_directory, to_directory, default_category=&#39;general&#39;):
@@ -411,7 +389,7 @@ class Phase(object):
 </details>
 </dd>
 <dt id="build.command_build"><code class="name flex">
-<span>def <span class="ident">command_build</span></span>(<span>incontext, parser)</span>
+<span>def <span class="ident">command_build</span></span>(<span>incontext, options)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -419,24 +397,21 @@ class Phase(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def command_build(incontext, parser):
+<pre><code class="python">@incontext.command(&#34;build&#34;, help=&#34;build the website&#34;)
+def command_build(incontext, options):
 
-    def do_build(options):
+    # Create the build directory.
+    utils.makedirs(incontext.configuration.site.destination.root_directory)
 
-        # Create the build directory.
-        utils.makedirs(incontext.configuration.site.destination.root_directory)
-
-        # Run the build tasks.
-        for task in incontext.configuration.site.build_steps:
-            identifier, args = task[&#34;task&#34;], task[&#34;args&#34;] if &#34;args&#34; in task else {}
-            logging.info(&#34;Running task &#39;%s&#39;...&#34; % identifier)
-            incontext.get_task(identifier)(incontext, options, **args)
-
-    return do_build</code></pre>
+    # Run the build tasks.
+    for task in incontext.configuration.site.build_steps:
+        identifier, args = task[&#34;task&#34;], task[&#34;args&#34;] if &#34;args&#34; in task else {}
+        logging.info(&#34;Running task &#39;%s&#39;...&#34; % identifier)
+        incontext.get_task(identifier)(incontext, options, **args)</code></pre>
 </details>
 </dd>
 <dt id="build.command_clean"><code class="name flex">
-<span>def <span class="ident">command_clean</span></span>(<span>incontext, parser)</span>
+<span>def <span class="ident">command_clean</span></span>(<span>incontext, options)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -444,19 +419,16 @@ class Phase(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def command_clean(incontext, parser):
+<pre><code class="python">@incontext.command(&#34;clean&#34;, help=&#34;remove the build directory&#34;)
+def command_clean(incontext, options):
 
-    def do_clean(options):
+    build_dir = incontext.configuration.site.destination.root_directory
+    if not os.path.exists(build_dir):
+        logging.info(&#34;Nothing to do.&#34;)
+        return
 
-        build_dir = incontext.configuration.site.destination.root_directory
-        if not os.path.exists(build_dir):
-            logging.info(&#34;Nothing to do.&#34;)
-            return
-
-        logging.info(&#34;Removing &#39;%s&#39;...&#34; % build_dir)
-        shutil.rmtree(build_dir)
-
-    return do_clean</code></pre>
+    logging.info(&#34;Removing &#39;%s&#39;...&#34; % build_dir)
+    shutil.rmtree(build_dir)</code></pre>
 </details>
 </dd>
 <dt id="build.configuration_provider_site"><code class="name flex">
@@ -547,8 +519,6 @@ class Phase(object):
 </summary>
 <pre><code class="python">def initialize_plugin(incontext):
     incontext.add_argument(&#34;--set&#34;, type=str, help=&#34;override configuration parameters&#34;)
-    incontext.add_command(&#34;build&#34;, command_build, help=&#34;build the website&#34;)
-    incontext.add_command(&#34;clean&#34;, command_clean, help=&#34;remove the build directory&#34;)
     incontext.add_configuration_provider(&#34;site&#34;, configuration_provider_site)
     incontext.add_handler(&#34;import_markdown&#34;, import_markdown)
     incontext.add_task(&#34;process_files&#34;, process_files)</code></pre>
@@ -729,47 +699,6 @@ def paths(self):
 </dd>
 </dl>
 </dd>
-<dt id="build.PropertyDictionary"><code class="flex name class">
-<span>class <span class="ident">PropertyDictionary</span></span>
-<span>(</span><span>dictionary)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class PropertyDictionary(object):
-
-    def __init__(self, dictionary):
-        self._dictionary = dictionary
-
-    def __getattr__(self, name):
-        return self._dictionary[name]
-
-    def keys(self):
-        return self._dictionary.keys()
-
-    def __getitem__(self, key):
-        return self._dictionary[key]</code></pre>
-</details>
-<h3>Methods</h3>
-<dl>
-<dt id="build.PropertyDictionary.keys"><code class="name flex">
-<span>def <span class="ident">keys</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def keys(self):
-    return self._dictionary.keys()</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
 <dt id="build.SiteConfiguration"><code class="flex name class">
 <span>class <span class="ident">SiteConfiguration</span></span>
 <span>(</span><span>path, overrides={})</span>
@@ -825,14 +754,14 @@ def paths(self):
             &#34;templates&#34;: &#34;templates&#34;,
         }
         paths.update(self._config[&#34;paths&#34;])
-        # TODO: Ensure the paths are under the root.
-        return PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
-                                   for name, path in paths.items()})
+        # TODO: Ensure the paths in site.yaml are under the root (https://github.com/inseven/incontext/issues/60)
+        return utils.PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
+                                         for name, path in paths.items()})
 
     @property
     def destination(self):
         self._load_configuration()
-        return PropertyDictionary({
+        return utils.PropertyDictionary({
             &#34;root_directory&#34;: self.paths.build,
             &#34;files_directory&#34;: os.path.join(self.paths.build, &#34;files&#34;),
             &#34;store_path&#34;: os.path.join(self.paths.build, &#34;store.sqlite&#34;),
@@ -876,7 +805,7 @@ def config(self):
 <pre><code class="python">@property
 def destination(self):
     self._load_configuration()
-    return PropertyDictionary({
+    return utils.PropertyDictionary({
         &#34;root_directory&#34;: self.paths.build,
         &#34;files_directory&#34;: os.path.join(self.paths.build, &#34;files&#34;),
         &#34;store_path&#34;: os.path.join(self.paths.build, &#34;store.sqlite&#34;),
@@ -899,9 +828,9 @@ def paths(self):
         &#34;templates&#34;: &#34;templates&#34;,
     }
     paths.update(self._config[&#34;paths&#34;])
-    # TODO: Ensure the paths are under the root.
-    return PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
-                               for name, path in paths.items()})</code></pre>
+    # TODO: Ensure the paths in site.yaml are under the root (https://github.com/inseven/incontext/issues/60)
+    return utils.PropertyDictionary({name: os.path.join(self._root, os.path.expanduser(path))
+                                     for name, path in paths.items()})</code></pre>
 </details>
 </dd>
 <dt id="build.SiteConfiguration.root"><code class="name">var <span class="ident">root</span></code></dt>
@@ -1034,12 +963,6 @@ def root(self):
 <li><code><a title="build.Phase.add_task" href="#build.Phase.add_task">add_task</a></code></li>
 <li><code><a title="build.Phase.paths" href="#build.Phase.paths">paths</a></code></li>
 <li><code><a title="build.Phase.process" href="#build.Phase.process">process</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="build.PropertyDictionary" href="#build.PropertyDictionary">PropertyDictionary</a></code></h4>
-<ul class="">
-<li><code><a title="build.PropertyDictionary.keys" href="#build.PropertyDictionary.keys">keys</a></code></li>
 </ul>
 </li>
 <li>

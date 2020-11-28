@@ -217,7 +217,8 @@ def command_publish(incontext, parser):
 
     def publish(options):
         basename = os.path.basename(options.path)
-        date = datetime.datetime.utcnow().strftime(&#34;%Y-%m-%d&#34;)
+        date = datetime.datetime.now().strftime(&#34;%Y-%m-%d&#34;)
+        utils.makedirs(incontext.configuration.site.paths.posts)
         destination = os.path.join(incontext.configuration.site.paths.posts, &#34;%s-%s&#34; % (date, basename))
         logging.info(&#34;Publishing to &#39;%s&#39;...&#34; % (os.path.relpath(destination, incontext.configuration.site.root), ))
         shutil.move(os.path.abspath(options.path), destination)
@@ -267,7 +268,8 @@ def command_publish(incontext, parser):
 
     def publish(options):
         basename = os.path.basename(options.path)
-        date = datetime.datetime.utcnow().strftime(&#34;%Y-%m-%d&#34;)
+        date = datetime.datetime.now().strftime(&#34;%Y-%m-%d&#34;)
+        utils.makedirs(incontext.configuration.site.paths.posts)
         destination = os.path.join(incontext.configuration.site.paths.posts, &#34;%s-%s&#34; % (date, basename))
         logging.info(&#34;Publishing to &#39;%s&#39;...&#34; % (os.path.relpath(destination, incontext.configuration.site.root), ))
         shutil.move(os.path.abspath(options.path), destination)
