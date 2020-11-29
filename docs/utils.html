@@ -127,7 +127,7 @@ class RegexMatcher(object):
 
     def matches(self, path):
         &#34;&#34;&#34;
-        Check if `path` matches any of the patterns.
+        `True` if `path` matches any of the regular expression patterns; `False` otherwise.
         &#34;&#34;&#34;
         for expression in self.expressions:
             if expression.search(path):
@@ -543,7 +543,7 @@ and Markdown. This class provides a lightweight solution.</p></div>
 
     def matches(self, path):
         &#34;&#34;&#34;
-        Check if `path` matches any of the patterns.
+        `True` if `path` matches any of the regular expression patterns; `False` otherwise.
         &#34;&#34;&#34;
         for expression in self.expressions:
             if expression.search(path):
@@ -556,14 +556,14 @@ and Markdown. This class provides a lightweight solution.</p></div>
 <span>def <span class="ident">matches</span></span>(<span>self, path)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Check if <code>path</code> matches any of the patterns.</p></div>
+<div class="desc"><p><code>True</code> if <code>path</code> matches any of the regular expression patterns; <code>False</code> otherwise.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def matches(self, path):
     &#34;&#34;&#34;
-    Check if `path` matches any of the patterns.
+    `True` if `path` matches any of the regular expression patterns; `False` otherwise.
     &#34;&#34;&#34;
     for expression in self.expressions:
         if expression.search(path):
