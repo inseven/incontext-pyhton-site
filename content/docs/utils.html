@@ -70,8 +70,8 @@ class Chdir(object):
 
     def __exit__(self, *args, **kwargs):
         os.chdir(self.pwd)
-        
-        
+
+
 class PropertyDictionary(object):
 
     def __init__(self, dictionary):
@@ -103,14 +103,35 @@ class TempDir(object):
 class FrontmatterDocument(object):
     &#34;&#34;&#34;
     Convenience class for working with Front Matter and Markdown.
-    
-    The frontmatter module expects a named tuple with `content` and `metadata` properties when serialising Front Matter and Markdown. This class provides
-    a lightweight solution.
+
+    The frontmatter module expects a named tuple with `content` and `metadata` properties when serialising Front Matter
+    and Markdown. This class provides a lightweight solution.
     &#34;&#34;&#34;
 
     def __init__(self, content=&#34;&#34;, metadata=None):
         self.content = content
         self.metadata = metadata
+
+
+class RegexMatcher(object):
+    &#34;&#34;&#34;
+    Utility for encapsulating a collection of regular expressions and check paths against them.
+    &#34;&#34;&#34;
+
+    def __init__(self, patterns):
+        &#34;&#34;&#34;
+        Create a new matcher with a list of regular expression patterns, `patterns`, to match against.
+        &#34;&#34;&#34;
+        self.expressions = [re.compile(&#34;^%s$&#34; % pattern, re.IGNORECASE) for pattern in patterns]
+
+    def matches(self, path):
+        &#34;&#34;&#34;
+        Check if `path` matches any of the patterns.
+        &#34;&#34;&#34;
+        for expression in self.expressions:
+            if expression.search(path):
+                return True
+        return False
 
 
 def tripple(root, path):
@@ -150,9 +171,9 @@ def find_files(path, types=None):
 def makedirs(path):
     &#34;&#34;&#34;
     Ensure a directory exists at `path`, recursively creating all intermediate directories if necessary.
-    
+
     Unlike `os.makedirs`, this does not raise an exception if the directory already exists.
-    
+
     N.B. This will not raise an exception if the path exists, but is not a directory.
     &#34;&#34;&#34;
     if not os.path.isdir(path):
@@ -287,9 +308,9 @@ def create_animated_thumbnail(input, output):
 <pre><code class="python">def makedirs(path):
     &#34;&#34;&#34;
     Ensure a directory exists at `path`, recursively creating all intermediate directories if necessary.
-    
+
     Unlike `os.makedirs`, this does not raise an exception if the directory already exists.
-    
+
     N.B. This will not raise an exception if the path exists, but is not a directory.
     &#34;&#34;&#34;
     if not os.path.isdir(path):
@@ -420,8 +441,8 @@ def create_animated_thumbnail(input, output):
 </code></dt>
 <dd>
 <div class="desc"><p>Convenience class for working with Front Matter and Markdown.</p>
-<p>The frontmatter module expects a named tuple with <code>content</code> and <code>metadata</code> properties when serialising Front Matter and Markdown. This class provides
-a lightweight solution.</p></div>
+<p>The frontmatter module expects a named tuple with <code>content</code> and <code>metadata</code> properties when serialising Front Matter
+and Markdown. This class provides a lightweight solution.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -429,9 +450,9 @@ a lightweight solution.</p></div>
 <pre><code class="python">class FrontmatterDocument(object):
     &#34;&#34;&#34;
     Convenience class for working with Front Matter and Markdown.
-    
-    The frontmatter module expects a named tuple with `content` and `metadata` properties when serialising Front Matter and Markdown. This class provides
-    a lightweight solution.
+
+    The frontmatter module expects a named tuple with `content` and `metadata` properties when serialising Front Matter
+    and Markdown. This class provides a lightweight solution.
     &#34;&#34;&#34;
 
     def __init__(self, content=&#34;&#34;, metadata=None):
@@ -476,6 +497,60 @@ a lightweight solution.</p></div>
 </summary>
 <pre><code class="python">def keys(self):
     return self._dictionary.keys()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="utils.RegexMatcher"><code class="flex name class">
+<span>class <span class="ident">RegexMatcher</span></span>
+<span>(</span><span>patterns)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Utility for encapsulating a collection of regular expressions and check paths against them.</p>
+<p>Create a new matcher with a list of regular expression patterns, <code>patterns</code>, to match against.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RegexMatcher(object):
+    &#34;&#34;&#34;
+    Utility for encapsulating a collection of regular expressions and check paths against them.
+    &#34;&#34;&#34;
+
+    def __init__(self, patterns):
+        &#34;&#34;&#34;
+        Create a new matcher with a list of regular expression patterns, `patterns`, to match against.
+        &#34;&#34;&#34;
+        self.expressions = [re.compile(&#34;^%s$&#34; % pattern, re.IGNORECASE) for pattern in patterns]
+
+    def matches(self, path):
+        &#34;&#34;&#34;
+        Check if `path` matches any of the patterns.
+        &#34;&#34;&#34;
+        for expression in self.expressions:
+            if expression.search(path):
+                return True
+        return False</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="utils.RegexMatcher.matches"><code class="name flex">
+<span>def <span class="ident">matches</span></span>(<span>self, path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if <code>path</code> matches any of the patterns.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def matches(self, path):
+    &#34;&#34;&#34;
+    Check if `path` matches any of the patterns.
+    &#34;&#34;&#34;
+    for expression in self.expressions:
+        if expression.search(path):
+            return True
+    return False</code></pre>
 </details>
 </dd>
 </dl>
@@ -537,6 +612,12 @@ a lightweight solution.</p></div>
 <h4><code><a title="utils.PropertyDictionary" href="#utils.PropertyDictionary">PropertyDictionary</a></code></h4>
 <ul class="">
 <li><code><a title="utils.PropertyDictionary.keys" href="#utils.PropertyDictionary.keys">keys</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="utils.RegexMatcher" href="#utils.RegexMatcher">RegexMatcher</a></code></h4>
+<ul class="">
+<li><code><a title="utils.RegexMatcher.matches" href="#utils.RegexMatcher.matches">matches</a></code></li>
 </ul>
 </li>
 <li>
