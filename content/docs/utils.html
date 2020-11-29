@@ -48,6 +48,7 @@
 
 import hashlib
 import os
+import pathlib
 import re
 import shutil
 import struct
@@ -137,6 +138,10 @@ class RegexMatcher(object):
 def tripple(root, path):
     dirname, basename = os.path.split(os.path.relpath(path, root))
     return (root, dirname, basename)
+
+
+def touch(path):
+    pathlib.Path(path).touch()
 
 
 def hash_items(items):
@@ -389,6 +394,19 @@ def create_animated_thumbnail(input, output):
                            source, destination])</code></pre>
 </details>
 </dd>
+<dt id="utils.touch"><code class="name flex">
+<span>def <span class="ident">touch</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def touch(path):
+    pathlib.Path(path).touch()</code></pre>
+</details>
+</dd>
 <dt id="utils.tripple"><code class="name flex">
 <span>def <span class="ident">tripple</span></span>(<span>root, path)</span>
 </code></dt>
@@ -597,6 +615,7 @@ and Markdown. This class provides a lightweight solution.</p></div>
 <li><code><a title="utils.safe_basename" href="#utils.safe_basename">safe_basename</a></code></li>
 <li><code><a title="utils.safe_command" href="#utils.safe_command">safe_command</a></code></li>
 <li><code><a title="utils.sass" href="#utils.sass">sass</a></code></li>
+<li><code><a title="utils.touch" href="#utils.touch">touch</a></code></li>
 <li><code><a title="utils.tripple" href="#utils.tripple">tripple</a></code></li>
 </ul>
 </li>
