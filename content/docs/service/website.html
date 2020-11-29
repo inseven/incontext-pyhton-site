@@ -1,0 +1,1675 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>website API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>website</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright (c) 2016-2020 InSeven Limited
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the &#34;Software&#34;), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import argparse
+import base64
+import collections
+import copy
+import datetime
+import functools
+import hashlib
+import json as js
+import logging
+import os
+import pytz
+import random
+import re
+import struct
+import sys
+import time
+import urllib.parse
+import uuid
+
+import dateutil.parser
+import jinja2
+import lxml.html
+import misaka
+
+from flask import Flask, Response, render_template, send_from_directory, send_file, abort, jsonify, request
+
+logging.basicConfig(stream=sys.stderr)
+
+import config
+import converters
+import extensions
+import store
+import utils
+
+
+app = Flask(__name__)
+
+
+class MyRenderer(misaka.SaferHtmlRenderer):
+
+    def __init__(self, page):
+        super(MyRenderer, self).__init__(flags=(),
+                                         sanitization_mode=&#39;&#39;,
+                                         nesting_level=0,
+                                         link_rewrite=None,
+                                         img_src_rewrite=None)
+        self._page = page
+
+    def rewrite_url(self, url, is_image_src=False):
+        if is_image_src:
+            o = urllib.parse.urlparse(url)
+            if o.scheme == &#39;&#39; and o.netloc == &#39;&#39;:
+                # Insert a marker in markdown images to allow us to replace them with the image template for local images.
+                return &#34;+&#34; + fixup_relative_url(url, self._page[&#34;path&#34;])
+        return fixup_relative_url(url, self._page[&#34;path&#34;])
+
+    def check_url(self, url, is_image_src=False):
+        return True
+
+    def header(self, content, level):
+        return &#34;&lt;h%d&gt;&lt;a id=\&#34;%s\&#34;&gt;&lt;/a&gt;%s&lt;/h%d&gt;&#34; % (level, content.replace(&#39; &#39;, &#39;-&#39;).lower(), content, level);
+
+
+app.config.from_object(config.Configuration)
+
+
+def initialize(templates_path, store_path, config):
+    app.jinja_loader = jinja2.FileSystemLoader(templates_path)
+    app.template_mtime = directory_mtime(templates_path)
+    app.config[&#34;CONFIG&#34;] = config
+    app.config[&#34;STORE_PATH&#34;] = store_path
+
+    app.jinja_env.extend(site=Site())
+    app.jinja_env.extend(store=store.DocumentStore(app.config[&#34;STORE_PATH&#34;]))
+
+    app.jinja_env.add_extension(&#39;extensions.Gallery&#39;)
+    app.jinja_env.add_extension(&#39;extensions.STL&#39;)
+    app.jinja_env.add_extension(&#39;extensions.Video&#39;)
+
+
+def directory_mtime(path):
+    mtimes = []
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            mtimes.append(os.path.getmtime(os.path.join(root, name)))
+    return max(mtimes) if mtimes else 0
+
+
+def wrap_document(document):
+    if document is None:
+        return None
+    if not &#34;template&#34; in document:
+        document[&#34;template&#34;] = &#34;post.html&#34;
+    return DocumentWrapper(document)
+
+
+def sort_posts(posts, ascending=False):
+    posts_with_date = [post for post in posts if post.date is not None]
+    posts_without_date = [post for post in posts if post.date is None]
+    return sorted(posts_with_date, key=lambda x: x.sort_date, reverse=not ascending) + posts_without_date
+
+
+class Site(object):
+
+    def __init__(self):
+        self.config = app.config[&#34;CONFIG&#34;]
+        self._cache = None
+        self._cache_by_parent = None
+
+    def load_cache(self):
+        if self._cache is not None:
+            return
+        self._cache = dict()
+        self._cache_by_parent = collections.defaultdict(list)
+        for document in [wrap_document(document) for document in app.jinja_env.store.getall()]:
+            self._cache[document.url] = document
+            self._cache_by_parent[document[&#34;parent&#34;]].append(document)
+
+    def posts(self, include=None, exclude=None, parent=None, search=None, ascending=False, **kwargs):
+        self.load_cache()
+        cached_posts = None
+        if include is None and exclude is None and parent is None and search is None and not kwargs:
+            cached_posts = self._cache.values()
+        elif include is None and exclude is None and search is None and not kwargs:
+            cached_posts = self._cache_by_parent[parent]
+        if cached_posts is not None:
+            return sort_posts(cached_posts, ascending=ascending)
+        return [wrap_document(document) for document in app.jinja_env.store.getall(include=include, exclude=exclude, parent=parent, search=search, asc=ascending, **kwargs)]
+
+    def post(self, url):
+        self.load_cache()
+        try:
+            return self._cache[url]
+        except KeyError:
+            return None
+
+    def __getitem__(self, key):
+        return self.config[key]
+
+    @property
+    def last_modified(self):
+        return app.jinja_env.store.last_modified
+
+
+def normpath(path):
+    if path.endswith(&#34;/&#34;):
+        path = path[:-1]
+    if not path.startswith(&#34;/&#34;):
+        path = &#34;/&#34; + path
+    return path
+
+
+class ValueCache(object):
+
+    def __init__(self, value):
+        self.value = value
+
+
+class QueryTracker(object):
+
+    def __init__(self):
+        self.queries = {}
+
+    def add(self, parameters, documents):
+        mtimes = [document.mtime for document in documents]
+        self.queries[js.dumps(parameters)] = utils.hash_items(mtimes)
+
+class DocumentWrapper(object):
+
+    def __init__(self, document):
+        self._document = document
+        self._thumbnail = None
+        self._siblings = None
+        self.query_tracker = QueryTracker()
+
+    def __getitem__(self, key):
+        return self._document[key]
+
+    def __getattr__(self, name):
+        try:
+            return self._document[name]
+        except KeyError:
+            if name == &#34;date&#34;:
+                return None
+            raise AttributeError
+
+    @property
+    def hash(self):
+        return utils.hash_items([self.mtime])
+
+    @property
+    def last_modified(self):
+        return time.ctime(self.mtime)
+
+    @property
+    def parent(self):
+        document = self._record_query({&#34;type&#34;: &#34;post&#34;, &#34;url&#34;: self._document[&#34;parent&#34;]})
+        return document[0] if document else None
+
+    @property
+    def children(self):
+        sort = self._document[&#34;sort&#34;] if &#34;sort&#34; in self._document else &#34;ascending&#34;
+        return self._record_query({&#34;type&#34;: &#34;children&#34;, &#34;parent&#34;: self.url, &#34;sort&#34;: sort})
+
+    @property
+    def siblings(self):
+        return self._record_query({&#34;type&#34;: &#34;siblings&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})
+
+    @property
+    def previous(self):
+        document = self._record_query({&#34;type&#34;: &#34;previous&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})
+        return document[0] if document else None
+
+    @property
+    def next(self):
+        document = self._record_query({&#34;type&#34;: &#34;next&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})
+        return document[0] if document else None
+
+    def _record_query(self, parameters):
+        documents = self._run_query(parameters)
+        self.query_tracker.add(parameters, documents)
+        for document in documents:
+            document.query_tracker = self.query_tracker
+        return documents
+
+    def evaluate_queries(self, queries):
+        hashes = []
+        for query, digest in queries.items():
+            parameters = js.loads(query)
+            documents = self._run_query(parameters)
+            hashes.append(utils.hash_items([document.mtime for document in documents]))
+        return hashes
+
+    def _run_query(self, parameters):
+        if &#34;type&#34; not in parameters or parameters[&#34;type&#34;] == &#34;posts&#34;:
+            include = parameters[&#34;include&#34;] if &#34;include&#34; in parameters else None
+            exclude = parameters[&#34;exclude&#34;] if &#34;exclude&#34; in parameters else None
+            ascending = parameters[&#34;sort&#34;] == &#34;ascending&#34; if &#34;sort&#34; in parameters else True
+            return app.jinja_env.site.posts(include=include, exclude=exclude, ascending=ascending)
+        elif parameters[&#34;type&#34;] == &#34;children&#34;:
+            parent = parameters[&#34;parent&#34;]
+            ascending = parameters[&#34;sort&#34;] == &#34;ascending&#34; if &#34;sort&#34; in parameters else True
+            return app.jinja_env.site.posts(parent=parent, ascending=ascending)
+        elif parameters[&#34;type&#34;] == &#34;post&#34;:
+            url = parameters[&#34;url&#34;]
+            document = app.jinja_env.site.post(url)
+            return [document] if document is not None else []
+        elif parameters[&#34;type&#34;] == &#34;siblings&#34;:
+            if parameters[&#34;parent&#34;] is None:
+                return []
+            return app.jinja_env.site.posts(parent=parameters[&#34;parent&#34;])
+        elif parameters[&#34;type&#34;] == &#34;previous&#34;:
+            if parameters[&#34;parent&#34;] is None:
+                return []
+            previous = []
+            for index, document in enumerate(app.jinja_env.site.posts(parent=parameters[&#34;parent&#34;])):
+                if document.url == self.url:
+                    return previous
+                previous = [document]
+            return []
+        elif parameters[&#34;type&#34;] == &#34;next&#34;:
+            if parameters[&#34;parent&#34;] is None:
+                return []
+            found = False
+            for index, document in enumerate(app.jinja_env.site.posts(parent=parameters[&#34;parent&#34;])):
+                if found:
+                    return [document]
+                if document.url == self.url:
+                    found = True
+            return []
+        exit(&#34;Unsupported query with parameters &#39;%s&#39;&#34; % (parameters, ))
+
+    def query(self, identifier):
+        parameters = None
+        try:
+            parameters = self._document[&#34;queries&#34;][identifier]
+        except KeyError:
+            exit(&#34;Unknown query &#39;%s&#39;.&#34; % (identifier, ))
+        return self._record_query(parameters)
+
+    @property
+    def content(self):
+        if self._document[&#34;content&#34;]:
+            content = app.jinja_env.from_string(self._document[&#34;content&#34;]).render(site=app.jinja_env.site,
+                                                                                  page=self,
+                                                                                  url=self.url)
+            return content
+        return None
+
+    @property
+    def html(self):
+        content = self.content
+        if content:
+            return markdown(self._document)(content)
+        return None
+
+    @property
+    def thumbnail(self):
+        if self._thumbnail is None:
+            def get_thumbnail():
+                # Images are their own thumbnails.
+                try:
+                    return self._document[&#34;image&#34;]
+                except KeyError:
+                    pass
+                # Use any manually specified thumbnail.
+                try:
+                    return self._document[&#34;thumbnail&#34;]
+                except KeyError:
+                    pass
+                # Parse the HTML and look for a suitable thumbnail.
+                html = self.html
+                if html:
+                    document = lxml.html.fromstring(html)
+                    images = document.xpath(&#34;//img&#34;)
+                    if images:
+                        return {&#39;url&#39;: images[0].get(&#39;src&#39;)}
+                # See if any of the children have thumbnails.
+                for child in self.children:
+                    thumbnail = child.thumbnail
+                    if thumbnail is not None:
+                        return thumbnail
+                return None
+            self._thumbnail = ValueCache(get_thumbnail())
+        return self._thumbnail.value
+
+    @property
+    def sort_date(self):
+        return self.date.replace(tzinfo=None)
+
+
+# Filters
+
+
+@app.add_template_filter
+def date(value, format=&#39;%Y-%d-%m&#39;):
+    return value.strftime(format)
+
+
+@app.add_template_filter
+def prepend(value, prefix):
+    return prefix + value
+
+
+@app.add_template_filter
+def sort_by(items, key):
+    return sorted(items, key=lambda item: item[key])
+
+
+@app.add_template_filter
+def json(object):
+    return js.dumps(object)
+
+
+@app.add_template_filter
+def text(html):
+    return &#34; &#34;.join(lxml.html.fromstring(html).text_content().split(&#34; &#34;)[:40])
+
+
+@app.add_template_filter
+def rfc3339(date):
+    if date.tzinfo is None:
+        return date.replace(tzinfo=pytz.utc).isoformat()
+    return date.isoformat()
+
+
+@app.add_template_filter
+def tag(identifier):
+    if identifier in app.jinja_env.site.config[&#39;tags&#39;]:
+        details = copy.deepcopy(app.jinja_env.site.config[&#39;tags&#39;][identifier])
+        details[&#39;identifier&#39;] = identifier
+        return details
+    title, _ = converters.title_and_scale_from_path(identifier)
+    return {&#39;title&#39;: title, &#39;description&#39;: None, &#39;identifier&#39;: identifier}
+
+
+@app.add_template_filter
+def date_or_now(date):
+    if date is not None:
+        return date
+    return datetime.datetime.now()
+
+
+class DefaultAttributeWrapper(object):
+
+    def __init__(self, wrapped, name, value):
+        self.wrapped = wrapped
+        self.name = name
+        self.value = value
+        
+    def __getitem__(self, key):
+        return self.__getattr__(key)
+
+    def __getattr__(self, name):
+        if name == self.name:
+            try:
+                value = self.wrapped.__getattr__(name)
+                if value is None:
+                    return self.value
+                return value
+            except AttributeError:
+                return self.value
+        elif name == f&#34;{self.name}_original&#34;:
+            return self.wrapped.__getattr__(self.name)
+        return self.wrapped.__getattr__(name)
+
+
+@app.add_template_filter
+def attribute_with_default(wrapped, attribute, value):
+    return [DefaultAttributeWrapper(w, attribute, value) for w in wrapped]
+
+
+def filter_base64(string):
+    return base64.b64encode(string.encode(&#39;utf-8&#39;)).decode(&#39;utf-8&#39;)
+
+
+def filter_render_template(template, **kwargs):
+    template = app.jinja_env.get_template(template)
+    content = template.render(site=app.jinja_env.site, **kwargs)
+    return content
+
+
+app.add_template_filter(filter_base64, name=&#39;base64&#39;)
+app.add_template_filter(filter_render_template, name=&#39;render_template&#39;)
+
+
+def fixup_relative_url(url, page_path):
+    o = urllib.parse.urlparse(url)
+    if o.scheme == &#39;&#39; and o.netloc == &#39;&#39; and not o.path.startswith(&#39;/&#39;) and not url.startswith(&#39;#&#39;):
+        result = os.path.join(os.path.dirname(page_path), o.path)
+        return result
+    return url
+
+
+def fixup_relative_srcset(srcset, page_path):
+    if srcset is None:
+        return None
+    srcs = [re.split(&#34;\s+&#34;, src) for src in re.split(&#39;\s*,\s*&#39;, srcset)]
+    for src in srcs:
+        src[0] = fixup_relative_url(src[0], page_path)
+    return &#34;, &#34;.join([&#34; &#34;.join(src) for src in srcs])
+
+
+def markdown(page):
+    def render(text):
+        renderer = MyRenderer(page)
+        markdown = misaka.Markdown(renderer, extensions=(&#39;fenced-code&#39;,
+                                                         &#39;smartypants&#39;,
+                                                         &#39;strikethrough&#39;,
+                                                         &#39;superscript&#39;,
+                                                         &#39;tables&#39;,
+                                                         &#39;footnotes&#39;))
+        content = misaka.smartypants(markdown(text))
+        if not content:
+            return content
+        document = lxml.html.fromstring(content)
+        for image in document.xpath(&#34;//img&#34;):
+            src = image.get(&#39;src&#39;)
+            if src.startswith(&#34;+&#34;):
+                image_url = (os.path.splitext(src[1:])[0] + &#34;/&#34;).lower()
+                image_document = app.jinja_env.site.post(image_url)
+                if image_document is None:
+                    logging.error(&#34;Failed to get document for image &#39;%s&#39;&#34; % (image_url, ))
+                    continue
+                template = app.jinja_env.get_template(&#34;image.html&#34;)
+                title = None
+                try:
+                    title = image_document[&#39;title&#39;]
+                except KeyError:
+                    pass
+                html = template.render(site=app.jinja_env.site,
+                                       image=image_document)
+                replacement_image = lxml.html.fromstring(html)
+                parent = image.getparent()
+                parent.insert(parent.index(image) + 1, replacement_image)
+                parent.remove(image)
+            else:
+                image.set(&#39;src&#39;, fixup_relative_url(src, page[&#34;path&#34;]))
+                image.set(&#39;srcset&#39;, fixup_relative_srcset(image.get(&#39;srcset&#39;), page[&#34;path&#34;]))
+        for anchor in document.xpath(&#34;//a&#34;):
+            anchor.set(&#39;href&#39;, fixup_relative_url(anchor.get(&#39;href&#39;), page[&#34;path&#34;]))
+        results = lxml.html.tostring(document, method=&#39;html&#39;, encoding=&#39;unicode&#39;)
+        return results
+    return render
+
+
+# Decorators
+
+
+def get_document(path):
+    page = app.jinja_env.site.post(path)
+    if not page:
+        abort(404)
+    return page
+
+
+def local_path(path):
+    return os.path.join(os.path.join(os.path.expanduser(app.config[config.keys.ROOT]), &#34;files&#34;), path[1:])
+
+@app.route(&#34;/&#34;)
+@app.route(&#34;/&lt;path:path&gt;&#34;)
+def documents(path=&#34;&#34;):
+    path = normpath(path)
+    path = converters.ensure_trailing_slash(path)
+    page = get_document(path)
+    page.query_tracker = QueryTracker()
+
+    template_filename = page.template
+    if template_filename.endswith(&#34;.json&#34;):
+        template = app.jinja_env.get_template(page.template)
+        content = template.render(site=app.jinja_env.site,
+                                  page=page,
+                                  args=request.args)
+        return app.response_class(
+            response=content,
+            status=200,
+            mimetype=&#34;application/json&#34;
+        ), page.query_tracker
+
+    headers = {
+        &#39;Last-Modified&#39;: app.jinja_env.site.last_modified,
+        &#39;Cache-Control&#39;: &#39;no-cache, must-revalidate&#39;,
+    }
+
+    content = render_template(page.template,
+                              site=app.jinja_env.site,
+                              page=page,
+                              args=request.args,
+                              markdown=markdown(page._document))
+
+    return Response(content, headers=headers), page.query_tracker</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="website.directory_mtime"><code class="name flex">
+<span>def <span class="ident">directory_mtime</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def directory_mtime(path):
+    mtimes = []
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            mtimes.append(os.path.getmtime(os.path.join(root, name)))
+    return max(mtimes) if mtimes else 0</code></pre>
+</details>
+</dd>
+<dt id="website.documents"><code class="name flex">
+<span>def <span class="ident">documents</span></span>(<span>path='')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.route(&#34;/&#34;)
+@app.route(&#34;/&lt;path:path&gt;&#34;)
+def documents(path=&#34;&#34;):
+    path = normpath(path)
+    path = converters.ensure_trailing_slash(path)
+    page = get_document(path)
+    page.query_tracker = QueryTracker()
+
+    template_filename = page.template
+    if template_filename.endswith(&#34;.json&#34;):
+        template = app.jinja_env.get_template(page.template)
+        content = template.render(site=app.jinja_env.site,
+                                  page=page,
+                                  args=request.args)
+        return app.response_class(
+            response=content,
+            status=200,
+            mimetype=&#34;application/json&#34;
+        ), page.query_tracker
+
+    headers = {
+        &#39;Last-Modified&#39;: app.jinja_env.site.last_modified,
+        &#39;Cache-Control&#39;: &#39;no-cache, must-revalidate&#39;,
+    }
+
+    content = render_template(page.template,
+                              site=app.jinja_env.site,
+                              page=page,
+                              args=request.args,
+                              markdown=markdown(page._document))
+
+    return Response(content, headers=headers), page.query_tracker</code></pre>
+</details>
+</dd>
+<dt id="website.filter_base64"><code class="name flex">
+<span>def <span class="ident">filter_base64</span></span>(<span>string)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def filter_base64(string):
+    return base64.b64encode(string.encode(&#39;utf-8&#39;)).decode(&#39;utf-8&#39;)</code></pre>
+</details>
+</dd>
+<dt id="website.filter_render_template"><code class="name flex">
+<span>def <span class="ident">filter_render_template</span></span>(<span>template, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def filter_render_template(template, **kwargs):
+    template = app.jinja_env.get_template(template)
+    content = template.render(site=app.jinja_env.site, **kwargs)
+    return content</code></pre>
+</details>
+</dd>
+<dt id="website.fixup_relative_srcset"><code class="name flex">
+<span>def <span class="ident">fixup_relative_srcset</span></span>(<span>srcset, page_path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fixup_relative_srcset(srcset, page_path):
+    if srcset is None:
+        return None
+    srcs = [re.split(&#34;\s+&#34;, src) for src in re.split(&#39;\s*,\s*&#39;, srcset)]
+    for src in srcs:
+        src[0] = fixup_relative_url(src[0], page_path)
+    return &#34;, &#34;.join([&#34; &#34;.join(src) for src in srcs])</code></pre>
+</details>
+</dd>
+<dt id="website.fixup_relative_url"><code class="name flex">
+<span>def <span class="ident">fixup_relative_url</span></span>(<span>url, page_path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fixup_relative_url(url, page_path):
+    o = urllib.parse.urlparse(url)
+    if o.scheme == &#39;&#39; and o.netloc == &#39;&#39; and not o.path.startswith(&#39;/&#39;) and not url.startswith(&#39;#&#39;):
+        result = os.path.join(os.path.dirname(page_path), o.path)
+        return result
+    return url</code></pre>
+</details>
+</dd>
+<dt id="website.get_document"><code class="name flex">
+<span>def <span class="ident">get_document</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_document(path):
+    page = app.jinja_env.site.post(path)
+    if not page:
+        abort(404)
+    return page</code></pre>
+</details>
+</dd>
+<dt id="website.initialize"><code class="name flex">
+<span>def <span class="ident">initialize</span></span>(<span>templates_path, store_path, config)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initialize(templates_path, store_path, config):
+    app.jinja_loader = jinja2.FileSystemLoader(templates_path)
+    app.template_mtime = directory_mtime(templates_path)
+    app.config[&#34;CONFIG&#34;] = config
+    app.config[&#34;STORE_PATH&#34;] = store_path
+
+    app.jinja_env.extend(site=Site())
+    app.jinja_env.extend(store=store.DocumentStore(app.config[&#34;STORE_PATH&#34;]))
+
+    app.jinja_env.add_extension(&#39;extensions.Gallery&#39;)
+    app.jinja_env.add_extension(&#39;extensions.STL&#39;)
+    app.jinja_env.add_extension(&#39;extensions.Video&#39;)</code></pre>
+</details>
+</dd>
+<dt id="website.local_path"><code class="name flex">
+<span>def <span class="ident">local_path</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def local_path(path):
+    return os.path.join(os.path.join(os.path.expanduser(app.config[config.keys.ROOT]), &#34;files&#34;), path[1:])</code></pre>
+</details>
+</dd>
+<dt id="website.markdown"><code class="name flex">
+<span>def <span class="ident">markdown</span></span>(<span>page)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def markdown(page):
+    def render(text):
+        renderer = MyRenderer(page)
+        markdown = misaka.Markdown(renderer, extensions=(&#39;fenced-code&#39;,
+                                                         &#39;smartypants&#39;,
+                                                         &#39;strikethrough&#39;,
+                                                         &#39;superscript&#39;,
+                                                         &#39;tables&#39;,
+                                                         &#39;footnotes&#39;))
+        content = misaka.smartypants(markdown(text))
+        if not content:
+            return content
+        document = lxml.html.fromstring(content)
+        for image in document.xpath(&#34;//img&#34;):
+            src = image.get(&#39;src&#39;)
+            if src.startswith(&#34;+&#34;):
+                image_url = (os.path.splitext(src[1:])[0] + &#34;/&#34;).lower()
+                image_document = app.jinja_env.site.post(image_url)
+                if image_document is None:
+                    logging.error(&#34;Failed to get document for image &#39;%s&#39;&#34; % (image_url, ))
+                    continue
+                template = app.jinja_env.get_template(&#34;image.html&#34;)
+                title = None
+                try:
+                    title = image_document[&#39;title&#39;]
+                except KeyError:
+                    pass
+                html = template.render(site=app.jinja_env.site,
+                                       image=image_document)
+                replacement_image = lxml.html.fromstring(html)
+                parent = image.getparent()
+                parent.insert(parent.index(image) + 1, replacement_image)
+                parent.remove(image)
+            else:
+                image.set(&#39;src&#39;, fixup_relative_url(src, page[&#34;path&#34;]))
+                image.set(&#39;srcset&#39;, fixup_relative_srcset(image.get(&#39;srcset&#39;), page[&#34;path&#34;]))
+        for anchor in document.xpath(&#34;//a&#34;):
+            anchor.set(&#39;href&#39;, fixup_relative_url(anchor.get(&#39;href&#39;), page[&#34;path&#34;]))
+        results = lxml.html.tostring(document, method=&#39;html&#39;, encoding=&#39;unicode&#39;)
+        return results
+    return render</code></pre>
+</details>
+</dd>
+<dt id="website.normpath"><code class="name flex">
+<span>def <span class="ident">normpath</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def normpath(path):
+    if path.endswith(&#34;/&#34;):
+        path = path[:-1]
+    if not path.startswith(&#34;/&#34;):
+        path = &#34;/&#34; + path
+    return path</code></pre>
+</details>
+</dd>
+<dt id="website.sort_posts"><code class="name flex">
+<span>def <span class="ident">sort_posts</span></span>(<span>posts, ascending=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sort_posts(posts, ascending=False):
+    posts_with_date = [post for post in posts if post.date is not None]
+    posts_without_date = [post for post in posts if post.date is None]
+    return sorted(posts_with_date, key=lambda x: x.sort_date, reverse=not ascending) + posts_without_date</code></pre>
+</details>
+</dd>
+<dt id="website.wrap_document"><code class="name flex">
+<span>def <span class="ident">wrap_document</span></span>(<span>document)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wrap_document(document):
+    if document is None:
+        return None
+    if not &#34;template&#34; in document:
+        document[&#34;template&#34;] = &#34;post.html&#34;
+    return DocumentWrapper(document)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="website.DefaultAttributeWrapper"><code class="flex name class">
+<span>class <span class="ident">DefaultAttributeWrapper</span></span>
+<span>(</span><span>wrapped, name, value)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DefaultAttributeWrapper(object):
+
+    def __init__(self, wrapped, name, value):
+        self.wrapped = wrapped
+        self.name = name
+        self.value = value
+        
+    def __getitem__(self, key):
+        return self.__getattr__(key)
+
+    def __getattr__(self, name):
+        if name == self.name:
+            try:
+                value = self.wrapped.__getattr__(name)
+                if value is None:
+                    return self.value
+                return value
+            except AttributeError:
+                return self.value
+        elif name == f&#34;{self.name}_original&#34;:
+            return self.wrapped.__getattr__(self.name)
+        return self.wrapped.__getattr__(name)</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper"><code class="flex name class">
+<span>class <span class="ident">DocumentWrapper</span></span>
+<span>(</span><span>document)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentWrapper(object):
+
+    def __init__(self, document):
+        self._document = document
+        self._thumbnail = None
+        self._siblings = None
+        self.query_tracker = QueryTracker()
+
+    def __getitem__(self, key):
+        return self._document[key]
+
+    def __getattr__(self, name):
+        try:
+            return self._document[name]
+        except KeyError:
+            if name == &#34;date&#34;:
+                return None
+            raise AttributeError
+
+    @property
+    def hash(self):
+        return utils.hash_items([self.mtime])
+
+    @property
+    def last_modified(self):
+        return time.ctime(self.mtime)
+
+    @property
+    def parent(self):
+        document = self._record_query({&#34;type&#34;: &#34;post&#34;, &#34;url&#34;: self._document[&#34;parent&#34;]})
+        return document[0] if document else None
+
+    @property
+    def children(self):
+        sort = self._document[&#34;sort&#34;] if &#34;sort&#34; in self._document else &#34;ascending&#34;
+        return self._record_query({&#34;type&#34;: &#34;children&#34;, &#34;parent&#34;: self.url, &#34;sort&#34;: sort})
+
+    @property
+    def siblings(self):
+        return self._record_query({&#34;type&#34;: &#34;siblings&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})
+
+    @property
+    def previous(self):
+        document = self._record_query({&#34;type&#34;: &#34;previous&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})
+        return document[0] if document else None
+
+    @property
+    def next(self):
+        document = self._record_query({&#34;type&#34;: &#34;next&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})
+        return document[0] if document else None
+
+    def _record_query(self, parameters):
+        documents = self._run_query(parameters)
+        self.query_tracker.add(parameters, documents)
+        for document in documents:
+            document.query_tracker = self.query_tracker
+        return documents
+
+    def evaluate_queries(self, queries):
+        hashes = []
+        for query, digest in queries.items():
+            parameters = js.loads(query)
+            documents = self._run_query(parameters)
+            hashes.append(utils.hash_items([document.mtime for document in documents]))
+        return hashes
+
+    def _run_query(self, parameters):
+        if &#34;type&#34; not in parameters or parameters[&#34;type&#34;] == &#34;posts&#34;:
+            include = parameters[&#34;include&#34;] if &#34;include&#34; in parameters else None
+            exclude = parameters[&#34;exclude&#34;] if &#34;exclude&#34; in parameters else None
+            ascending = parameters[&#34;sort&#34;] == &#34;ascending&#34; if &#34;sort&#34; in parameters else True
+            return app.jinja_env.site.posts(include=include, exclude=exclude, ascending=ascending)
+        elif parameters[&#34;type&#34;] == &#34;children&#34;:
+            parent = parameters[&#34;parent&#34;]
+            ascending = parameters[&#34;sort&#34;] == &#34;ascending&#34; if &#34;sort&#34; in parameters else True
+            return app.jinja_env.site.posts(parent=parent, ascending=ascending)
+        elif parameters[&#34;type&#34;] == &#34;post&#34;:
+            url = parameters[&#34;url&#34;]
+            document = app.jinja_env.site.post(url)
+            return [document] if document is not None else []
+        elif parameters[&#34;type&#34;] == &#34;siblings&#34;:
+            if parameters[&#34;parent&#34;] is None:
+                return []
+            return app.jinja_env.site.posts(parent=parameters[&#34;parent&#34;])
+        elif parameters[&#34;type&#34;] == &#34;previous&#34;:
+            if parameters[&#34;parent&#34;] is None:
+                return []
+            previous = []
+            for index, document in enumerate(app.jinja_env.site.posts(parent=parameters[&#34;parent&#34;])):
+                if document.url == self.url:
+                    return previous
+                previous = [document]
+            return []
+        elif parameters[&#34;type&#34;] == &#34;next&#34;:
+            if parameters[&#34;parent&#34;] is None:
+                return []
+            found = False
+            for index, document in enumerate(app.jinja_env.site.posts(parent=parameters[&#34;parent&#34;])):
+                if found:
+                    return [document]
+                if document.url == self.url:
+                    found = True
+            return []
+        exit(&#34;Unsupported query with parameters &#39;%s&#39;&#34; % (parameters, ))
+
+    def query(self, identifier):
+        parameters = None
+        try:
+            parameters = self._document[&#34;queries&#34;][identifier]
+        except KeyError:
+            exit(&#34;Unknown query &#39;%s&#39;.&#34; % (identifier, ))
+        return self._record_query(parameters)
+
+    @property
+    def content(self):
+        if self._document[&#34;content&#34;]:
+            content = app.jinja_env.from_string(self._document[&#34;content&#34;]).render(site=app.jinja_env.site,
+                                                                                  page=self,
+                                                                                  url=self.url)
+            return content
+        return None
+
+    @property
+    def html(self):
+        content = self.content
+        if content:
+            return markdown(self._document)(content)
+        return None
+
+    @property
+    def thumbnail(self):
+        if self._thumbnail is None:
+            def get_thumbnail():
+                # Images are their own thumbnails.
+                try:
+                    return self._document[&#34;image&#34;]
+                except KeyError:
+                    pass
+                # Use any manually specified thumbnail.
+                try:
+                    return self._document[&#34;thumbnail&#34;]
+                except KeyError:
+                    pass
+                # Parse the HTML and look for a suitable thumbnail.
+                html = self.html
+                if html:
+                    document = lxml.html.fromstring(html)
+                    images = document.xpath(&#34;//img&#34;)
+                    if images:
+                        return {&#39;url&#39;: images[0].get(&#39;src&#39;)}
+                # See if any of the children have thumbnails.
+                for child in self.children:
+                    thumbnail = child.thumbnail
+                    if thumbnail is not None:
+                        return thumbnail
+                return None
+            self._thumbnail = ValueCache(get_thumbnail())
+        return self._thumbnail.value
+
+    @property
+    def sort_date(self):
+        return self.date.replace(tzinfo=None)</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="website.DocumentWrapper.children"><code class="name">var <span class="ident">children</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def children(self):
+    sort = self._document[&#34;sort&#34;] if &#34;sort&#34; in self._document else &#34;ascending&#34;
+    return self._record_query({&#34;type&#34;: &#34;children&#34;, &#34;parent&#34;: self.url, &#34;sort&#34;: sort})</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.content"><code class="name">var <span class="ident">content</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def content(self):
+    if self._document[&#34;content&#34;]:
+        content = app.jinja_env.from_string(self._document[&#34;content&#34;]).render(site=app.jinja_env.site,
+                                                                              page=self,
+                                                                              url=self.url)
+        return content
+    return None</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.hash"><code class="name">var <span class="ident">hash</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def hash(self):
+    return utils.hash_items([self.mtime])</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.html"><code class="name">var <span class="ident">html</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def html(self):
+    content = self.content
+    if content:
+        return markdown(self._document)(content)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.last_modified"><code class="name">var <span class="ident">last_modified</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def last_modified(self):
+    return time.ctime(self.mtime)</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.next"><code class="name">var <span class="ident">next</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def next(self):
+    document = self._record_query({&#34;type&#34;: &#34;next&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})
+    return document[0] if document else None</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.parent"><code class="name">var <span class="ident">parent</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def parent(self):
+    document = self._record_query({&#34;type&#34;: &#34;post&#34;, &#34;url&#34;: self._document[&#34;parent&#34;]})
+    return document[0] if document else None</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.previous"><code class="name">var <span class="ident">previous</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def previous(self):
+    document = self._record_query({&#34;type&#34;: &#34;previous&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})
+    return document[0] if document else None</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.siblings"><code class="name">var <span class="ident">siblings</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def siblings(self):
+    return self._record_query({&#34;type&#34;: &#34;siblings&#34;, &#34;parent&#34;: self._document[&#34;parent&#34;]})</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.sort_date"><code class="name">var <span class="ident">sort_date</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def sort_date(self):
+    return self.date.replace(tzinfo=None)</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.thumbnail"><code class="name">var <span class="ident">thumbnail</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def thumbnail(self):
+    if self._thumbnail is None:
+        def get_thumbnail():
+            # Images are their own thumbnails.
+            try:
+                return self._document[&#34;image&#34;]
+            except KeyError:
+                pass
+            # Use any manually specified thumbnail.
+            try:
+                return self._document[&#34;thumbnail&#34;]
+            except KeyError:
+                pass
+            # Parse the HTML and look for a suitable thumbnail.
+            html = self.html
+            if html:
+                document = lxml.html.fromstring(html)
+                images = document.xpath(&#34;//img&#34;)
+                if images:
+                    return {&#39;url&#39;: images[0].get(&#39;src&#39;)}
+            # See if any of the children have thumbnails.
+            for child in self.children:
+                thumbnail = child.thumbnail
+                if thumbnail is not None:
+                    return thumbnail
+            return None
+        self._thumbnail = ValueCache(get_thumbnail())
+    return self._thumbnail.value</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="website.DocumentWrapper.evaluate_queries"><code class="name flex">
+<span>def <span class="ident">evaluate_queries</span></span>(<span>self, queries)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def evaluate_queries(self, queries):
+    hashes = []
+    for query, digest in queries.items():
+        parameters = js.loads(query)
+        documents = self._run_query(parameters)
+        hashes.append(utils.hash_items([document.mtime for document in documents]))
+    return hashes</code></pre>
+</details>
+</dd>
+<dt id="website.DocumentWrapper.query"><code class="name flex">
+<span>def <span class="ident">query</span></span>(<span>self, identifier)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query(self, identifier):
+    parameters = None
+    try:
+        parameters = self._document[&#34;queries&#34;][identifier]
+    except KeyError:
+        exit(&#34;Unknown query &#39;%s&#39;.&#34; % (identifier, ))
+    return self._record_query(parameters)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="website.MyRenderer"><code class="flex name class">
+<span>class <span class="ident">MyRenderer</span></span>
+<span>(</span><span>page)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A subclass of :class:<code>HtmlRenderer</code> which adds protections against
+Cross-Site Scripting (XSS):</p>
+<ol>
+<li>The <code>'skip-html'</code> flag is turned on by default, preventing injection of
+HTML elements. If you want to escape HTML code instead of removing it
+entirely, change <code>sanitization_mode</code> to <code>'escape'</code>.</li>
+<li>The URLs of links and images are filtered to prevent JavaScript injection.
+This also blocks the rendering of email addresses into links.
+See the :meth:<code>check_url</code> method below.</li>
+<li>Optionally, the URLs can also be rewritten to counter other attacks such
+as phishing.</li>
+</ol>
+<p>Enabling URL rewriting requires extra arguments:</p>
+<p>:arg link_rewrite: the URL of a redirect page, necessary to rewrite the
+<code>href</code> attributes of links
+:arg img_src_rewrite: the URL of an image proxy, necessary to rewrite the
+<code>src</code> attributes of images</p>
+<p>Both strings should include a <code>{url}</code> placeholder for the URL-encoded
+target. Examples::</p>
+<pre><code>link_rewrite='https://example.com/redirect?url={url}',
+img_src_rewrite='https://img-proxy-domain/{url}'
+</code></pre>
+<div class="admonition versionadded">
+<p class="admonition-title">Added in version:&ensp;2.1.0</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MyRenderer(misaka.SaferHtmlRenderer):
+
+    def __init__(self, page):
+        super(MyRenderer, self).__init__(flags=(),
+                                         sanitization_mode=&#39;&#39;,
+                                         nesting_level=0,
+                                         link_rewrite=None,
+                                         img_src_rewrite=None)
+        self._page = page
+
+    def rewrite_url(self, url, is_image_src=False):
+        if is_image_src:
+            o = urllib.parse.urlparse(url)
+            if o.scheme == &#39;&#39; and o.netloc == &#39;&#39;:
+                # Insert a marker in markdown images to allow us to replace them with the image template for local images.
+                return &#34;+&#34; + fixup_relative_url(url, self._page[&#34;path&#34;])
+        return fixup_relative_url(url, self._page[&#34;path&#34;])
+
+    def check_url(self, url, is_image_src=False):
+        return True
+
+    def header(self, content, level):
+        return &#34;&lt;h%d&gt;&lt;a id=\&#34;%s\&#34;&gt;&lt;/a&gt;%s&lt;/h%d&gt;&#34; % (level, content.replace(&#39; &#39;, &#39;-&#39;).lower(), content, level);</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>misaka.api.SaferHtmlRenderer</li>
+<li>misaka.api.HtmlRenderer</li>
+<li>misaka.api.BaseRenderer</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="website.MyRenderer.check_url"><code class="name flex">
+<span>def <span class="ident">check_url</span></span>(<span>self, url, is_image_src=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This method is used to check a URL.</p>
+<p>Returns :obj:<code>True</code> if the URL is "safe", :obj:<code>False</code> otherwise.</p>
+<p>The default implementation only allows HTTP and HTTPS links. That means
+no <code>mailto:</code>, no <code>xmpp:</code>, no <code>ftp:</code>, etc.</p>
+<p>This method exists specifically to allow easy customization of link
+filtering through subclassing, so don't hesitate to write your own.</p>
+<p>If you're thinking of implementing a blacklist approach, see
+"<code>Which URL schemes are dangerous (XSS exploitable)?
+&lt;http://security.stackexchange.com/q/148428/37409&gt;</code>_".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_url(self, url, is_image_src=False):
+    return True</code></pre>
+</details>
+</dd>
+<dt id="website.MyRenderer.header"><code class="name flex">
+<span>def <span class="ident">header</span></span>(<span>self, content, level)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def header(self, content, level):
+    return &#34;&lt;h%d&gt;&lt;a id=\&#34;%s\&#34;&gt;&lt;/a&gt;%s&lt;/h%d&gt;&#34; % (level, content.replace(&#39; &#39;, &#39;-&#39;).lower(), content, level);</code></pre>
+</details>
+</dd>
+<dt id="website.MyRenderer.rewrite_url"><code class="name flex">
+<span>def <span class="ident">rewrite_url</span></span>(<span>self, url, is_image_src=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This method is called to rewrite URLs.</p>
+<p>It uses either <code>self.link_rewrite</code> or <code>self.img_src_rewrite</code>
+depending on the value of <code>is_image_src</code>. The URL is returned
+unchanged if the corresponding attribute is :obj:<code>None</code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rewrite_url(self, url, is_image_src=False):
+    if is_image_src:
+        o = urllib.parse.urlparse(url)
+        if o.scheme == &#39;&#39; and o.netloc == &#39;&#39;:
+            # Insert a marker in markdown images to allow us to replace them with the image template for local images.
+            return &#34;+&#34; + fixup_relative_url(url, self._page[&#34;path&#34;])
+    return fixup_relative_url(url, self._page[&#34;path&#34;])</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="website.QueryTracker"><code class="flex name class">
+<span>class <span class="ident">QueryTracker</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class QueryTracker(object):
+
+    def __init__(self):
+        self.queries = {}
+
+    def add(self, parameters, documents):
+        mtimes = [document.mtime for document in documents]
+        self.queries[js.dumps(parameters)] = utils.hash_items(mtimes)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="website.QueryTracker.add"><code class="name flex">
+<span>def <span class="ident">add</span></span>(<span>self, parameters, documents)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add(self, parameters, documents):
+    mtimes = [document.mtime for document in documents]
+    self.queries[js.dumps(parameters)] = utils.hash_items(mtimes)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="website.Site"><code class="flex name class">
+<span>class <span class="ident">Site</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Site(object):
+
+    def __init__(self):
+        self.config = app.config[&#34;CONFIG&#34;]
+        self._cache = None
+        self._cache_by_parent = None
+
+    def load_cache(self):
+        if self._cache is not None:
+            return
+        self._cache = dict()
+        self._cache_by_parent = collections.defaultdict(list)
+        for document in [wrap_document(document) for document in app.jinja_env.store.getall()]:
+            self._cache[document.url] = document
+            self._cache_by_parent[document[&#34;parent&#34;]].append(document)
+
+    def posts(self, include=None, exclude=None, parent=None, search=None, ascending=False, **kwargs):
+        self.load_cache()
+        cached_posts = None
+        if include is None and exclude is None and parent is None and search is None and not kwargs:
+            cached_posts = self._cache.values()
+        elif include is None and exclude is None and search is None and not kwargs:
+            cached_posts = self._cache_by_parent[parent]
+        if cached_posts is not None:
+            return sort_posts(cached_posts, ascending=ascending)
+        return [wrap_document(document) for document in app.jinja_env.store.getall(include=include, exclude=exclude, parent=parent, search=search, asc=ascending, **kwargs)]
+
+    def post(self, url):
+        self.load_cache()
+        try:
+            return self._cache[url]
+        except KeyError:
+            return None
+
+    def __getitem__(self, key):
+        return self.config[key]
+
+    @property
+    def last_modified(self):
+        return app.jinja_env.store.last_modified</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="website.Site.last_modified"><code class="name">var <span class="ident">last_modified</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def last_modified(self):
+    return app.jinja_env.store.last_modified</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="website.Site.load_cache"><code class="name flex">
+<span>def <span class="ident">load_cache</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_cache(self):
+    if self._cache is not None:
+        return
+    self._cache = dict()
+    self._cache_by_parent = collections.defaultdict(list)
+    for document in [wrap_document(document) for document in app.jinja_env.store.getall()]:
+        self._cache[document.url] = document
+        self._cache_by_parent[document[&#34;parent&#34;]].append(document)</code></pre>
+</details>
+</dd>
+<dt id="website.Site.post"><code class="name flex">
+<span>def <span class="ident">post</span></span>(<span>self, url)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def post(self, url):
+    self.load_cache()
+    try:
+        return self._cache[url]
+    except KeyError:
+        return None</code></pre>
+</details>
+</dd>
+<dt id="website.Site.posts"><code class="name flex">
+<span>def <span class="ident">posts</span></span>(<span>self, include=None, exclude=None, parent=None, search=None, ascending=False, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def posts(self, include=None, exclude=None, parent=None, search=None, ascending=False, **kwargs):
+    self.load_cache()
+    cached_posts = None
+    if include is None and exclude is None and parent is None and search is None and not kwargs:
+        cached_posts = self._cache.values()
+    elif include is None and exclude is None and search is None and not kwargs:
+        cached_posts = self._cache_by_parent[parent]
+    if cached_posts is not None:
+        return sort_posts(cached_posts, ascending=ascending)
+    return [wrap_document(document) for document in app.jinja_env.store.getall(include=include, exclude=exclude, parent=parent, search=search, asc=ascending, **kwargs)]</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="website.ValueCache"><code class="flex name class">
+<span>class <span class="ident">ValueCache</span></span>
+<span>(</span><span>value)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ValueCache(object):
+
+    def __init__(self, value):
+        self.value = value</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="website.directory_mtime" href="#website.directory_mtime">directory_mtime</a></code></li>
+<li><code><a title="website.documents" href="#website.documents">documents</a></code></li>
+<li><code><a title="website.filter_base64" href="#website.filter_base64">filter_base64</a></code></li>
+<li><code><a title="website.filter_render_template" href="#website.filter_render_template">filter_render_template</a></code></li>
+<li><code><a title="website.fixup_relative_srcset" href="#website.fixup_relative_srcset">fixup_relative_srcset</a></code></li>
+<li><code><a title="website.fixup_relative_url" href="#website.fixup_relative_url">fixup_relative_url</a></code></li>
+<li><code><a title="website.get_document" href="#website.get_document">get_document</a></code></li>
+<li><code><a title="website.initialize" href="#website.initialize">initialize</a></code></li>
+<li><code><a title="website.local_path" href="#website.local_path">local_path</a></code></li>
+<li><code><a title="website.markdown" href="#website.markdown">markdown</a></code></li>
+<li><code><a title="website.normpath" href="#website.normpath">normpath</a></code></li>
+<li><code><a title="website.sort_posts" href="#website.sort_posts">sort_posts</a></code></li>
+<li><code><a title="website.wrap_document" href="#website.wrap_document">wrap_document</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="website.DefaultAttributeWrapper" href="#website.DefaultAttributeWrapper">DefaultAttributeWrapper</a></code></h4>
+</li>
+<li>
+<h4><code><a title="website.DocumentWrapper" href="#website.DocumentWrapper">DocumentWrapper</a></code></h4>
+<ul class="two-column">
+<li><code><a title="website.DocumentWrapper.children" href="#website.DocumentWrapper.children">children</a></code></li>
+<li><code><a title="website.DocumentWrapper.content" href="#website.DocumentWrapper.content">content</a></code></li>
+<li><code><a title="website.DocumentWrapper.evaluate_queries" href="#website.DocumentWrapper.evaluate_queries">evaluate_queries</a></code></li>
+<li><code><a title="website.DocumentWrapper.hash" href="#website.DocumentWrapper.hash">hash</a></code></li>
+<li><code><a title="website.DocumentWrapper.html" href="#website.DocumentWrapper.html">html</a></code></li>
+<li><code><a title="website.DocumentWrapper.last_modified" href="#website.DocumentWrapper.last_modified">last_modified</a></code></li>
+<li><code><a title="website.DocumentWrapper.next" href="#website.DocumentWrapper.next">next</a></code></li>
+<li><code><a title="website.DocumentWrapper.parent" href="#website.DocumentWrapper.parent">parent</a></code></li>
+<li><code><a title="website.DocumentWrapper.previous" href="#website.DocumentWrapper.previous">previous</a></code></li>
+<li><code><a title="website.DocumentWrapper.query" href="#website.DocumentWrapper.query">query</a></code></li>
+<li><code><a title="website.DocumentWrapper.siblings" href="#website.DocumentWrapper.siblings">siblings</a></code></li>
+<li><code><a title="website.DocumentWrapper.sort_date" href="#website.DocumentWrapper.sort_date">sort_date</a></code></li>
+<li><code><a title="website.DocumentWrapper.thumbnail" href="#website.DocumentWrapper.thumbnail">thumbnail</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="website.MyRenderer" href="#website.MyRenderer">MyRenderer</a></code></h4>
+<ul class="">
+<li><code><a title="website.MyRenderer.check_url" href="#website.MyRenderer.check_url">check_url</a></code></li>
+<li><code><a title="website.MyRenderer.header" href="#website.MyRenderer.header">header</a></code></li>
+<li><code><a title="website.MyRenderer.rewrite_url" href="#website.MyRenderer.rewrite_url">rewrite_url</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="website.QueryTracker" href="#website.QueryTracker">QueryTracker</a></code></h4>
+<ul class="">
+<li><code><a title="website.QueryTracker.add" href="#website.QueryTracker.add">add</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="website.Site" href="#website.Site">Site</a></code></h4>
+<ul class="">
+<li><code><a title="website.Site.last_modified" href="#website.Site.last_modified">last_modified</a></code></li>
+<li><code><a title="website.Site.load_cache" href="#website.Site.load_cache">load_cache</a></code></li>
+<li><code><a title="website.Site.post" href="#website.Site.post">post</a></code></li>
+<li><code><a title="website.Site.posts" href="#website.Site.posts">posts</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="website.ValueCache" href="#website.ValueCache">ValueCache</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

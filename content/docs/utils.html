@@ -173,6 +173,24 @@ def find_files(path, types=None):
     return result
 
 
+def find(path, extensions=None, transform=None):
+    &#34;&#34;&#34;
+    Find the files in `path` with file extensions matching `extensions`.
+
+    `extensions` should be given as an array of file extensions.
+
+    For example,
+
+    ```
+    texts = find(&#34;~/&#34;, [&#34;.txt&#34;])
+    ```
+    &#34;&#34;&#34;
+    paths = [os.path.join(*tripple) for tripple in find_files(path, types=extensions)]
+    if transform:
+        paths = [transform(path) for path in paths]
+    return paths
+
+
 def makedirs(path):
     &#34;&#34;&#34;
     Ensure a directory exists at `path`, recursively creating all intermediate directories if necessary.
@@ -254,6 +272,37 @@ def create_animated_thumbnail(input, output):
                                &#34;-layers&#34;, &#34;OptimizeTransparency&#34;,
                                &#34;-colors&#34;, &#34;256&#34;,
                                output])</code></pre>
+</details>
+</dd>
+<dt id="utils.find"><code class="name flex">
+<span>def <span class="ident">find</span></span>(<span>path, extensions=None, transform=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Find the files in <code>path</code> with file extensions matching <code>extensions</code>.</p>
+<p><code>extensions</code> should be given as an array of file extensions.</p>
+<p>For example,</p>
+<pre><code>texts = find(&quot;~/&quot;, [&quot;.txt&quot;])
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find(path, extensions=None, transform=None):
+    &#34;&#34;&#34;
+    Find the files in `path` with file extensions matching `extensions`.
+
+    `extensions` should be given as an array of file extensions.
+
+    For example,
+
+    ```
+    texts = find(&#34;~/&#34;, [&#34;.txt&#34;])
+    ```
+    &#34;&#34;&#34;
+    paths = [os.path.join(*tripple) for tripple in find_files(path, types=extensions)]
+    if transform:
+        paths = [transform(path) for path in paths]
+    return paths</code></pre>
 </details>
 </dd>
 <dt id="utils.find_files"><code class="name flex">
@@ -607,6 +656,7 @@ and Markdown. This class provides a lightweight solution.</p></div>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="utils.create_animated_thumbnail" href="#utils.create_animated_thumbnail">create_animated_thumbnail</a></code></li>
+<li><code><a title="utils.find" href="#utils.find">find</a></code></li>
 <li><code><a title="utils.find_files" href="#utils.find_files">find_files</a></code></li>
 <li><code><a title="utils.hash_items" href="#utils.hash_items">hash_items</a></code></li>
 <li><code><a title="utils.makedirs" href="#utils.makedirs">makedirs</a></code></li>
