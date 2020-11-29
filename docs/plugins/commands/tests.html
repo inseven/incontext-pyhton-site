@@ -56,7 +56,7 @@ import paths
 @incontext.command(&#34;tests&#34;, help=&#34;Run the tests&#34;)
 def command_tests(incontext, options):
     environment = dict(os.environ)
-    environment[&#34;PYTHONPATH&#34;] = paths.SCRIPTS_DIR
+    environment[&#34;PYTHONPATH&#34;] = paths.INCONTEXT_DIRECTORY
     subprocess.check_call([&#34;nosetests&#34;, &#34;-v&#34;, paths.TESTS_DIR], env=environment)</code></pre>
 </details>
 </section>
@@ -79,7 +79,7 @@ def command_tests(incontext, options):
 <pre><code class="python">@incontext.command(&#34;tests&#34;, help=&#34;Run the tests&#34;)
 def command_tests(incontext, options):
     environment = dict(os.environ)
-    environment[&#34;PYTHONPATH&#34;] = paths.SCRIPTS_DIR
+    environment[&#34;PYTHONPATH&#34;] = paths.INCONTEXT_DIRECTORY
     subprocess.check_call([&#34;nosetests&#34;, &#34;-v&#34;, paths.TESTS_DIR], env=environment)</code></pre>
 </details>
 </dd>

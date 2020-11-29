@@ -60,7 +60,7 @@ import utils
 
 
 class PluginsTestCase(unittest.TestCase):
-    
+
     def test_expected_plugins(self):
         instance = incontext.InContext(plugins_directory=paths.PLUGINS_DIR)
         self.assertIsInstance(instance.plugins, incontext._Plugins)
@@ -71,7 +71,6 @@ class PluginsTestCase(unittest.TestCase):
                                  &#34;build-documentation&#34;,
                                  &#34;clean&#34;,
                                  &#34;publish&#34;,
-                                 &#34;serve&#34;,
                                  &#34;tests&#34;,
                                  &#34;watch&#34;,
                              })</code></pre>
@@ -124,7 +123,7 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class PluginsTestCase(unittest.TestCase):
-    
+
     def test_expected_plugins(self):
         instance = incontext.InContext(plugins_directory=paths.PLUGINS_DIR)
         self.assertIsInstance(instance.plugins, incontext._Plugins)
@@ -135,7 +134,6 @@ not have a method with the specified name.</p></div>
                                  &#34;build-documentation&#34;,
                                  &#34;clean&#34;,
                                  &#34;publish&#34;,
-                                 &#34;serve&#34;,
                                  &#34;tests&#34;,
                                  &#34;watch&#34;,
                              })</code></pre>
@@ -165,7 +163,6 @@ not have a method with the specified name.</p></div>
                              &#34;build-documentation&#34;,
                              &#34;clean&#34;,
                              &#34;publish&#34;,
-                             &#34;serve&#34;,
                              &#34;tests&#34;,
                              &#34;watch&#34;,
                          })</code></pre>
