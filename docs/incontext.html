@@ -77,17 +77,23 @@ class _CommandPlugin(object):
         self.callback = callback
         self.callback_type = callback_type
         self.arguments = arguments
+        self._runner = None
         
     def configure(self, incontext, parser):
         if self.callback_type == CALLBACK_TYPE_SETUP:
-            return self.callback(incontext, parser)
+            self._runner = self.callback(incontext, parser)
+            return self._runner
         elif self.callback_type == CALLBACK_TYPE_STANDALONE:
             for argument in self.arguments:
                 parser.add_argument(*(argument.args), **(argument.kwargs))
             def callback(options):
                 return self.callback(incontext, options)
+            self._runner = callback
             return callback
         raise AssertionError(&#34;Unknown command callback type.&#34;)
+        
+    def run(self, **kwargs):
+        return self._runner(Namespace(**kwargs))
 
 
 class Argument(object):
@@ -234,6 +240,10 @@ class InContext(object):
                 self.plugins.extend(plugin_instance.incontext._PLUGINS)
                 
     @property
+    def commands(self):
+        return self.plugins.plugins(PLUGIN_TYPE_COMMAND)
+                
+    @property
     def context_functions(self):
         &#34;&#34;&#34;
         Return a dictionary of additional context functions that will be available to the Jinja templating at render time.
@@ -323,8 +333,6 @@ class InContext(object):
             parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
             fn = command_plugin.configure(self, parser)
             parser.set_defaults(fn=fn)
-            def command_runner(**kwargs):
-                fn(Namespace(**kwargs))
 
         # Parse the arguments.       
         options = self.parser.parse_args(args)
@@ -541,6 +549,10 @@ if __name__ == &#34;__main__&#34;:
                 self.plugins.extend(plugin_instance.incontext._PLUGINS)
                 
     @property
+    def commands(self):
+        return self.plugins.plugins(PLUGIN_TYPE_COMMAND)
+                
+    @property
     def context_functions(self):
         &#34;&#34;&#34;
         Return a dictionary of additional context functions that will be available to the Jinja templating at render time.
@@ -630,8 +642,6 @@ if __name__ == &#34;__main__&#34;:
             parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
             fn = command_plugin.configure(self, parser)
             parser.set_defaults(fn=fn)
-            def command_runner(**kwargs):
-                fn(Namespace(**kwargs))
 
         # Parse the arguments.       
         options = self.parser.parse_args(args)
@@ -644,6 +654,18 @@ if __name__ == &#34;__main__&#34;:
 </details>
 <h3>Instance variables</h3>
 <dl>
+<dt id="incontext.InContext.commands"><code class="name">var <span class="ident">commands</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def commands(self):
+    return self.plugins.plugins(PLUGIN_TYPE_COMMAND)</code></pre>
+</details>
+</dd>
 <dt id="incontext.InContext.context_functions"><code class="name">var <span class="ident">context_functions</span></code></dt>
 <dd>
 <div class="desc"><p>Return a dictionary of additional context functions that will be available to the Jinja templating at render time.</p></div>
@@ -848,8 +870,6 @@ must return a new callable which will be called if the the command is selected f
         parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
         fn = command_plugin.configure(self, parser)
         parser.set_defaults(fn=fn)
-        def command_runner(**kwargs):
-            fn(Namespace(**kwargs))
 
     # Parse the arguments.       
     options = self.parser.parse_args(args)
@@ -913,6 +933,7 @@ must return a new callable which will be called if the the command is selected f
 <li><code><a title="incontext.InContext.add_configuration_provider" href="#incontext.InContext.add_configuration_provider">add_configuration_provider</a></code></li>
 <li><code><a title="incontext.InContext.add_handler" href="#incontext.InContext.add_handler">add_handler</a></code></li>
 <li><code><a title="incontext.InContext.add_task" href="#incontext.InContext.add_task">add_task</a></code></li>
+<li><code><a title="incontext.InContext.commands" href="#incontext.InContext.commands">commands</a></code></li>
 <li><code><a title="incontext.InContext.context_functions" href="#incontext.InContext.context_functions">context_functions</a></code></li>
 <li><code><a title="incontext.InContext.get_handler" href="#incontext.InContext.get_handler">get_handler</a></code></li>
 <li><code><a title="incontext.InContext.get_task" href="#incontext.InContext.get_task">get_task</a></code></li>
