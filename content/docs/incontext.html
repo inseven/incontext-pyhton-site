@@ -57,6 +57,7 @@ import os
 import sys
 
 import paths
+import utils
 
 verbose = &#39;--verbose&#39; in sys.argv[1:] or &#39;-v&#39; in sys.argv[1:]
 logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format=&#34;[%(levelname)s] %(message)s&#34;)
@@ -205,9 +206,12 @@ class InContext(object):
         # Load the plugins.
         sys.path.append(self.plugins_directory)
         plugins = {}
-        for plugin in glob.glob(os.path.join(self.plugins_directory, &#34;*.py&#34;)):
-            identifier = os.path.splitext(os.path.relpath(plugin, self.plugins_directory))[0].replace(&#39;/&#39;, &#39;_&#39;)
-            plugins[identifier] = importlib.import_module(identifier, plugin)
+        for plugin in utils.find_files(self.plugins_directory, [&#34;.py&#34;]):
+            plugin = os.path.join(*plugin)
+            (module, _) = os.path.splitext(os.path.relpath(plugin, self.plugins_directory))
+            module = module.replace(&#34;/&#34;, &#34;.&#34;)
+            logging.debug(&#34;Importing &#39;%s&#39;...&#34;, module)
+            plugins[module] = importlib.import_module(module)
 
         # Create the argument parser.
         self.parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, description=&#34;Generate website.&#34;)
@@ -309,14 +313,14 @@ class InContext(object):
         &#34;&#34;&#34;
         return self.handlers[name]
 
-    def run(self, args):
+    def run(self, args=None):
         &#34;&#34;&#34;
         Parse the command line arguments and execute the requested command.
         &#34;&#34;&#34;
         
         # Prepare the commands for running.
         for command_plugin in self.plugins.plugins(PLUGIN_TYPE_COMMAND).values():
-            parser = self.subparsers.add_parser(command_plugin.name, help=help)
+            parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
             fn = command_plugin.configure(self, parser)
             parser.set_defaults(fn=fn)
             def command_runner(**kwargs):
@@ -509,9 +513,12 @@ if __name__ == &#34;__main__&#34;:
         # Load the plugins.
         sys.path.append(self.plugins_directory)
         plugins = {}
-        for plugin in glob.glob(os.path.join(self.plugins_directory, &#34;*.py&#34;)):
-            identifier = os.path.splitext(os.path.relpath(plugin, self.plugins_directory))[0].replace(&#39;/&#39;, &#39;_&#39;)
-            plugins[identifier] = importlib.import_module(identifier, plugin)
+        for plugin in utils.find_files(self.plugins_directory, [&#34;.py&#34;]):
+            plugin = os.path.join(*plugin)
+            (module, _) = os.path.splitext(os.path.relpath(plugin, self.plugins_directory))
+            module = module.replace(&#34;/&#34;, &#34;.&#34;)
+            logging.debug(&#34;Importing &#39;%s&#39;...&#34;, module)
+            plugins[module] = importlib.import_module(module)
 
         # Create the argument parser.
         self.parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, description=&#34;Generate website.&#34;)
@@ -613,14 +620,14 @@ if __name__ == &#34;__main__&#34;:
         &#34;&#34;&#34;
         return self.handlers[name]
 
-    def run(self, args):
+    def run(self, args=None):
         &#34;&#34;&#34;
         Parse the command line arguments and execute the requested command.
         &#34;&#34;&#34;
         
         # Prepare the commands for running.
         for command_plugin in self.plugins.plugins(PLUGIN_TYPE_COMMAND).values():
-            parser = self.subparsers.add_parser(command_plugin.name, help=help)
+            parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
             fn = command_plugin.configure(self, parser)
             parser.set_defaults(fn=fn)
             def command_runner(**kwargs):
@@ -823,7 +830,7 @@ must return a new callable which will be called if the the command is selected f
 </details>
 </dd>
 <dt id="incontext.InContext.run"><code class="name flex">
-<span>def <span class="ident">run</span></span>(<span>self, args)</span>
+<span>def <span class="ident">run</span></span>(<span>self, args=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parse the command line arguments and execute the requested command.</p></div>
@@ -831,14 +838,14 @@ must return a new callable which will be called if the the command is selected f
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run(self, args):
+<pre><code class="python">def run(self, args=None):
     &#34;&#34;&#34;
     Parse the command line arguments and execute the requested command.
     &#34;&#34;&#34;
     
     # Prepare the commands for running.
     for command_plugin in self.plugins.plugins(PLUGIN_TYPE_COMMAND).values():
-        parser = self.subparsers.add_parser(command_plugin.name, help=help)
+        parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
         fn = command_plugin.configure(self, parser)
         parser.set_defaults(fn=fn)
         def command_runner(**kwargs):
