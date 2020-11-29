@@ -96,7 +96,7 @@ class CommandsTestCase(unittest.TestCase):
         with tempfile.TemporaryDirectory() as path:
             self.assertEqual(len(utils.find(path)), 0)
             common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-            self.assertEqual(len(utils.find(path)), 24)
+            self.assertEqual(len(utils.find(path)), 25)
 
     def test_add_draft_and_publish_with_build(self):
         configuration = {
@@ -198,7 +198,41 @@ class CommandsTestCase(unittest.TestCase):
             site.build()
             site.assertExists(&#34;build/files/foo.txt&#34;)
             site.assertExists(&#34;build/files/image.jpeg&#34;)
-            site.assertNotExists(&#34;build/files/example.markdown&#34;)</code></pre>
+            site.assertNotExists(&#34;build/files/example.markdown&#34;)
+
+    def test_ignore(self):
+        configuration = {
+            &#34;config&#34;: {
+                &#34;title&#34;: &#34;Example Site&#34;,
+                &#34;url&#34;: &#34;https://example.com&#34;
+            },
+            &#34;paths&#34;: {},
+            &#34;build_steps&#34;: [
+                {
+                    &#34;task&#34;: &#34;process_files&#34;,
+                    &#34;args&#34;: {
+                        &#34;handlers&#34;: [
+                            {
+                                &#34;when&#34;: [
+                                    &#34;.*\.txt&#34;,
+                                ],
+                                &#34;then&#34;: &#34;ignore&#34;,
+                            },
+                            {
+                                &#34;when&#34;: [
+                                    &#34;.*\.txt&#34;,
+                                ],
+                                &#34;then&#34;: &#34;copy_file&#34;,
+                            }
+                        ],
+                    }
+                },
+            ],
+        }
+        with common.TemporarySite(self, configuration=configuration) as site:
+            site.touch(&#34;content/foo.txt&#34;)
+            site.build()
+            site.assertNotExists(&#34;build/files/foo.txt&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -283,7 +317,7 @@ not have a method with the specified name.</p></div>
         with tempfile.TemporaryDirectory() as path:
             self.assertEqual(len(utils.find(path)), 0)
             common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-            self.assertEqual(len(utils.find(path)), 24)
+            self.assertEqual(len(utils.find(path)), 25)
 
     def test_add_draft_and_publish_with_build(self):
         configuration = {
@@ -385,7 +419,41 @@ not have a method with the specified name.</p></div>
             site.build()
             site.assertExists(&#34;build/files/foo.txt&#34;)
             site.assertExists(&#34;build/files/image.jpeg&#34;)
-            site.assertNotExists(&#34;build/files/example.markdown&#34;)</code></pre>
+            site.assertNotExists(&#34;build/files/example.markdown&#34;)
+
+    def test_ignore(self):
+        configuration = {
+            &#34;config&#34;: {
+                &#34;title&#34;: &#34;Example Site&#34;,
+                &#34;url&#34;: &#34;https://example.com&#34;
+            },
+            &#34;paths&#34;: {},
+            &#34;build_steps&#34;: [
+                {
+                    &#34;task&#34;: &#34;process_files&#34;,
+                    &#34;args&#34;: {
+                        &#34;handlers&#34;: [
+                            {
+                                &#34;when&#34;: [
+                                    &#34;.*\.txt&#34;,
+                                ],
+                                &#34;then&#34;: &#34;ignore&#34;,
+                            },
+                            {
+                                &#34;when&#34;: [
+                                    &#34;.*\.txt&#34;,
+                                ],
+                                &#34;then&#34;: &#34;copy_file&#34;,
+                            }
+                        ],
+                    }
+                },
+            ],
+        }
+        with common.TemporarySite(self, configuration=configuration) as site:
+            site.touch(&#34;content/foo.txt&#34;)
+            site.build()
+            site.assertNotExists(&#34;build/files/foo.txt&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -490,7 +558,7 @@ not have a method with the specified name.</p></div>
     with tempfile.TemporaryDirectory() as path:
         self.assertEqual(len(utils.find(path)), 0)
         common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-        self.assertEqual(len(utils.find(path)), 24)</code></pre>
+        self.assertEqual(len(utils.find(path)), 25)</code></pre>
 </details>
 </dd>
 <dt id="test_commands.CommandsTestCase.test_copy_file_multiple_regex_syntax"><code class="name flex">
@@ -591,6 +659,50 @@ not have a method with the specified name.</p></div>
         self.assertTrue(os.path.isdir(os.path.join(site.path, &#34;templates&#34;)))</code></pre>
 </details>
 </dd>
+<dt id="test_commands.CommandsTestCase.test_ignore"><code class="name flex">
+<span>def <span class="ident">test_ignore</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_ignore(self):
+    configuration = {
+        &#34;config&#34;: {
+            &#34;title&#34;: &#34;Example Site&#34;,
+            &#34;url&#34;: &#34;https://example.com&#34;
+        },
+        &#34;paths&#34;: {},
+        &#34;build_steps&#34;: [
+            {
+                &#34;task&#34;: &#34;process_files&#34;,
+                &#34;args&#34;: {
+                    &#34;handlers&#34;: [
+                        {
+                            &#34;when&#34;: [
+                                &#34;.*\.txt&#34;,
+                            ],
+                            &#34;then&#34;: &#34;ignore&#34;,
+                        },
+                        {
+                            &#34;when&#34;: [
+                                &#34;.*\.txt&#34;,
+                            ],
+                            &#34;then&#34;: &#34;copy_file&#34;,
+                        }
+                    ],
+                }
+            },
+        ],
+    }
+    with common.TemporarySite(self, configuration=configuration) as site:
+        site.touch(&#34;content/foo.txt&#34;)
+        site.build()
+        site.assertNotExists(&#34;build/files/foo.txt&#34;)</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -613,6 +725,7 @@ not have a method with the specified name.</p></div>
 <li><code><a title="test_commands.CommandsTestCase.test_copy_file_multiple_regex_syntax" href="#test_commands.CommandsTestCase.test_copy_file_multiple_regex_syntax">test_copy_file_multiple_regex_syntax</a></code></li>
 <li><code><a title="test_commands.CommandsTestCase.test_copy_file_regex_syntax" href="#test_commands.CommandsTestCase.test_copy_file_regex_syntax">test_copy_file_regex_syntax</a></code></li>
 <li><code><a title="test_commands.CommandsTestCase.test_create_test_site" href="#test_commands.CommandsTestCase.test_create_test_site">test_create_test_site</a></code></li>
+<li><code><a title="test_commands.CommandsTestCase.test_ignore" href="#test_commands.CommandsTestCase.test_ignore">test_ignore</a></code></li>
 </ul>
 </li>
 </ul>
