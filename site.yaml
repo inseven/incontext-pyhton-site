@@ -8,11 +8,10 @@ build_steps:
 - task: process_files
   args:
     handlers:
-    - when: '(.*/)?\.DS_Store'
-      then: ignore
-    - when: '(.*/)?\..*'
-      then: ignore
-    - when: '(.*/)?.*~'
+    - when:
+      - '(.*/)?\.DS_Store'
+      - '(.*/)?\..*'
+      - '(.*/)?.*~'
       then: ignore
     - when: '(.*/)?.*\.markdown'
       then: import_markdown
