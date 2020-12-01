@@ -41,8 +41,6 @@ jobs:
     - name: Build the site
       run: |
         python3 incontext/incontext --site site build
-        rm -r gh-pages/*
-        cp -R site/build/files/* gh-pages
 
     - name: Checkout gh-pages branch
       uses: actions/checkout@v2
