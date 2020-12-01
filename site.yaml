@@ -2,7 +2,7 @@ config:
   title: InContext
   date_format: "%B %-d, %Y"
   date_format_short: "%B %-d"
-  url: "https://jbmorley.co.uk"
+  url: "https://incontext.app"
 paths: []
 build_steps:
 - task: process_files
