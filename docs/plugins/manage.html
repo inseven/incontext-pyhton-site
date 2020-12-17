@@ -204,7 +204,7 @@ CONTENT_TYPES = {
 def command_add(incontext, parser):
     subparsers = parser.add_subparsers(title=&#34;content type&#34;, required=True)
     for content_type, function in CONTENT_TYPES.items():
-        parser = subparsers.add_parser(content_type, help=help)
+        parser = subparsers.add_parser(content_type)
         parser.set_defaults(add_function=function(incontext, parser))
 
     def add(options):
@@ -245,7 +245,7 @@ def command_publish(incontext, parser):
 <pre><code class="python">def command_add(incontext, parser):
     subparsers = parser.add_subparsers(title=&#34;content type&#34;, required=True)
     for content_type, function in CONTENT_TYPES.items():
-        parser = subparsers.add_parser(content_type, help=help)
+        parser = subparsers.add_parser(content_type)
         parser.set_defaults(add_function=function(incontext, parser))
 
     def add(options):

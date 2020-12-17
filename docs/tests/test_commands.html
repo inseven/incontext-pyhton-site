@@ -96,7 +96,7 @@ class CommandsTestCase(unittest.TestCase):
         with tempfile.TemporaryDirectory() as path:
             self.assertEqual(len(utils.find(path)), 0)
             common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-            self.assertEqual(len(utils.find(path)), 25)
+            self.assertEqual(len(utils.find(path)), 26)
 
     def test_add_draft_and_publish_with_build(self):
         configuration = {
@@ -232,7 +232,17 @@ class CommandsTestCase(unittest.TestCase):
         with common.TemporarySite(self, configuration=configuration) as site:
             site.touch(&#34;content/foo.txt&#34;)
             site.build()
-            site.assertNotExists(&#34;build/files/foo.txt&#34;)</code></pre>
+            site.assertNotExists(&#34;build/files/foo.txt&#34;)
+
+    @common.with_temporary_directory
+    def test_new_site(self):
+        common.run_incontext([&#34;new&#34;, &#34;example&#34;], plugins_directory=paths.PLUGINS_DIR)
+        site = common.Site(self, &#34;example&#34;)
+        site.assertExists(&#34;README.md&#34;)
+        site.assertNotExists(&#34;.git&#34;)
+        site.assertNotExists(&#34;.github&#34;)
+        site.build()
+        site.assertExists(&#34;build/files/index.html&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -317,7 +327,7 @@ not have a method with the specified name.</p></div>
         with tempfile.TemporaryDirectory() as path:
             self.assertEqual(len(utils.find(path)), 0)
             common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-            self.assertEqual(len(utils.find(path)), 25)
+            self.assertEqual(len(utils.find(path)), 26)
 
     def test_add_draft_and_publish_with_build(self):
         configuration = {
@@ -453,7 +463,17 @@ not have a method with the specified name.</p></div>
         with common.TemporarySite(self, configuration=configuration) as site:
             site.touch(&#34;content/foo.txt&#34;)
             site.build()
-            site.assertNotExists(&#34;build/files/foo.txt&#34;)</code></pre>
+            site.assertNotExists(&#34;build/files/foo.txt&#34;)
+
+    @common.with_temporary_directory
+    def test_new_site(self):
+        common.run_incontext([&#34;new&#34;, &#34;example&#34;], plugins_directory=paths.PLUGINS_DIR)
+        site = common.Site(self, &#34;example&#34;)
+        site.assertExists(&#34;README.md&#34;)
+        site.assertNotExists(&#34;.git&#34;)
+        site.assertNotExists(&#34;.github&#34;)
+        site.build()
+        site.assertExists(&#34;build/files/index.html&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -558,7 +578,7 @@ not have a method with the specified name.</p></div>
     with tempfile.TemporaryDirectory() as path:
         self.assertEqual(len(utils.find(path)), 0)
         common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-        self.assertEqual(len(utils.find(path)), 25)</code></pre>
+        self.assertEqual(len(utils.find(path)), 26)</code></pre>
 </details>
 </dd>
 <dt id="test_commands.CommandsTestCase.test_copy_file_multiple_regex_syntax"><code class="name flex">
@@ -703,6 +723,26 @@ not have a method with the specified name.</p></div>
         site.assertNotExists(&#34;build/files/foo.txt&#34;)</code></pre>
 </details>
 </dd>
+<dt id="test_commands.CommandsTestCase.test_new_site"><code class="name flex">
+<span>def <span class="ident">test_new_site</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@common.with_temporary_directory
+def test_new_site(self):
+    common.run_incontext([&#34;new&#34;, &#34;example&#34;], plugins_directory=paths.PLUGINS_DIR)
+    site = common.Site(self, &#34;example&#34;)
+    site.assertExists(&#34;README.md&#34;)
+    site.assertNotExists(&#34;.git&#34;)
+    site.assertNotExists(&#34;.github&#34;)
+    site.build()
+    site.assertExists(&#34;build/files/index.html&#34;)</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -726,6 +766,7 @@ not have a method with the specified name.</p></div>
 <li><code><a title="test_commands.CommandsTestCase.test_copy_file_regex_syntax" href="#test_commands.CommandsTestCase.test_copy_file_regex_syntax">test_copy_file_regex_syntax</a></code></li>
 <li><code><a title="test_commands.CommandsTestCase.test_create_test_site" href="#test_commands.CommandsTestCase.test_create_test_site">test_create_test_site</a></code></li>
 <li><code><a title="test_commands.CommandsTestCase.test_ignore" href="#test_commands.CommandsTestCase.test_ignore">test_ignore</a></code></li>
+<li><code><a title="test_commands.CommandsTestCase.test_new_site" href="#test_commands.CommandsTestCase.test_new_site">test_new_site</a></code></li>
 </ul>
 </li>
 </ul>
