@@ -46,13 +46,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import jinja2
+import logging
 import uuid
+
+import jinja2
 
 from jinja2 import nodes
 from jinja2.ext import Extension
 
-import converters
 import converters
 
 
@@ -107,7 +108,40 @@ class STL(SimpleExtension):
         template = self.environment.get_template(&#34;extensions/stl.html&#34;)
         return template.render(site=self.environment.site,
                                path=path,
-                               uuid=str(uuid.uuid1()))</code></pre>
+                               uuid=str(uuid.uuid1()))
+
+
+class TemplateExtension(Extension):
+
+    tags = {&#34;template&#34;}
+
+    def __init__(self, environment):
+        super(TemplateExtension, self).__init__(environment)
+
+    def parse(self, parser):
+        lineno = next(parser.stream).lineno
+        parameters = [parser.parse_expression()]
+
+        while parser.stream.look().type != &#34;data&#34; and parser.stream.look().type != &#34;eof&#34;:
+            key = parser.parse_expression()
+            assert parser.stream.skip_if(&#34;colon&#34;)
+            value = parser.parse_expression()
+            parameters.extend([jinja2.nodes.Const(key.name), value])
+            parser.stream.skip_if(&#34;comma&#34;)
+
+        context = jinja2.nodes.ContextReference()
+        args = [context, jinja2.nodes.List(parameters)]
+        return nodes.CallBlock(self.call_method(&#39;render&#39;, args), [], [], &#34;&#34;).set_lineno(lineno)
+
+    def render(self, context, parameters, caller):
+        template = parameters.pop(0)
+        args = {}
+        while parameters:
+            key = parameters.pop(0)
+            value = parameters.pop(0)
+            args[key] = value
+        template = self.environment.get_template(template)
+        return template.render(site=self.environment.site, page=context[&#34;page&#34;], **args)</code></pre>
 </details>
 </section>
 <section>
@@ -384,6 +418,137 @@ list of multiple nodes.</p></div>
 </dd>
 </dl>
 </dd>
+<dt id="extensions.TemplateExtension"><code class="flex name class">
+<span>class <span class="ident">TemplateExtension</span></span>
+<span>(</span><span>environment)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extensions can be used to add extra functionality to the Jinja template
+system at the parser level.
+Custom extensions are bound to an environment
+but may not store environment specific data on <code>self</code>.
+The reason for
+this is that an extension can be bound to another environment (for
+overlays) by creating a copy and reassigning the <code>environment</code> attribute.</p>
+<p>As extensions are created by the environment they cannot accept any
+arguments for configuration.
+One may want to work around that by using
+a factory function, but that is not possible as extensions are identified
+by their import name.
+The correct way to configure the extension is
+storing the configuration values on the environment.
+Because this way the
+environment ends up acting as central configuration storage the
+attributes may clash which is why extensions have to ensure that the names
+they choose for configuration are not too generic.
+<code>prefix</code> for example
+is a terrible name, <code>fragment_cache_prefix</code> on the other hand is a good
+name as includes the name of the extension (fragment cache).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TemplateExtension(Extension):
+
+    tags = {&#34;template&#34;}
+
+    def __init__(self, environment):
+        super(TemplateExtension, self).__init__(environment)
+
+    def parse(self, parser):
+        lineno = next(parser.stream).lineno
+        parameters = [parser.parse_expression()]
+
+        while parser.stream.look().type != &#34;data&#34; and parser.stream.look().type != &#34;eof&#34;:
+            key = parser.parse_expression()
+            assert parser.stream.skip_if(&#34;colon&#34;)
+            value = parser.parse_expression()
+            parameters.extend([jinja2.nodes.Const(key.name), value])
+            parser.stream.skip_if(&#34;comma&#34;)
+
+        context = jinja2.nodes.ContextReference()
+        args = [context, jinja2.nodes.List(parameters)]
+        return nodes.CallBlock(self.call_method(&#39;render&#39;, args), [], [], &#34;&#34;).set_lineno(lineno)
+
+    def render(self, context, parameters, caller):
+        template = parameters.pop(0)
+        args = {}
+        while parameters:
+            key = parameters.pop(0)
+            value = parameters.pop(0)
+            args[key] = value
+        template = self.environment.get_template(template)
+        return template.render(site=self.environment.site, page=context[&#34;page&#34;], **args)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>jinja2.ext.Extension</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="extensions.TemplateExtension.identifier"><code class="name">var <span class="ident">identifier</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="extensions.TemplateExtension.tags"><code class="name">var <span class="ident">tags</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="extensions.TemplateExtension.parse"><code class="name flex">
+<span>def <span class="ident">parse</span></span>(<span>self, parser)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>If any of the :attr:<code>tags</code> matched this method is called with the
+parser as first argument.
+The token the parser stream is pointing at
+is the name token that matched.
+This method has to return one or a
+list of multiple nodes.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def parse(self, parser):
+    lineno = next(parser.stream).lineno
+    parameters = [parser.parse_expression()]
+
+    while parser.stream.look().type != &#34;data&#34; and parser.stream.look().type != &#34;eof&#34;:
+        key = parser.parse_expression()
+        assert parser.stream.skip_if(&#34;colon&#34;)
+        value = parser.parse_expression()
+        parameters.extend([jinja2.nodes.Const(key.name), value])
+        parser.stream.skip_if(&#34;comma&#34;)
+
+    context = jinja2.nodes.ContextReference()
+    args = [context, jinja2.nodes.List(parameters)]
+    return nodes.CallBlock(self.call_method(&#39;render&#39;, args), [], [], &#34;&#34;).set_lineno(lineno)</code></pre>
+</details>
+</dd>
+<dt id="extensions.TemplateExtension.render"><code class="name flex">
+<span>def <span class="ident">render</span></span>(<span>self, context, parameters, caller)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def render(self, context, parameters, caller):
+    template = parameters.pop(0)
+    args = {}
+    while parameters:
+        key = parameters.pop(0)
+        value = parameters.pop(0)
+        args[key] = value
+    template = self.environment.get_template(template)
+    return template.render(site=self.environment.site, page=context[&#34;page&#34;], **args)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="extensions.Video"><code class="flex name class">
 <span>class <span class="ident">Video</span></span>
 <span>(</span><span>environment)</span>
@@ -504,6 +669,15 @@ name as includes the name of the extension (fragment cache).</p></div>
 <ul class="">
 <li><code><a title="extensions.SimpleExtension.identifier" href="#extensions.SimpleExtension.identifier">identifier</a></code></li>
 <li><code><a title="extensions.SimpleExtension.parse" href="#extensions.SimpleExtension.parse">parse</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="extensions.TemplateExtension" href="#extensions.TemplateExtension">TemplateExtension</a></code></h4>
+<ul class="">
+<li><code><a title="extensions.TemplateExtension.identifier" href="#extensions.TemplateExtension.identifier">identifier</a></code></li>
+<li><code><a title="extensions.TemplateExtension.parse" href="#extensions.TemplateExtension.parse">parse</a></code></li>
+<li><code><a title="extensions.TemplateExtension.render" href="#extensions.TemplateExtension.render">render</a></code></li>
+<li><code><a title="extensions.TemplateExtension.tags" href="#extensions.TemplateExtension.tags">tags</a></code></li>
 </ul>
 </li>
 <li>
