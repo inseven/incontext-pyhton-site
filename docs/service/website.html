@@ -124,6 +124,7 @@ def initialize(templates_path, store_path, config):
     app.jinja_env.add_extension(&#39;extensions.Gallery&#39;)
     app.jinja_env.add_extension(&#39;extensions.STL&#39;)
     app.jinja_env.add_extension(&#39;extensions.Video&#39;)
+    app.jinja_env.add_extension(&#39;extensions.TemplateExtension&#39;)
 
 
 def directory_mtime(path):
@@ -326,6 +327,13 @@ class DocumentWrapper(object):
             exit(&#34;Unknown query &#39;%s&#39;.&#34; % (identifier, ))
         return self._record_query(parameters)
 
+    def abspath(self, path):
+        if path == &#39;.&#39;:
+            return self.url
+        if not path.startswith(&#34;/&#34;):
+            return self.url + path
+        return path
+
     @property
     def content(self):
         if self._document[&#34;content&#34;]:
@@ -435,7 +443,7 @@ class DefaultAttributeWrapper(object):
         self.wrapped = wrapped
         self.name = name
         self.value = value
-        
+
     def __getitem__(self, key):
         return self.__getattr__(key)
 
@@ -745,7 +753,8 @@ def documents(path=&#34;&#34;):
 
     app.jinja_env.add_extension(&#39;extensions.Gallery&#39;)
     app.jinja_env.add_extension(&#39;extensions.STL&#39;)
-    app.jinja_env.add_extension(&#39;extensions.Video&#39;)</code></pre>
+    app.jinja_env.add_extension(&#39;extensions.Video&#39;)
+    app.jinja_env.add_extension(&#39;extensions.TemplateExtension&#39;)</code></pre>
 </details>
 </dd>
 <dt id="website.local_path"><code class="name flex">
@@ -883,7 +892,7 @@ def documents(path=&#34;&#34;):
         self.wrapped = wrapped
         self.name = name
         self.value = value
-        
+
     def __getitem__(self, key):
         return self.__getattr__(key)
 
@@ -1023,6 +1032,13 @@ def documents(path=&#34;&#34;):
         except KeyError:
             exit(&#34;Unknown query &#39;%s&#39;.&#34; % (identifier, ))
         return self._record_query(parameters)
+
+    def abspath(self, path):
+        if path == &#39;.&#39;:
+            return self.url
+        if not path.startswith(&#34;/&#34;):
+            return self.url + path
+        return path
 
     @property
     def content(self):
@@ -1249,6 +1265,23 @@ def thumbnail(self):
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="website.DocumentWrapper.abspath"><code class="name flex">
+<span>def <span class="ident">abspath</span></span>(<span>self, path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def abspath(self, path):
+    if path == &#39;.&#39;:
+        return self.url
+    if not path.startswith(&#34;/&#34;):
+        return self.url + path
+    return path</code></pre>
+</details>
+</dd>
 <dt id="website.DocumentWrapper.evaluate_queries"><code class="name flex">
 <span>def <span class="ident">evaluate_queries</span></span>(<span>self, queries)</span>
 </code></dt>
@@ -1622,6 +1655,7 @@ def last_modified(self):
 <li>
 <h4><code><a title="website.DocumentWrapper" href="#website.DocumentWrapper">DocumentWrapper</a></code></h4>
 <ul class="two-column">
+<li><code><a title="website.DocumentWrapper.abspath" href="#website.DocumentWrapper.abspath">abspath</a></code></li>
 <li><code><a title="website.DocumentWrapper.children" href="#website.DocumentWrapper.children">children</a></code></li>
 <li><code><a title="website.DocumentWrapper.content" href="#website.DocumentWrapper.content">content</a></code></li>
 <li><code><a title="website.DocumentWrapper.evaluate_queries" href="#website.DocumentWrapper.evaluate_queries">evaluate_queries</a></code></li>
