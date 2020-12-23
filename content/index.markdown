@@ -21,10 +21,12 @@ Most existing static site generators do a great job with text content, but treat
    export PATH=$PATH:/path/to/incontext
    ```
 
-4. Build your site:
+4. Create and build a new site:
 
    ```bash
-   cd my-site; incontext build
+   incontext new my-new-site
+   cd my-new-site
+   incontext build
    ```
 
 # Documentation
