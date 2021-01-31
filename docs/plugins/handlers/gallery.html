@@ -74,6 +74,34 @@ import store
 import utils
 
 
+PRIORITIZED_DATE_KEYS = [
+    &#34;DateTimeOriginal&#34;,
+    &#34;CreateDate&#34;,
+    &#34;ContentCreateDate&#34;,
+    &#34;CreationDate&#34;,
+    &#34;FileModifyDate&#34;,
+]
+
+
+class Exif(object):
+
+    def __init__(self, path):
+        self.path = path
+        self.exif = exif(path)
+
+    @property
+    def date(self):
+        for key in PRIORITIZED_DATE_KEYS:
+            if key in self.exif:
+                logging.debug(&#34;Selecting date from &#39;%s&#39; exif key.&#34;, key)
+                return self.exif[key]
+        raise KeyError(&#34;date&#34;)
+
+    @property
+    def title(self):
+        return self.exif[&#34;Title&#34;]
+
+
 def initialize_plugin(incontext):
     incontext.add_handler(&#34;import_photo&#34;, import_photo)
 
@@ -122,7 +150,7 @@ def exif(path):
             for key, value in sidecar.items():
                 data[key] = value
 
-    for field in [&#34;CreationDate&#34;, &#34;DateTimeOriginal&#34;, &#34;ContentCreateDate&#34;, &#34;FileModifyDate&#34;]:
+    for field in PRIORITIZED_DATE_KEYS:
         if field in data:
             data[field] = dateutil.parser.parse(data[field].replace(&#34;:&#34;, &#34;-&#34;, 2))
 
@@ -235,7 +263,7 @@ def imagemagick_resize(source, destination, size):
 def gifsicle_resize(source, destination, size):
     &#34;&#34;&#34;
     Resize a gif using the `gifsicle` command line utility (see [](https://www.lcdf.org/gifsicle/)).
-    
+
     Resizing using animated gifs using ImageMagick will often produce very large output files and, in the case of
     incrementally encoded images, result in completely broken output.
     &#34;&#34;&#34;
@@ -500,7 +528,7 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
             for key, value in sidecar.items():
                 data[key] = value
 
-    for field in [&#34;CreationDate&#34;, &#34;DateTimeOriginal&#34;, &#34;ContentCreateDate&#34;, &#34;FileModifyDate&#34;]:
+    for field in PRIORITIZED_DATE_KEYS:
         if field in data:
             data[field] = dateutil.parser.parse(data[field].replace(&#34;:&#34;, &#34;-&#34;, 2))
 
@@ -666,7 +694,7 @@ incrementally encoded images, result in completely broken output.</p></div>
 <pre><code class="python">def gifsicle_resize(source, destination, size):
     &#34;&#34;&#34;
     Resize a gif using the `gifsicle` command line utility (see [](https://www.lcdf.org/gifsicle/)).
-    
+
     Resizing using animated gifs using ImageMagick will often produce very large output files and, in the case of
     incrementally encoded images, result in completely broken output.
     &#34;&#34;&#34;
@@ -1011,6 +1039,66 @@ incrementally encoded images, result in completely broken output.</p></div>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="gallery.Exif"><code class="flex name class">
+<span>class <span class="ident">Exif</span></span>
+<span>(</span><span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Exif(object):
+
+    def __init__(self, path):
+        self.path = path
+        self.exif = exif(path)
+
+    @property
+    def date(self):
+        for key in PRIORITIZED_DATE_KEYS:
+            if key in self.exif:
+                logging.debug(&#34;Selecting date from &#39;%s&#39; exif key.&#34;, key)
+                return self.exif[key]
+        raise KeyError(&#34;date&#34;)
+
+    @property
+    def title(self):
+        return self.exif[&#34;Title&#34;]</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="gallery.Exif.date"><code class="name">var <span class="ident">date</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def date(self):
+    for key in PRIORITIZED_DATE_KEYS:
+        if key in self.exif:
+            logging.debug(&#34;Selecting date from &#39;%s&#39; exif key.&#34;, key)
+            return self.exif[key]
+    raise KeyError(&#34;date&#34;)</code></pre>
+</details>
+</dd>
+<dt id="gallery.Exif.title"><code class="name">var <span class="ident">title</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def title(self):
+    return self.exif[&#34;Title&#34;]</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="gallery.MissingDate"><code class="flex name class">
 <span>class <span class="ident">MissingDate</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -1081,6 +1169,13 @@ incrementally encoded images, result in completely broken output.</p></div>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="gallery.Exif" href="#gallery.Exif">Exif</a></code></h4>
+<ul class="">
+<li><code><a title="gallery.Exif.date" href="#gallery.Exif.date">date</a></code></li>
+<li><code><a title="gallery.Exif.title" href="#gallery.Exif.title">title</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="gallery.MissingDate" href="#gallery.MissingDate">MissingDate</a></code></h4>
 </li>
