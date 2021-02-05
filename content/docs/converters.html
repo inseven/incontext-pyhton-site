@@ -26,7 +26,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python"># Copyright (c) 2016-2020 InSeven Limited
+<pre><code class="python"># Copyright (c) 2016-2021 InSeven Limited
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the &#34;Software&#34;), to deal
@@ -68,10 +68,12 @@ def read_frontmatter(path):
     return data
 
 
+# TODO: Move converters.merge_dictionaries into utils #96
 def merge_dictionaries(a, b):
+    result = dict(a)
     for key, value in b.items():
-        a[key] = value
-    return a
+        result[key] = value
+    return result
 
 
 def clean_name(path):
@@ -300,9 +302,10 @@ def frontmatter_document(root, path, default_category=&#39;general&#39;):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def merge_dictionaries(a, b):
+    result = dict(a)
     for key, value in b.items():
-        a[key] = value
-    return a</code></pre>
+        result[key] = value
+    return result</code></pre>
 </details>
 </dd>
 <dt id="converters.parent"><code class="name flex">

@@ -26,7 +26,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python"># Copyright (c) 2016-2020 InSeven Limited
+<pre><code class="python"># Copyright (c) 2016-2021 InSeven Limited
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the &#34;Software&#34;), to deal
@@ -73,6 +73,8 @@ import converters
 import store
 import utils
 
+from schema import Default, Dictionary, Empty, First, Key
+
 
 PRIORITIZED_DATE_KEYS = [
     &#34;DateTimeOriginal&#34;,
@@ -81,6 +83,53 @@ PRIORITIZED_DATE_KEYS = [
     &#34;CreationDate&#34;,
     &#34;FileModifyDate&#34;,
 ]
+
+EXTENSION_TO_FORMAT = {
+    &#34;.png&#34;: &#34;png&#34;,
+    &#34;.jpg&#34;: &#34;jpeg&#34;,
+    &#34;.jpeg&#34;: &#34;jpeg&#34;,
+    &#34;.gif&#34;: &#34;gif&#34;,
+    &#34;.tiff&#34;: &#34;tiff&#34;,
+}
+
+IMAGEMAGICK_WHITELIST = [
+    &#34;.gif&#34;,
+]
+
+METADATA_SCHEMA = Dictionary({
+
+    &#34;title&#34;: First(Key(&#34;Title&#34;), Key(&#34;DisplayName&#34;), Key(&#34;ObjectName&#34;), Empty()),
+    &#34;content&#34;: First(Key(&#34;ImageDescription&#34;), Key(&#34;Description&#34;), Key(&#34;ArtworkContentDescription&#34;), Default(None)),
+    &#34;date&#34;: First(Key(&#34;DateTimeOriginal&#34;), Key(&#34;ContentCreateDate&#34;), Key(&#34;CreationDate&#34;), Empty()),
+    &#34;projection&#34;: First(Key(&#34;ProjectionType&#34;), Empty()),
+    &#34;location&#34;: First(Dictionary({
+        &#34;latitude&#34;: Key(&#34;GPSLatitude&#34;),
+        &#34;longitude&#34;: Key(&#34;GPSLongitude&#34;),
+    }), Empty())
+
+})
+
+DEFAULT_PROFILES = {
+    &#34;image&#34;: {
+        &#34;width&#34;: 1600,
+        &#34;scale&#34;: 1
+    },
+    &#34;thumbnail&#34;: {
+        &#34;height&#34;: 240,
+        &#34;scale&#34;: 2
+    },
+}
+
+EQUIRECTANGULAR_PROFILES = {
+    &#34;image&#34;: {
+        &#34;width&#34;: 10000,
+        &#34;scale&#34;: 1
+    },
+    &#34;thumbnail&#34;: {
+        &#34;height&#34;: 240,
+        &#34;scale&#34;: 2
+    },
+}
 
 
 class Exif(object):
@@ -165,14 +214,6 @@ def exif(path):
             data[field] = value
 
     return data
-
-
-class MissingDate(Exception):
-    pass
-
-
-class MissingLocation(Exception):
-    pass
 
 
 def load_image(path):
@@ -282,21 +323,10 @@ def gifsicle_resize(source, destination, size):
         raise e
 
 
-EXTENSION_TO_FORMAT = {
-    &#34;.png&#34;: &#34;png&#34;,
-    &#34;.jpg&#34;: &#34;jpeg&#34;,
-    &#34;.jpeg&#34;: &#34;jpeg&#34;,
-    &#34;.gif&#34;: &#34;gif&#34;,
-    &#34;.tiff&#34;: &#34;tiff&#34;,
-}
-
-IMAGEMAGICK_WHITELIST = [
-    &#34;.gif&#34;,
-]
-
 IMAGE_RESIZE_HANDLERS = {
     &#34;.gif&#34;: gifsicle_resize
 }
+
 
 def get_ext(path):
     return os.path.splitext(path)[1].lower()
@@ -388,13 +418,12 @@ def get_image_data(root, dirname, basename):
         return {&#34;filename&#34;: basename, &#34;width&#34;: width, &#34;height&#34;: height}
 
 
-def first_value_or_none(dictionary, keys):
-    for key in keys:
-        try:
-            return dictionary[key]
-        except KeyError:
-            pass
-    return None
+def metadata_for_media_file(root, path, title_from_filename):
+    metadata = converters.parse_path(path, title_from_filename=title_from_filename)
+    exif_data = exif(os.path.join(root, path))
+    metadata_from_exif = METADATA_SCHEMA(exif_data)
+    metadata = converters.merge_dictionaries(metadata, metadata_from_exif)
+    return metadata
 
 
 def process_image(incontext, root, destination, dirname, basename, category, title_from_filename=True):
@@ -406,55 +435,8 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
     name, ext = os.path.splitext(basename)
     utils.makedirs(destination_dir)
 
-    metadata = load_metadata(markdown_path)
-
-    DEFAULT_PROFILES = {
-        &#34;image&#34;: {
-            &#34;width&#34;: 1600,
-            &#34;scale&#34;: 1
-        },
-        &#34;thumbnail&#34;: {
-            &#34;height&#34;: 240,
-            &#34;scale&#34;: 2
-        },
-    }
-
-    EQUIRECTANGULAR_PROFILES = {
-        &#34;image&#34;: {
-            &#34;width&#34;: 10000,
-            &#34;scale&#34;: 1
-        },
-        &#34;thumbnail&#34;: {
-            &#34;height&#34;: 240,
-            &#34;scale&#34;: 2
-        },
-    }
-
-    # Use the common path parsing from converters to ensure we pick up information like the title, etc.
-    metadata = converters.parse_path(os.path.join(dirname, basename), title_from_filename=title_from_filename)
-
-    # Read data from the EXIF and add it to the metadata
-
-    exif_data = exif(source_path)
-
-    # Select title with priority: Title, ObjectName
-    if &#34;ObjectName&#34; in exif_data:
-        metadata[&#34;title&#34;] = exif_data[&#34;ObjectName&#34;]
-    if &#34;Title&#34; in exif_data:
-        metadata[&#34;title&#34;] = exif_data[&#34;Title&#34;]
-
-    metadata[&#34;content&#34;] = first_value_or_none(exif_data, [&#34;ImageDescription&#34;, &#34;Description&#34;, &#34;ArtworkContentDescription&#34;])
-
-    if &#34;DateTimeOriginal&#34; in exif_data:
-        metadata[&#34;date&#34;] = exif_data[&#34;DateTimeOriginal&#34;]
-
-    if &#34;ProjectionType&#34; in exif_data:
-        metadata[&#34;projection&#34;] = exif_data[&#34;ProjectionType&#34;]
-        logging.debug(f&#34;projection = {metadata[&#39;projection&#39;]}&#34;)
-
-    # Read the location from the exif.
-    if &#34;GPSLatitude&#34; in exif_data and &#34;GPSLongitude&#34; in exif_data:
-        metadata[&#34;location&#34;] = {&#34;latitude&#34;: exif_data[&#34;GPSLatitude&#34;], &#34;longitude&#34;: exif_data[&#34;GPSLongitude&#34;]}
+    metadata = metadata_for_media_file(root, os.path.join(dirname, basename),
+                                       title_from_filename=title_from_filename)
 
     # Determine which profiles to use; we use a different profile for equirectangular projections.
     # TODO: In an ideal world we would allow all of this special case behaviour to be configured in site.yaml
@@ -543,24 +525,6 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
             data[field] = value
 
     return data</code></pre>
-</details>
-</dd>
-<dt id="gallery.first_value_or_none"><code class="name flex">
-<span>def <span class="ident">first_value_or_none</span></span>(<span>dictionary, keys)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def first_value_or_none(dictionary, keys):
-    for key in keys:
-        try:
-            return dictionary[key]
-        except KeyError:
-            pass
-    return None</code></pre>
 </details>
 </dd>
 <dt id="gallery.generate_identifier"><code class="name flex">
@@ -839,6 +803,23 @@ incrementally encoded images, result in completely broken output.</p></div>
         return default</code></pre>
 </details>
 </dd>
+<dt id="gallery.metadata_for_media_file"><code class="name flex">
+<span>def <span class="ident">metadata_for_media_file</span></span>(<span>root, path, title_from_filename)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def metadata_for_media_file(root, path, title_from_filename):
+    metadata = converters.parse_path(path, title_from_filename=title_from_filename)
+    exif_data = exif(os.path.join(root, path))
+    metadata_from_exif = METADATA_SCHEMA(exif_data)
+    metadata = converters.merge_dictionaries(metadata, metadata_from_exif)
+    return metadata</code></pre>
+</details>
+</dd>
 <dt id="gallery.process_image"><code class="name flex">
 <span>def <span class="ident">process_image</span></span>(<span>incontext, root, destination, dirname, basename, category, title_from_filename=True)</span>
 </code></dt>
@@ -857,55 +838,8 @@ incrementally encoded images, result in completely broken output.</p></div>
     name, ext = os.path.splitext(basename)
     utils.makedirs(destination_dir)
 
-    metadata = load_metadata(markdown_path)
-
-    DEFAULT_PROFILES = {
-        &#34;image&#34;: {
-            &#34;width&#34;: 1600,
-            &#34;scale&#34;: 1
-        },
-        &#34;thumbnail&#34;: {
-            &#34;height&#34;: 240,
-            &#34;scale&#34;: 2
-        },
-    }
-
-    EQUIRECTANGULAR_PROFILES = {
-        &#34;image&#34;: {
-            &#34;width&#34;: 10000,
-            &#34;scale&#34;: 1
-        },
-        &#34;thumbnail&#34;: {
-            &#34;height&#34;: 240,
-            &#34;scale&#34;: 2
-        },
-    }
-
-    # Use the common path parsing from converters to ensure we pick up information like the title, etc.
-    metadata = converters.parse_path(os.path.join(dirname, basename), title_from_filename=title_from_filename)
-
-    # Read data from the EXIF and add it to the metadata
-
-    exif_data = exif(source_path)
-
-    # Select title with priority: Title, ObjectName
-    if &#34;ObjectName&#34; in exif_data:
-        metadata[&#34;title&#34;] = exif_data[&#34;ObjectName&#34;]
-    if &#34;Title&#34; in exif_data:
-        metadata[&#34;title&#34;] = exif_data[&#34;Title&#34;]
-
-    metadata[&#34;content&#34;] = first_value_or_none(exif_data, [&#34;ImageDescription&#34;, &#34;Description&#34;, &#34;ArtworkContentDescription&#34;])
-
-    if &#34;DateTimeOriginal&#34; in exif_data:
-        metadata[&#34;date&#34;] = exif_data[&#34;DateTimeOriginal&#34;]
-
-    if &#34;ProjectionType&#34; in exif_data:
-        metadata[&#34;projection&#34;] = exif_data[&#34;ProjectionType&#34;]
-        logging.debug(f&#34;projection = {metadata[&#39;projection&#39;]}&#34;)
-
-    # Read the location from the exif.
-    if &#34;GPSLatitude&#34; in exif_data and &#34;GPSLongitude&#34; in exif_data:
-        metadata[&#34;location&#34;] = {&#34;latitude&#34;: exif_data[&#34;GPSLatitude&#34;], &#34;longitude&#34;: exif_data[&#34;GPSLongitude&#34;]}
+    metadata = metadata_for_media_file(root, os.path.join(dirname, basename),
+                                       title_from_filename=title_from_filename)
 
     # Determine which profiles to use; we use a different profile for equirectangular projections.
     # TODO: In an ideal world we would allow all of this special case behaviour to be configured in site.yaml
@@ -1099,44 +1033,6 @@ def title(self):
 </dd>
 </dl>
 </dd>
-<dt id="gallery.MissingDate"><code class="flex name class">
-<span>class <span class="ident">MissingDate</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Common base class for all non-exit exceptions.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class MissingDate(Exception):
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-</dd>
-<dt id="gallery.MissingLocation"><code class="flex name class">
-<span>class <span class="ident">MissingLocation</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Common base class for all non-exit exceptions.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class MissingLocation(Exception):
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-</dd>
 </dl>
 </section>
 </article>
@@ -1147,9 +1043,8 @@ def title(self):
 </div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="gallery.exif" href="#gallery.exif">exif</a></code></li>
-<li><code><a title="gallery.first_value_or_none" href="#gallery.first_value_or_none">first_value_or_none</a></code></li>
 <li><code><a title="gallery.generate_identifier" href="#gallery.generate_identifier">generate_identifier</a></code></li>
 <li><code><a title="gallery.generate_thumbnail" href="#gallery.generate_thumbnail">generate_thumbnail</a></code></li>
 <li><code><a title="gallery.get_details" href="#gallery.get_details">get_details</a></code></li>
@@ -1163,6 +1058,7 @@ def title(self):
 <li><code><a title="gallery.initialize_plugin" href="#gallery.initialize_plugin">initialize_plugin</a></code></li>
 <li><code><a title="gallery.load_image" href="#gallery.load_image">load_image</a></code></li>
 <li><code><a title="gallery.load_metadata" href="#gallery.load_metadata">load_metadata</a></code></li>
+<li><code><a title="gallery.metadata_for_media_file" href="#gallery.metadata_for_media_file">metadata_for_media_file</a></code></li>
 <li><code><a title="gallery.process_image" href="#gallery.process_image">process_image</a></code></li>
 <li><code><a title="gallery.resize" href="#gallery.resize">resize</a></code></li>
 </ul>
@@ -1175,12 +1071,6 @@ def title(self):
 <li><code><a title="gallery.Exif.date" href="#gallery.Exif.date">date</a></code></li>
 <li><code><a title="gallery.Exif.title" href="#gallery.Exif.title">title</a></code></li>
 </ul>
-</li>
-<li>
-<h4><code><a title="gallery.MissingDate" href="#gallery.MissingDate">MissingDate</a></code></h4>
-</li>
-<li>
-<h4><code><a title="gallery.MissingLocation" href="#gallery.MissingLocation">MissingLocation</a></code></h4>
 </li>
 </ul>
 </li>

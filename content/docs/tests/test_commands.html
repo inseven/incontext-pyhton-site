@@ -28,7 +28,7 @@
 </summary>
 <pre><code class="python">#!/usr/bin/env python
 #
-# Copyright (c) 2016-2020 InSeven Limited
+# Copyright (c) 2016-2021 InSeven Limited
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the &#34;Software&#34;), to deal
@@ -96,7 +96,7 @@ class CommandsTestCase(unittest.TestCase):
         with tempfile.TemporaryDirectory() as path:
             self.assertEqual(len(utils.find(path)), 0)
             common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-            self.assertEqual(len(utils.find(path)), 26)
+            self.assertEqual(len(utils.find(path)), 28)
 
     def test_add_draft_and_publish_with_build(self):
         configuration = {
@@ -327,7 +327,7 @@ not have a method with the specified name.</p></div>
         with tempfile.TemporaryDirectory() as path:
             self.assertEqual(len(utils.find(path)), 0)
             common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-            self.assertEqual(len(utils.find(path)), 26)
+            self.assertEqual(len(utils.find(path)), 28)
 
     def test_add_draft_and_publish_with_build(self):
         configuration = {
@@ -578,7 +578,7 @@ not have a method with the specified name.</p></div>
     with tempfile.TemporaryDirectory() as path:
         self.assertEqual(len(utils.find(path)), 0)
         common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-        self.assertEqual(len(utils.find(path)), 26)</code></pre>
+        self.assertEqual(len(utils.find(path)), 28)</code></pre>
 </details>
 </dd>
 <dt id="test_commands.CommandsTestCase.test_copy_file_multiple_regex_syntax"><code class="name flex">
