@@ -73,16 +73,8 @@ import converters
 import store
 import utils
 
-from schema import Default, Dictionary, Empty, First, GPSCoordinate, Key
+from schema import Default, Dictionary, Empty, EXIFDate, First, GPSCoordinate, Key
 
-
-PRIORITIZED_DATE_KEYS = [
-    &#34;DateTimeOriginal&#34;,
-    &#34;CreateDate&#34;,
-    &#34;ContentCreateDate&#34;,
-    &#34;CreationDate&#34;,
-    &#34;FileModifyDate&#34;,
-]
 
 EXTENSION_TO_FORMAT = {
     &#34;.png&#34;: &#34;png&#34;,
@@ -100,7 +92,7 @@ METADATA_SCHEMA = Dictionary({
 
     &#34;title&#34;: First(Key(&#34;Title&#34;), Key(&#34;DisplayName&#34;), Key(&#34;ObjectName&#34;), Empty()),
     &#34;content&#34;: First(Key(&#34;ImageDescription&#34;), Key(&#34;Description&#34;), Key(&#34;ArtworkContentDescription&#34;), Default(None)),
-    &#34;date&#34;: First(Key(&#34;DateTimeOriginal&#34;), Key(&#34;ContentCreateDate&#34;), Key(&#34;CreationDate&#34;), Empty()),
+    &#34;date&#34;: First(EXIFDate(First(Key(&#34;DateTimeOriginal&#34;), Key(&#34;CreateDate&#34;), Key(&#34;ContentCreateDate&#34;), Key(&#34;CreationDate&#34;), Key(&#34;FileModifyDate&#34;))), Empty()),
     &#34;projection&#34;: First(Key(&#34;ProjectionType&#34;), Empty()),
     &#34;location&#34;: First(Dictionary({
         &#34;latitude&#34;: GPSCoordinate(Key(&#34;GPSLatitude&#34;)),
@@ -130,25 +122,6 @@ EQUIRECTANGULAR_PROFILES = {
         &#34;scale&#34;: 2
     },
 }
-
-
-class Exif(object):
-
-    def __init__(self, path):
-        self.path = path
-        self.exif = exif(path)
-
-    @property
-    def date(self):
-        for key in PRIORITIZED_DATE_KEYS:
-            if key in self.exif:
-                logging.debug(&#34;Selecting date from &#39;%s&#39; exif key.&#34;, key)
-                return self.exif[key]
-        raise KeyError(&#34;date&#34;)
-
-    @property
-    def title(self):
-        return self.exif[&#34;Title&#34;]
 
 
 def initialize_plugin(incontext):
@@ -196,12 +169,7 @@ def exif(path):
     if os.path.exists(sidecar_path):
         with open(sidecar_path, &#34;r&#34;) as fh:
             sidecar = json.loads(fh.read())
-            for key, value in sidecar.items():
-                data[key] = value
-
-    for field in PRIORITIZED_DATE_KEYS:
-        if field in data:
-            data[field] = dateutil.parser.parse(data[field].replace(&#34;:&#34;, &#34;-&#34;, 2))
+            data = converters.merge_dictionaries(data, sidecar)
 
     return data
 
@@ -408,11 +376,19 @@ def get_image_data(root, dirname, basename):
         return {&#34;filename&#34;: basename, &#34;width&#34;: width, &#34;height&#34;: height}
 
 
+def metadata_from_exif(path):
+    &#34;&#34;&#34;
+    Generate a metadata dictionary from just the EXIF data contained within the file at `path`, as specified within
+    `METADATA_SCHEMA`.
+    &#34;&#34;&#34;
+    exif_data = exif(path)
+    return METADATA_SCHEMA(exif_data)
+
+
 def metadata_for_media_file(root, path, title_from_filename):
     metadata = converters.parse_path(path, title_from_filename=title_from_filename)
-    exif_data = exif(os.path.join(root, path))
-    metadata_from_exif = METADATA_SCHEMA(exif_data)
-    metadata = converters.merge_dictionaries(metadata, metadata_from_exif)
+    exif_metadata = metadata_from_exif(os.path.join(root, path))
+    metadata = converters.merge_dictionaries(metadata, exif_metadata)
     return metadata
 
 
@@ -497,12 +473,7 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
     if os.path.exists(sidecar_path):
         with open(sidecar_path, &#34;r&#34;) as fh:
             sidecar = json.loads(fh.read())
-            for key, value in sidecar.items():
-                data[key] = value
-
-    for field in PRIORITIZED_DATE_KEYS:
-        if field in data:
-            data[field] = dateutil.parser.parse(data[field].replace(&#34;:&#34;, &#34;-&#34;, 2))
+            data = converters.merge_dictionaries(data, sidecar)
 
     return data</code></pre>
 </details>
@@ -794,10 +765,28 @@ incrementally encoded images, result in completely broken output.</p></div>
 </summary>
 <pre><code class="python">def metadata_for_media_file(root, path, title_from_filename):
     metadata = converters.parse_path(path, title_from_filename=title_from_filename)
-    exif_data = exif(os.path.join(root, path))
-    metadata_from_exif = METADATA_SCHEMA(exif_data)
-    metadata = converters.merge_dictionaries(metadata, metadata_from_exif)
+    exif_metadata = metadata_from_exif(os.path.join(root, path))
+    metadata = converters.merge_dictionaries(metadata, exif_metadata)
     return metadata</code></pre>
+</details>
+</dd>
+<dt id="gallery.metadata_from_exif"><code class="name flex">
+<span>def <span class="ident">metadata_from_exif</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a metadata dictionary from just the EXIF data contained within the file at <code>path</code>, as specified within
+<code>METADATA_SCHEMA</code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def metadata_from_exif(path):
+    &#34;&#34;&#34;
+    Generate a metadata dictionary from just the EXIF data contained within the file at `path`, as specified within
+    `METADATA_SCHEMA`.
+    &#34;&#34;&#34;
+    exif_data = exif(path)
+    return METADATA_SCHEMA(exif_data)</code></pre>
 </details>
 </dd>
 <dt id="gallery.process_image"><code class="name flex">
@@ -951,69 +940,6 @@ incrementally encoded images, result in completely broken output.</p></div>
 </dl>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="gallery.Exif"><code class="flex name class">
-<span>class <span class="ident">Exif</span></span>
-<span>(</span><span>path)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Exif(object):
-
-    def __init__(self, path):
-        self.path = path
-        self.exif = exif(path)
-
-    @property
-    def date(self):
-        for key in PRIORITIZED_DATE_KEYS:
-            if key in self.exif:
-                logging.debug(&#34;Selecting date from &#39;%s&#39; exif key.&#34;, key)
-                return self.exif[key]
-        raise KeyError(&#34;date&#34;)
-
-    @property
-    def title(self):
-        return self.exif[&#34;Title&#34;]</code></pre>
-</details>
-<h3>Instance variables</h3>
-<dl>
-<dt id="gallery.Exif.date"><code class="name">var <span class="ident">date</span></code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def date(self):
-    for key in PRIORITIZED_DATE_KEYS:
-        if key in self.exif:
-            logging.debug(&#34;Selecting date from &#39;%s&#39; exif key.&#34;, key)
-            return self.exif[key]
-    raise KeyError(&#34;date&#34;)</code></pre>
-</details>
-</dd>
-<dt id="gallery.Exif.title"><code class="name">var <span class="ident">title</span></code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def title(self):
-    return self.exif[&#34;Title&#34;]</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -1039,19 +965,9 @@ def title(self):
 <li><code><a title="gallery.load_image" href="#gallery.load_image">load_image</a></code></li>
 <li><code><a title="gallery.load_metadata" href="#gallery.load_metadata">load_metadata</a></code></li>
 <li><code><a title="gallery.metadata_for_media_file" href="#gallery.metadata_for_media_file">metadata_for_media_file</a></code></li>
+<li><code><a title="gallery.metadata_from_exif" href="#gallery.metadata_from_exif">metadata_from_exif</a></code></li>
 <li><code><a title="gallery.process_image" href="#gallery.process_image">process_image</a></code></li>
 <li><code><a title="gallery.resize" href="#gallery.resize">resize</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="gallery.Exif" href="#gallery.Exif">Exif</a></code></h4>
-<ul class="">
-<li><code><a title="gallery.Exif.date" href="#gallery.Exif.date">date</a></code></li>
-<li><code><a title="gallery.Exif.title" href="#gallery.Exif.title">title</a></code></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>

@@ -50,7 +50,9 @@
 
 import unittest
 
-from schema import Dictionary, Empty, First, GPSCoordinate, Identity, Key, Skip, TransformFailure
+import dateutil
+
+from schema import Default, Dictionary, Empty, EXIFDate, First, GPSCoordinate, Identity, Key, Skip, TransformFailure
 
 
 class SchemaTestCase(unittest.TestCase):
@@ -75,6 +77,10 @@ class SchemaTestCase(unittest.TestCase):
         s = Empty()
         with self.assertRaises(Skip):
             s(&#34;anything&#34;)
+
+    def test_default(self):
+        s = Default(None)
+        self.assertEqual(s(&#34;cheese&#34;), None)
 
     def test_dictionary_with_empty(self):
         s = Dictionary({
@@ -121,7 +127,18 @@ class SchemaTestCase(unittest.TestCase):
         self.assertEqual(s(&#34;119.3941638889 W&#34;), -119.3941638889)
         self.assertEqual(s(&#34;119.3941638889 E&#34;), 119.3941638889)
         with self.assertRaises(AssertionError):
-            s(&#34;45 deg 31&#39; 42.13\&#34; N&#34;)</code></pre>
+            s(&#34;45 deg 31&#39; 42.13\&#34; N&#34;)
+
+    def test_exif_date(self):
+        s = EXIFDate(Identity())
+        self.assertEquals(s(&#34;2019:10:20 12:14:09.606-07:00&#34;), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+        self.assertEquals(s(&#34;2019:09:10 09:04:30&#34;), dateutil.parser.parse(&#34;2019-09-10 09:04:30&#34;))
+
+    def test_date_transform_with_first(self):
+        s = First(EXIFDate(First(Key(&#34;date&#34;), Key(&#34;secondary_date&#34;))), Default(None))
+        self.assertEquals(s({&#34;date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+        self.assertEquals(s({&#34;secondary_date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+        self.assertEquals(s({&#34;tertiary_date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), None)</code></pre>
 </details>
 </section>
 <section>
@@ -193,6 +210,10 @@ not have a method with the specified name.</p></div>
         with self.assertRaises(Skip):
             s(&#34;anything&#34;)
 
+    def test_default(self):
+        s = Default(None)
+        self.assertEqual(s(&#34;cheese&#34;), None)
+
     def test_dictionary_with_empty(self):
         s = Dictionary({
             &#34;field&#34;: Empty()
@@ -238,7 +259,18 @@ not have a method with the specified name.</p></div>
         self.assertEqual(s(&#34;119.3941638889 W&#34;), -119.3941638889)
         self.assertEqual(s(&#34;119.3941638889 E&#34;), 119.3941638889)
         with self.assertRaises(AssertionError):
-            s(&#34;45 deg 31&#39; 42.13\&#34; N&#34;)</code></pre>
+            s(&#34;45 deg 31&#39; 42.13\&#34; N&#34;)
+
+    def test_exif_date(self):
+        s = EXIFDate(Identity())
+        self.assertEquals(s(&#34;2019:10:20 12:14:09.606-07:00&#34;), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+        self.assertEquals(s(&#34;2019:09:10 09:04:30&#34;), dateutil.parser.parse(&#34;2019-09-10 09:04:30&#34;))
+
+    def test_date_transform_with_first(self):
+        s = First(EXIFDate(First(Key(&#34;date&#34;), Key(&#34;secondary_date&#34;))), Default(None))
+        self.assertEquals(s({&#34;date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+        self.assertEquals(s({&#34;secondary_date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+        self.assertEquals(s({&#34;tertiary_date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), None)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -257,6 +289,36 @@ not have a method with the specified name.</p></div>
 </summary>
 <pre><code class="python">def assertSchema(self, schema, data, result):
     self.assertEquals(schema(data), result)</code></pre>
+</details>
+</dd>
+<dt id="test_schema.SchemaTestCase.test_date_transform_with_first"><code class="name flex">
+<span>def <span class="ident">test_date_transform_with_first</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_date_transform_with_first(self):
+    s = First(EXIFDate(First(Key(&#34;date&#34;), Key(&#34;secondary_date&#34;))), Default(None))
+    self.assertEquals(s({&#34;date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+    self.assertEquals(s({&#34;secondary_date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+    self.assertEquals(s({&#34;tertiary_date&#34;: &#34;2019:10:20 12:14:09.606-07:00&#34;}), None)</code></pre>
+</details>
+</dd>
+<dt id="test_schema.SchemaTestCase.test_default"><code class="name flex">
+<span>def <span class="ident">test_default</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_default(self):
+    s = Default(None)
+    self.assertEqual(s(&#34;cheese&#34;), None)</code></pre>
 </details>
 </dd>
 <dt id="test_schema.SchemaTestCase.test_dictionary_different_key"><code class="name flex">
@@ -347,6 +409,21 @@ not have a method with the specified name.</p></div>
         s(&#34;anything&#34;)</code></pre>
 </details>
 </dd>
+<dt id="test_schema.SchemaTestCase.test_exif_date"><code class="name flex">
+<span>def <span class="ident">test_exif_date</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_exif_date(self):
+    s = EXIFDate(Identity())
+    self.assertEquals(s(&#34;2019:10:20 12:14:09.606-07:00&#34;), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
+    self.assertEquals(s(&#34;2019:09:10 09:04:30&#34;), dateutil.parser.parse(&#34;2019-09-10 09:04:30&#34;))</code></pre>
+</details>
+</dd>
 <dt id="test_schema.SchemaTestCase.test_first_match_first"><code class="name flex">
 <span>def <span class="ident">test_first_match_first</span></span>(<span>self)</span>
 </code></dt>
@@ -431,11 +508,14 @@ not have a method with the specified name.</p></div>
 <h4><code><a title="test_schema.SchemaTestCase" href="#test_schema.SchemaTestCase">SchemaTestCase</a></code></h4>
 <ul class="">
 <li><code><a title="test_schema.SchemaTestCase.assertSchema" href="#test_schema.SchemaTestCase.assertSchema">assertSchema</a></code></li>
+<li><code><a title="test_schema.SchemaTestCase.test_date_transform_with_first" href="#test_schema.SchemaTestCase.test_date_transform_with_first">test_date_transform_with_first</a></code></li>
+<li><code><a title="test_schema.SchemaTestCase.test_default" href="#test_schema.SchemaTestCase.test_default">test_default</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_dictionary_different_key" href="#test_schema.SchemaTestCase.test_dictionary_different_key">test_dictionary_different_key</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_dictionary_matching_key" href="#test_schema.SchemaTestCase.test_dictionary_matching_key">test_dictionary_matching_key</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_dictionary_multiple_keys" href="#test_schema.SchemaTestCase.test_dictionary_multiple_keys">test_dictionary_multiple_keys</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_dictionary_with_empty" href="#test_schema.SchemaTestCase.test_dictionary_with_empty">test_dictionary_with_empty</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_empty" href="#test_schema.SchemaTestCase.test_empty">test_empty</a></code></li>
+<li><code><a title="test_schema.SchemaTestCase.test_exif_date" href="#test_schema.SchemaTestCase.test_exif_date">test_exif_date</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_first_match_first" href="#test_schema.SchemaTestCase.test_first_match_first">test_first_match_first</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_gps_coordinate" href="#test_schema.SchemaTestCase.test_gps_coordinate">test_gps_coordinate</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_identity" href="#test_schema.SchemaTestCase.test_identity">test_identity</a></code></li>
