@@ -50,7 +50,7 @@
 
 import unittest
 
-from schema import Dictionary, Empty, First, Key, Skip, TransformFailure
+from schema import Dictionary, Empty, First, GPSCoordinate, Identity, Key, Skip, TransformFailure
 
 
 class SchemaTestCase(unittest.TestCase):
@@ -107,7 +107,21 @@ class SchemaTestCase(unittest.TestCase):
             }),
             {&#34;bar&#34;: &#34;cheese&#34;},
             {&#34;foo&#34;: &#34;cheese&#34;}
-        )</code></pre>
+        )
+
+    def test_identity(self):
+        s = Identity()
+        self.assertEqual(s(&#34;Hello, World!&#34;), &#34;Hello, World!&#34;)
+        self.assertEqual(s({}), {})
+
+    def test_gps_coordinate(self):
+        s = GPSCoordinate(Identity())
+        self.assertEqual(s(&#34;45.5283694444 N&#34;), 45.5283694444)
+        self.assertEqual(s(&#34;45.5283694444 S&#34;), 45.5283694444)
+        self.assertEqual(s(&#34;119.3941638889 W&#34;), -119.3941638889)
+        self.assertEqual(s(&#34;119.3941638889 E&#34;), 119.3941638889)
+        with self.assertRaises(AssertionError):
+            s(&#34;45 deg 31&#39; 42.13\&#34; N&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -210,7 +224,21 @@ not have a method with the specified name.</p></div>
             }),
             {&#34;bar&#34;: &#34;cheese&#34;},
             {&#34;foo&#34;: &#34;cheese&#34;}
-        )</code></pre>
+        )
+
+    def test_identity(self):
+        s = Identity()
+        self.assertEqual(s(&#34;Hello, World!&#34;), &#34;Hello, World!&#34;)
+        self.assertEqual(s({}), {})
+
+    def test_gps_coordinate(self):
+        s = GPSCoordinate(Identity())
+        self.assertEqual(s(&#34;45.5283694444 N&#34;), 45.5283694444)
+        self.assertEqual(s(&#34;45.5283694444 S&#34;), 45.5283694444)
+        self.assertEqual(s(&#34;119.3941638889 W&#34;), -119.3941638889)
+        self.assertEqual(s(&#34;119.3941638889 E&#34;), 119.3941638889)
+        with self.assertRaises(AssertionError):
+            s(&#34;45 deg 31&#39; 42.13\&#34; N&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -336,6 +364,40 @@ not have a method with the specified name.</p></div>
         s({&#34;baz&#34;: &#34;cheese&#34;})</code></pre>
 </details>
 </dd>
+<dt id="test_schema.SchemaTestCase.test_gps_coordinate"><code class="name flex">
+<span>def <span class="ident">test_gps_coordinate</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_gps_coordinate(self):
+    s = GPSCoordinate(Identity())
+    self.assertEqual(s(&#34;45.5283694444 N&#34;), 45.5283694444)
+    self.assertEqual(s(&#34;45.5283694444 S&#34;), 45.5283694444)
+    self.assertEqual(s(&#34;119.3941638889 W&#34;), -119.3941638889)
+    self.assertEqual(s(&#34;119.3941638889 E&#34;), 119.3941638889)
+    with self.assertRaises(AssertionError):
+        s(&#34;45 deg 31&#39; 42.13\&#34; N&#34;)</code></pre>
+</details>
+</dd>
+<dt id="test_schema.SchemaTestCase.test_identity"><code class="name flex">
+<span>def <span class="ident">test_identity</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_identity(self):
+    s = Identity()
+    self.assertEqual(s(&#34;Hello, World!&#34;), &#34;Hello, World!&#34;)
+    self.assertEqual(s({}), {})</code></pre>
+</details>
+</dd>
 <dt id="test_schema.SchemaTestCase.test_key"><code class="name flex">
 <span>def <span class="ident">test_key</span></span>(<span>self)</span>
 </code></dt>
@@ -375,6 +437,8 @@ not have a method with the specified name.</p></div>
 <li><code><a title="test_schema.SchemaTestCase.test_dictionary_with_empty" href="#test_schema.SchemaTestCase.test_dictionary_with_empty">test_dictionary_with_empty</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_empty" href="#test_schema.SchemaTestCase.test_empty">test_empty</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_first_match_first" href="#test_schema.SchemaTestCase.test_first_match_first">test_first_match_first</a></code></li>
+<li><code><a title="test_schema.SchemaTestCase.test_gps_coordinate" href="#test_schema.SchemaTestCase.test_gps_coordinate">test_gps_coordinate</a></code></li>
+<li><code><a title="test_schema.SchemaTestCase.test_identity" href="#test_schema.SchemaTestCase.test_identity">test_identity</a></code></li>
 <li><code><a title="test_schema.SchemaTestCase.test_key" href="#test_schema.SchemaTestCase.test_key">test_key</a></code></li>
 </ul>
 </li>

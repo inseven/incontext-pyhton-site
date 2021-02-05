@@ -48,6 +48,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import re
+
 
 class TransformFailure(Exception):
     pass
@@ -95,6 +97,32 @@ class Empty(object):
 
     def __call__(self, data):
         raise Skip()
+
+
+class Identity(object):
+
+    def __call__(self, data):
+        return data
+
+
+GPS_COORDINATE_EXPRESSION = re.compile(r&#34;^(\d+\.\d+) ([NSEW])$&#34;)
+
+
+class GPSCoordinate(object):
+
+    def __init__(self, transform):
+        self.transform = transform
+
+    def __call__(self, data):
+        data = self.transform(data)
+        match = GPS_COORDINATE_EXPRESSION.match(data)
+        if not match:
+            raise AssertionError(f&#34;Invalid GPS coordinate &#39;{data}&#39;.&#34;)
+        value = float(match.group(1))
+        direction = match.group(2)
+        if direction == &#34;W&#34;:
+            value = value * -1
+        return value
 
 
 class Dictionary(object):
@@ -204,6 +232,48 @@ class Dictionary(object):
         raise TransformFailure()</code></pre>
 </details>
 </dd>
+<dt id="schema.GPSCoordinate"><code class="flex name class">
+<span>class <span class="ident">GPSCoordinate</span></span>
+<span>(</span><span>transform)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class GPSCoordinate(object):
+
+    def __init__(self, transform):
+        self.transform = transform
+
+    def __call__(self, data):
+        data = self.transform(data)
+        match = GPS_COORDINATE_EXPRESSION.match(data)
+        if not match:
+            raise AssertionError(f&#34;Invalid GPS coordinate &#39;{data}&#39;.&#34;)
+        value = float(match.group(1))
+        direction = match.group(2)
+        if direction == &#34;W&#34;:
+            value = value * -1
+        return value</code></pre>
+</details>
+</dd>
+<dt id="schema.Identity"><code class="flex name class">
+<span>class <span class="ident">Identity</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Identity(object):
+
+    def __call__(self, data):
+        return data</code></pre>
+</details>
+</dd>
 <dt id="schema.Key"><code class="flex name class">
 <span>class <span class="ident">Key</span></span>
 <span>(</span><span>key)</span>
@@ -285,6 +355,12 @@ class Dictionary(object):
 </li>
 <li>
 <h4><code><a title="schema.First" href="#schema.First">First</a></code></h4>
+</li>
+<li>
+<h4><code><a title="schema.GPSCoordinate" href="#schema.GPSCoordinate">GPSCoordinate</a></code></h4>
+</li>
+<li>
+<h4><code><a title="schema.Identity" href="#schema.Identity">Identity</a></code></h4>
 </li>
 <li>
 <h4><code><a title="schema.Key" href="#schema.Key">Key</a></code></h4>

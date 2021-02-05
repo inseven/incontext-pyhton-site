@@ -73,7 +73,7 @@ import converters
 import store
 import utils
 
-from schema import Default, Dictionary, Empty, First, Key
+from schema import Default, Dictionary, Empty, First, GPSCoordinate, Key
 
 
 PRIORITIZED_DATE_KEYS = [
@@ -103,8 +103,8 @@ METADATA_SCHEMA = Dictionary({
     &#34;date&#34;: First(Key(&#34;DateTimeOriginal&#34;), Key(&#34;ContentCreateDate&#34;), Key(&#34;CreationDate&#34;), Empty()),
     &#34;projection&#34;: First(Key(&#34;ProjectionType&#34;), Empty()),
     &#34;location&#34;: First(Dictionary({
-        &#34;latitude&#34;: Key(&#34;GPSLatitude&#34;),
-        &#34;longitude&#34;: Key(&#34;GPSLongitude&#34;),
+        &#34;latitude&#34;: GPSCoordinate(Key(&#34;GPSLatitude&#34;)),
+        &#34;longitude&#34;: GPSCoordinate(Key(&#34;GPSLongitude&#34;)),
     }), Empty())
 
 })
@@ -202,16 +202,6 @@ def exif(path):
     for field in PRIORITIZED_DATE_KEYS:
         if field in data:
             data[field] = dateutil.parser.parse(data[field].replace(&#34;:&#34;, &#34;-&#34;, 2))
-
-    for field in [&#34;GPSLatitude&#34;, &#34;GPSLongitude&#34;]:
-        if field in data:
-            components = data[field].split(&#34; &#34;)
-            value = float(components[0])
-            if len(components) &gt; 1:
-                direction = components[1]
-                if direction == &#34;W&#34;:
-                    value = value * -1
-            data[field] = value
 
     return data
 
@@ -513,16 +503,6 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
     for field in PRIORITIZED_DATE_KEYS:
         if field in data:
             data[field] = dateutil.parser.parse(data[field].replace(&#34;:&#34;, &#34;-&#34;, 2))
-
-    for field in [&#34;GPSLatitude&#34;, &#34;GPSLongitude&#34;]:
-        if field in data:
-            components = data[field].split(&#34; &#34;)
-            value = float(components[0])
-            if len(components) &gt; 1:
-                direction = components[1]
-                if direction == &#34;W&#34;:
-                    value = value * -1
-            data[field] = value
 
     return data</code></pre>
 </details>
