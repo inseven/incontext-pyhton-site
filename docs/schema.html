@@ -50,6 +50,8 @@
 
 import re
 
+import dateutil
+
 
 class TransformFailure(Exception):
     pass
@@ -125,6 +127,19 @@ class GPSCoordinate(object):
         return value
 
 
+class EXIFDate(object):
+
+    def __init__(self, transform):
+        self.transform = transform
+
+    def __call__(self, data):
+        data = self.transform(data)
+        # ExifTool makes the odd decision to separate the date components with a colon, meaning that `dateutil` cannot
+        # parse it directly, so we fix it up.
+        value = dateutil.parser.parse(data.replace(&#34;:&#34;, &#34;-&#34;, 2))
+        return value
+
+
 class Dictionary(object):
 
     def __init__(self, schema):
@@ -191,6 +206,29 @@ class Dictionary(object):
             except Skip:
                 pass
         return result</code></pre>
+</details>
+</dd>
+<dt id="schema.EXIFDate"><code class="flex name class">
+<span>class <span class="ident">EXIFDate</span></span>
+<span>(</span><span>transform)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EXIFDate(object):
+
+    def __init__(self, transform):
+        self.transform = transform
+
+    def __call__(self, data):
+        data = self.transform(data)
+        # ExifTool makes the odd decision to separate the date components with a colon, meaning that `dateutil` cannot
+        # parse it directly, so we fix it up.
+        value = dateutil.parser.parse(data.replace(&#34;:&#34;, &#34;-&#34;, 2))
+        return value</code></pre>
 </details>
 </dd>
 <dt id="schema.Empty"><code class="flex name class">
@@ -349,6 +387,9 @@ class Dictionary(object):
 </li>
 <li>
 <h4><code><a title="schema.Dictionary" href="#schema.Dictionary">Dictionary</a></code></h4>
+</li>
+<li>
+<h4><code><a title="schema.EXIFDate" href="#schema.EXIFDate">EXIFDate</a></code></h4>
 </li>
 <li>
 <h4><code><a title="schema.Empty" href="#schema.Empty">Empty</a></code></h4>

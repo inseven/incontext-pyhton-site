@@ -135,12 +135,12 @@ def subcommand_add_snapshot(incontext, parser):
 
                 path = jpeg_path
 
-            exif = gallery.Exif(path)
-            date = exif.date.strftime(&#34;%Y-%m-%d-%H-%M-%S&#34;)
+            exif_metadata = gallery.metadata_from_exif(path)
+            date = exif_metadata[&#34;date&#34;].strftime(&#34;%Y-%m-%d-%H-%M-%S&#34;)
 
             title = &#34;&#34;
             try:
-                title = exif.title
+                title = exif_metadata[&#34;title&#34;]
             except KeyError:
                 pass
             if options.title:
@@ -375,12 +375,12 @@ def command_publish(incontext, parser):
 
                 path = jpeg_path
 
-            exif = gallery.Exif(path)
-            date = exif.date.strftime(&#34;%Y-%m-%d-%H-%M-%S&#34;)
+            exif_metadata = gallery.metadata_from_exif(path)
+            date = exif_metadata[&#34;date&#34;].strftime(&#34;%Y-%m-%d-%H-%M-%S&#34;)
 
             title = &#34;&#34;
             try:
-                title = exif.title
+                title = exif_metadata[&#34;title&#34;]
             except KeyError:
                 pass
             if options.title:
