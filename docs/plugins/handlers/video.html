@@ -26,7 +26,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python"># Copyright (c) 2016-2020 InSeven Limited
+<pre><code class="python"># Copyright (c) 2016-2021 InSeven Limited
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the &#34;Software&#34;), to deal
@@ -71,30 +71,12 @@ def import_video(incontext, from_directory, to_directory, category, title_from_f
         destination = os.path.join(to_directory, dirname, basename)
         utils.makedirs(os.path.join(to_directory, dirname))
 
-        data = converters.parse_path(os.path.join(dirname, basename), title_from_filename=title_from_filename)
-        data[&#39;content&#39;] = &#39;&#39;
+        data = gallery.metadata_for_media_file(root, os.path.join(dirname, basename),
+                                               title_from_filename=title_from_filename)
         data[&#34;category&#34;] = category
         data[&#34;template&#34;] = &#34;photo.html&#34;  # TODO: Change this to be part of the configuration.
 
-        exif = gallery.exif(path)
-
-        if &#34;Title&#34; in exif:
-            data[&#34;title&#34;] = exif[&#34;Title&#34;]
-
-        if &#34;Description&#34; in exif:
-            data[&#34;content&#34;] = exif[&#34;Description&#34;]
-
-        if &#34;ImageDescription&#34; in exif:
-            data[&#34;content&#34;] = exif[&#34;ImageDescription&#34;]
-
-        if &#34;CreationDate&#34; in exif:
-            data[&#34;date&#34;] = exif[&#34;CreationDate&#34;]
-
-        if &#34;ContentCreateDate&#34; in exif:
-            data[&#34;date&#34;] = exif[&#34;ContentCreateDate&#34;]
-
         name, _ = os.path.splitext(basename)
-
         mp4_name = &#34;%s.mp4&#34; % name
         mp4_path = os.path.join(to_directory, dirname, mp4_name)
         if not os.path.exists(mp4_path):
@@ -163,30 +145,12 @@ def import_video(incontext, from_directory, to_directory, category, title_from_f
         destination = os.path.join(to_directory, dirname, basename)
         utils.makedirs(os.path.join(to_directory, dirname))
 
-        data = converters.parse_path(os.path.join(dirname, basename), title_from_filename=title_from_filename)
-        data[&#39;content&#39;] = &#39;&#39;
+        data = gallery.metadata_for_media_file(root, os.path.join(dirname, basename),
+                                               title_from_filename=title_from_filename)
         data[&#34;category&#34;] = category
         data[&#34;template&#34;] = &#34;photo.html&#34;  # TODO: Change this to be part of the configuration.
 
-        exif = gallery.exif(path)
-
-        if &#34;Title&#34; in exif:
-            data[&#34;title&#34;] = exif[&#34;Title&#34;]
-
-        if &#34;Description&#34; in exif:
-            data[&#34;content&#34;] = exif[&#34;Description&#34;]
-
-        if &#34;ImageDescription&#34; in exif:
-            data[&#34;content&#34;] = exif[&#34;ImageDescription&#34;]
-
-        if &#34;CreationDate&#34; in exif:
-            data[&#34;date&#34;] = exif[&#34;CreationDate&#34;]
-
-        if &#34;ContentCreateDate&#34; in exif:
-            data[&#34;date&#34;] = exif[&#34;ContentCreateDate&#34;]
-
         name, _ = os.path.splitext(basename)
-
         mp4_name = &#34;%s.mp4&#34; % name
         mp4_path = os.path.join(to_directory, dirname, mp4_name)
         if not os.path.exists(mp4_path):
