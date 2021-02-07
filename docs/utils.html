@@ -239,7 +239,12 @@ def create_animated_thumbnail(input, output):
                                &#34;-coalesce&#34;,
                                &#34;-layers&#34;, &#34;OptimizeTransparency&#34;,
                                &#34;-colors&#34;, &#34;256&#34;,
-                               output])</code></pre>
+                               output])
+
+
+def replace_extension(path, extension):
+    root, ext = os.path.splitext(path)
+    return root + extension</code></pre>
 </details>
 </section>
 <section>
@@ -382,6 +387,20 @@ def create_animated_thumbnail(input, output):
 </summary>
 <pre><code class="python">def matches_types(path, types):
     return bool([t for t in types if path.endswith(&#34;%s&#34; % t)])</code></pre>
+</details>
+</dd>
+<dt id="utils.replace_extension"><code class="name flex">
+<span>def <span class="ident">replace_extension</span></span>(<span>path, extension)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def replace_extension(path, extension):
+    root, ext = os.path.splitext(path)
+    return root + extension</code></pre>
 </details>
 </dd>
 <dt id="utils.safe_arg"><code class="name flex">
@@ -661,6 +680,7 @@ and Markdown. This class provides a lightweight solution.</p></div>
 <li><code><a title="utils.hash_items" href="#utils.hash_items">hash_items</a></code></li>
 <li><code><a title="utils.makedirs" href="#utils.makedirs">makedirs</a></code></li>
 <li><code><a title="utils.matches_types" href="#utils.matches_types">matches_types</a></code></li>
+<li><code><a title="utils.replace_extension" href="#utils.replace_extension">replace_extension</a></code></li>
 <li><code><a title="utils.safe_arg" href="#utils.safe_arg">safe_arg</a></code></li>
 <li><code><a title="utils.safe_basename" href="#utils.safe_basename">safe_basename</a></code></li>
 <li><code><a title="utils.safe_command" href="#utils.safe_command">safe_command</a></code></li>

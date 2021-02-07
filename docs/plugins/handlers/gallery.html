@@ -49,11 +49,13 @@
 import argparse
 import codecs
 import datetime
+import fnmatch
 import functools
 import glob
 import io
 import json
 import logging
+import mimetypes
 import os
 import os.path
 import re
@@ -62,6 +64,7 @@ import subprocess
 import sys
 import time
 
+import braceexpand
 import dateutil
 import frontmatter
 import pyheif
@@ -75,18 +78,6 @@ import utils
 
 from schema import Default, Dictionary, Empty, EXIFDate, First, GPSCoordinate, Key
 
-
-EXTENSION_TO_FORMAT = {
-    &#34;.png&#34;: &#34;png&#34;,
-    &#34;.jpg&#34;: &#34;jpeg&#34;,
-    &#34;.jpeg&#34;: &#34;jpeg&#34;,
-    &#34;.gif&#34;: &#34;gif&#34;,
-    &#34;.tiff&#34;: &#34;tiff&#34;,
-}
-
-IMAGEMAGICK_WHITELIST = [
-    &#34;.gif&#34;,
-]
 
 METADATA_SCHEMA = Dictionary({
 
@@ -142,23 +133,6 @@ def generate_identifier(basename):
     return os.path.splitext(basename)[0]
 
 
-def load_metadata(path):
-
-    default = {&#34;version&#34;: 0}
-    try:
-        fm = frontmatter.load(path)
-        dictionary = fm.metadata
-        try:
-            dictionary[&#34;content&#34;] = fm.content
-        except AttributeError:
-            pass
-        return dictionary
-    except IOError:
-        return default
-    except ValueError:
-        return default
-
-
 def exif(path):
     data = json.loads(subprocess.check_output([&#34;exiftool&#34;, &#34;-j&#34;, &#34;-c&#34;, &#34;%.10f&#34;, path]).decode(&#39;utf-8&#39;))[0]
 
@@ -198,19 +172,6 @@ def load_image(path):
     return Image.open(path)
 
 
-def get_orientation(exif):
-    try:
-        exif = dict(exif.items())
-        for orientation in ExifTags.TAGS.keys():
-            if ExifTags.TAGS[orientation] == &#39;Orientation&#39;:
-                break
-        return exif[orientation]
-    except:
-        logging.debug(&#34;Unable to get get EXIF data&#34;)
-        pass
-    return 1
-
-
 def get_size(source, scale):
     with load_image(source) as img:
         width, height = img.size
@@ -245,7 +206,7 @@ def imagemagick_resize(source, destination, size):
                &#39;-quality&#39;, &#39;75&#39;,
                &#39;-auto-orient&#39;,
                &#39;-resize&#39;, size,
-               source,
+               source + &#34;[0]&#34;,
                destination]
     try:
         logging.debug(&#34;Running command &#39;%s&#39;...&#34;, utils.safe_command(command))
@@ -281,35 +242,92 @@ def gifsicle_resize(source, destination, size):
         raise e
 
 
-IMAGE_RESIZE_HANDLERS = {
-    &#34;.gif&#34;: gifsicle_resize
-}
+class Size(object):
+
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
 
 
-def get_ext(path):
-    return os.path.splitext(path)[1].lower()
+class Regex(object):
+
+    def __init__(self, pattern, flags=0):
+        self.expression = re.compile(pattern, flags)
+
+    def evaluate(self, data):
+        return self.expression.match(data) is not None
+
+
+class Equal(object):
+
+    def __init__(self, value):
+        self.value = value
+
+    def evaluate(self, data):
+        return data == self.value
+
+
+class Or(object):
+
+    def __init__(self, *tests):
+        self.tests = tests
+
+    def evaluate(self, data):
+        for test in self.tests:
+            if test.evaluate(data):
+                return True
+        return False
+
+
+class Glob(Or):
+
+    def __init__(self, glob):
+        patterns = [fnmatch.translate(p) for p in braceexpand.braceexpand(glob)]
+        tests = [Regex(pattern, re.IGNORECASE) for pattern in patterns]
+        super().__init__(*tests)
+
+
+RESIZE_METHODS = [
+    (Glob(&#34;*.gif&#34;), gifsicle_resize),
+    (Glob(&#34;*&#34;), imagemagick_resize),
+]
+
+
+OUTPUT_MIME_TYPES = [
+    (Glob(&#34;*.heic&#34;), &#34;image/jpeg&#34;),
+    (Glob(&#34;*.tiff&#34;), &#34;image/jpeg&#34;),
+    (Glob(&#34;*&#34;), &#34;*&#34;),
+]
+
+
+def evaluate_tests(tests, data):
+    for test, result in tests:
+        if test.evaluate(data):
+            return result
+    raise KeyError(f&#34;Failed to find match for &#39;{data}&#39;.&#34;)
+
+
+def safe_resize(source, destination, size):
+    &#34;&#34;&#34;
+    Determine a suitable resize handler to use when resizing (and converting an image) and run it.
+
+    This makes use of `RESIZE_METHODS` to determine which resize handler to use.
+    &#34;&#34;&#34;
+    resize_method = evaluate_tests(RESIZE_METHODS, os.path.basename(source))
+    resize_method(source,
+                  destination,
+                  f&#34;{size.width}x{size.height}&#34;)
 
 
 def resize(source, dest_root, dest_dirname, dest_basename, size, scale):
 
-    # Unfortunately HEIC files are not broadly supported, so we always need to ensure these
-    # are converted to JPEG files on the fly. We therefore fix-up the destination filename.
-    (name, ext) = os.path.splitext(dest_basename)
-    if ext == &#34;.heic&#34;:
-        ext = &#34;.jpeg&#34;
-    dest_basename = &#34;&#34;.join([name, ext])
-
-    is_heic = get_ext(source) == &#34;.heic&#34;
+    # Determine the desired output MIME type and extension.
+    name, ext = os.path.splitext(dest_basename)
+    destination_mime_type = evaluate_tests(OUTPUT_MIME_TYPES, os.path.basename(source))
+    destination_extension = ext if destination_mime_type == &#34;*&#34; else mimetypes.guess_extension(destination_mime_type)
+    dest_basename = f&#34;{name}{destination_extension}&#34;
 
     with load_image(source) as image:
-
-        # Get the exif from the image before performing any processing.
-        exif = None
-        try:
-            exif = image._getexif()
-        except:
-            pass
-
         (source_width, source_height) = image.size
         logging.debug(&#34;Image source dimensions = %sx%s&#34;, source_width, source_height)
 
@@ -329,51 +347,18 @@ def resize(source, dest_root, dest_dirname, dest_basename, size, scale):
 
         logging.debug(&#34;Image target dimensions = %sx%s&#34;, destination_width, destination_height)
 
-        # Check to see if a resize is required.
-        should_resize = True
-        if source_width &lt;= destination_width or source_height &lt;= destination_height:
-            should_resize = False
-
-        # Perform the resize.
-        destination = os.path.join(dest_root, dest_dirname, dest_basename)
-        if should_resize:
-            image = image.resize((destination_width, destination_height), resample=Image.LANCZOS)
-
-        # Use ImageMagick&#39;s convert command if permitted as this can perform faster/better for some image types.
-        if ext in IMAGE_RESIZE_HANDLERS:
-            IMAGE_RESIZE_HANDLERS[ext](source,
-                                       os.path.join(dest_root, dest_dirname, dest_basename),
-                                       f&#34;{destination_width}x{destination_height}&#34;)
-        else:
-            # Auto-orient the image (unless it&#39;s a heic file as apparently that doesn&#39;t need it).
-            if exif is not None and not is_heic:
-                orientation = get_orientation(exif)
-                logging.debug(f&#34;EXIF orientation = {orientation}&#34;)
-                if orientation == 3:
-                    logging.debug(&#34;Correcting image orientation (rotate 180 degrees)&#34;)
-                    image = image.transpose(Image.ROTATE_180)
-                elif orientation == 6:
-                    logging.debug(&#34;Correcting image orientation (rotate 270 degrees)&#34;)
-                    image = image.transpose(Image.ROTATE_270)
-                elif orientation == 8:
-                    logging.debug(&#34;Correcting image orientation (rotate 90 degrees)&#34;)
-                    image = image.transpose(Image.ROTATE_90)
-
-            # Save the image.
-            image.save(destination, EXTENSION_TO_FORMAT[ext.lower()], quality=75)
+        safe_resize(source,
+                    os.path.join(dest_root, dest_dirname, dest_basename),
+                    Size(width=destination_width,
+                         height=destination_height))
 
     return get_details(dest_root, dest_dirname, dest_basename, scale)
 
 
+# TODO: Rename the generate_thumbnail method as it&#39;s misleading #45
 def generate_thumbnail(source, dest_root, dest_dirname, dest_basename, size, source_scale, scale):
     destination = os.path.join(dest_root, dest_dirname, dest_basename)
     return resize(source, dest_root, dest_dirname, dest_basename, size, scale)
-
-
-def get_image_data(root, dirname, basename):
-    with Image.open(os.path.join(root, dirname, basename)) as img:
-        width, height = img.size
-        return {&#34;filename&#34;: basename, &#34;width&#34;: width, &#34;height&#34;: height}
 
 
 def metadata_from_exif(path):
@@ -404,15 +389,14 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
     metadata = metadata_for_media_file(root, os.path.join(dirname, basename),
                                        title_from_filename=title_from_filename)
 
+    # TODO: Support specifying image size sets in the configuration file #10
+
     # Determine which profiles to use; we use a different profile for equirectangular projections.
-    # TODO: In an ideal world we would allow all of this special case behaviour to be configured in site.yaml
-    #       so there are no custom modifications required to the script.
     profiles = DEFAULT_PROFILES
     if &#34;projection&#34; in metadata and metadata[&#34;projection&#34;] == &#34;equirectangular&#34;:
         profiles = EQUIRECTANGULAR_PROFILES
 
     # Generate the various different image sizes.
-    # TODO: Consider making this common code for all images.
     for profile_name, profile_details in profiles.items():
 
         filename = &#34;%s-%s%s&#34; % (identifier, profile_name.replace(&#34;_&#34;, &#34;-&#34;), ext)
@@ -432,7 +416,10 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
         source_scale = metadata[&#34;scale&#34;] if metadata[&#34;scale&#34;] is not None else 1
 
         # TODO: Rename generate_thumbnail.
-        metadata[profile_name] = generate_thumbnail(source_path, destination, dirname, filename, (width, height), source_scale, scale)
+        metadata[profile_name] = generate_thumbnail(source_path,
+                                                    destination, dirname, filename,
+                                                    (width, height),
+                                                    source_scale, scale)  # TODO: Why two scales?
 
     # Configure the page details.
     metadata[&#34;category&#34;] = category
@@ -454,6 +441,22 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="gallery.evaluate_tests"><code class="name flex">
+<span>def <span class="ident">evaluate_tests</span></span>(<span>tests, data)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def evaluate_tests(tests, data):
+    for test, result in tests:
+        if test.evaluate(data):
+            return result
+    raise KeyError(f&#34;Failed to find match for &#39;{data}&#39;.&#34;)</code></pre>
+</details>
+</dd>
 <dt id="gallery.exif"><code class="name flex">
 <span>def <span class="ident">exif</span></span>(<span>path)</span>
 </code></dt>
@@ -519,56 +522,6 @@ def process_image(incontext, root, destination, dirname, basename, category, tit
     details[&#34;filename&#34;] = basename
     details[&#34;url&#34;] = os.path.join(&#34;/&#34;, dirname, basename)
     return details</code></pre>
-</details>
-</dd>
-<dt id="gallery.get_ext"><code class="name flex">
-<span>def <span class="ident">get_ext</span></span>(<span>path)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_ext(path):
-    return os.path.splitext(path)[1].lower()</code></pre>
-</details>
-</dd>
-<dt id="gallery.get_image_data"><code class="name flex">
-<span>def <span class="ident">get_image_data</span></span>(<span>root, dirname, basename)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_image_data(root, dirname, basename):
-    with Image.open(os.path.join(root, dirname, basename)) as img:
-        width, height = img.size
-        return {&#34;filename&#34;: basename, &#34;width&#34;: width, &#34;height&#34;: height}</code></pre>
-</details>
-</dd>
-<dt id="gallery.get_orientation"><code class="name flex">
-<span>def <span class="ident">get_orientation</span></span>(<span>exif)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_orientation(exif):
-    try:
-        exif = dict(exif.items())
-        for orientation in ExifTags.TAGS.keys():
-            if ExifTags.TAGS[orientation] == &#39;Orientation&#39;:
-                break
-        return exif[orientation]
-    except:
-        logging.debug(&#34;Unable to get get EXIF data&#34;)
-        pass
-    return 1</code></pre>
 </details>
 </dd>
 <dt id="gallery.get_size"><code class="name flex">
@@ -649,7 +602,7 @@ incrementally encoded images, result in completely broken output.</p></div>
                &#39;-quality&#39;, &#39;75&#39;,
                &#39;-auto-orient&#39;,
                &#39;-resize&#39;, size,
-               source,
+               source + &#34;[0]&#34;,
                destination]
     try:
         logging.debug(&#34;Running command &#39;%s&#39;...&#34;, utils.safe_command(command))
@@ -728,32 +681,6 @@ incrementally encoded images, result in completely broken output.</p></div>
     return Image.open(path)</code></pre>
 </details>
 </dd>
-<dt id="gallery.load_metadata"><code class="name flex">
-<span>def <span class="ident">load_metadata</span></span>(<span>path)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_metadata(path):
-
-    default = {&#34;version&#34;: 0}
-    try:
-        fm = frontmatter.load(path)
-        dictionary = fm.metadata
-        try:
-            dictionary[&#34;content&#34;] = fm.content
-        except AttributeError:
-            pass
-        return dictionary
-    except IOError:
-        return default
-    except ValueError:
-        return default</code></pre>
-</details>
-</dd>
 <dt id="gallery.metadata_for_media_file"><code class="name flex">
 <span>def <span class="ident">metadata_for_media_file</span></span>(<span>root, path, title_from_filename)</span>
 </code></dt>
@@ -810,15 +737,14 @@ incrementally encoded images, result in completely broken output.</p></div>
     metadata = metadata_for_media_file(root, os.path.join(dirname, basename),
                                        title_from_filename=title_from_filename)
 
+    # TODO: Support specifying image size sets in the configuration file #10
+
     # Determine which profiles to use; we use a different profile for equirectangular projections.
-    # TODO: In an ideal world we would allow all of this special case behaviour to be configured in site.yaml
-    #       so there are no custom modifications required to the script.
     profiles = DEFAULT_PROFILES
     if &#34;projection&#34; in metadata and metadata[&#34;projection&#34;] == &#34;equirectangular&#34;:
         profiles = EQUIRECTANGULAR_PROFILES
 
     # Generate the various different image sizes.
-    # TODO: Consider making this common code for all images.
     for profile_name, profile_details in profiles.items():
 
         filename = &#34;%s-%s%s&#34; % (identifier, profile_name.replace(&#34;_&#34;, &#34;-&#34;), ext)
@@ -838,7 +764,10 @@ incrementally encoded images, result in completely broken output.</p></div>
         source_scale = metadata[&#34;scale&#34;] if metadata[&#34;scale&#34;] is not None else 1
 
         # TODO: Rename generate_thumbnail.
-        metadata[profile_name] = generate_thumbnail(source_path, destination, dirname, filename, (width, height), source_scale, scale)
+        metadata[profile_name] = generate_thumbnail(source_path,
+                                                    destination, dirname, filename,
+                                                    (width, height),
+                                                    source_scale, scale)  # TODO: Why two scales?
 
     # Configure the page details.
     metadata[&#34;category&#34;] = category
@@ -864,24 +793,13 @@ incrementally encoded images, result in completely broken output.</p></div>
 </summary>
 <pre><code class="python">def resize(source, dest_root, dest_dirname, dest_basename, size, scale):
 
-    # Unfortunately HEIC files are not broadly supported, so we always need to ensure these
-    # are converted to JPEG files on the fly. We therefore fix-up the destination filename.
-    (name, ext) = os.path.splitext(dest_basename)
-    if ext == &#34;.heic&#34;:
-        ext = &#34;.jpeg&#34;
-    dest_basename = &#34;&#34;.join([name, ext])
-
-    is_heic = get_ext(source) == &#34;.heic&#34;
+    # Determine the desired output MIME type and extension.
+    name, ext = os.path.splitext(dest_basename)
+    destination_mime_type = evaluate_tests(OUTPUT_MIME_TYPES, os.path.basename(source))
+    destination_extension = ext if destination_mime_type == &#34;*&#34; else mimetypes.guess_extension(destination_mime_type)
+    dest_basename = f&#34;{name}{destination_extension}&#34;
 
     with load_image(source) as image:
-
-        # Get the exif from the image before performing any processing.
-        exif = None
-        try:
-            exif = image._getexif()
-        except:
-            pass
-
         (source_width, source_height) = image.size
         logging.debug(&#34;Image source dimensions = %sx%s&#34;, source_width, source_height)
 
@@ -901,45 +819,196 @@ incrementally encoded images, result in completely broken output.</p></div>
 
         logging.debug(&#34;Image target dimensions = %sx%s&#34;, destination_width, destination_height)
 
-        # Check to see if a resize is required.
-        should_resize = True
-        if source_width &lt;= destination_width or source_height &lt;= destination_height:
-            should_resize = False
-
-        # Perform the resize.
-        destination = os.path.join(dest_root, dest_dirname, dest_basename)
-        if should_resize:
-            image = image.resize((destination_width, destination_height), resample=Image.LANCZOS)
-
-        # Use ImageMagick&#39;s convert command if permitted as this can perform faster/better for some image types.
-        if ext in IMAGE_RESIZE_HANDLERS:
-            IMAGE_RESIZE_HANDLERS[ext](source,
-                                       os.path.join(dest_root, dest_dirname, dest_basename),
-                                       f&#34;{destination_width}x{destination_height}&#34;)
-        else:
-            # Auto-orient the image (unless it&#39;s a heic file as apparently that doesn&#39;t need it).
-            if exif is not None and not is_heic:
-                orientation = get_orientation(exif)
-                logging.debug(f&#34;EXIF orientation = {orientation}&#34;)
-                if orientation == 3:
-                    logging.debug(&#34;Correcting image orientation (rotate 180 degrees)&#34;)
-                    image = image.transpose(Image.ROTATE_180)
-                elif orientation == 6:
-                    logging.debug(&#34;Correcting image orientation (rotate 270 degrees)&#34;)
-                    image = image.transpose(Image.ROTATE_270)
-                elif orientation == 8:
-                    logging.debug(&#34;Correcting image orientation (rotate 90 degrees)&#34;)
-                    image = image.transpose(Image.ROTATE_90)
-
-            # Save the image.
-            image.save(destination, EXTENSION_TO_FORMAT[ext.lower()], quality=75)
+        safe_resize(source,
+                    os.path.join(dest_root, dest_dirname, dest_basename),
+                    Size(width=destination_width,
+                         height=destination_height))
 
     return get_details(dest_root, dest_dirname, dest_basename, scale)</code></pre>
+</details>
+</dd>
+<dt id="gallery.safe_resize"><code class="name flex">
+<span>def <span class="ident">safe_resize</span></span>(<span>source, destination, size)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determine a suitable resize handler to use when resizing (and converting an image) and run it.</p>
+<p>This makes use of <code>RESIZE_METHODS</code> to determine which resize handler to use.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def safe_resize(source, destination, size):
+    &#34;&#34;&#34;
+    Determine a suitable resize handler to use when resizing (and converting an image) and run it.
+
+    This makes use of `RESIZE_METHODS` to determine which resize handler to use.
+    &#34;&#34;&#34;
+    resize_method = evaluate_tests(RESIZE_METHODS, os.path.basename(source))
+    resize_method(source,
+                  destination,
+                  f&#34;{size.width}x{size.height}&#34;)</code></pre>
 </details>
 </dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="gallery.Equal"><code class="flex name class">
+<span>class <span class="ident">Equal</span></span>
+<span>(</span><span>value)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Equal(object):
+
+    def __init__(self, value):
+        self.value = value
+
+    def evaluate(self, data):
+        return data == self.value</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="gallery.Equal.evaluate"><code class="name flex">
+<span>def <span class="ident">evaluate</span></span>(<span>self, data)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def evaluate(self, data):
+    return data == self.value</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="gallery.Glob"><code class="flex name class">
+<span>class <span class="ident">Glob</span></span>
+<span>(</span><span>glob)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Glob(Or):
+
+    def __init__(self, glob):
+        patterns = [fnmatch.translate(p) for p in braceexpand.braceexpand(glob)]
+        tests = [Regex(pattern, re.IGNORECASE) for pattern in patterns]
+        super().__init__(*tests)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="gallery.Or" href="#gallery.Or">Or</a></li>
+</ul>
+</dd>
+<dt id="gallery.Or"><code class="flex name class">
+<span>class <span class="ident">Or</span></span>
+<span>(</span><span>*tests)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Or(object):
+
+    def __init__(self, *tests):
+        self.tests = tests
+
+    def evaluate(self, data):
+        for test in self.tests:
+            if test.evaluate(data):
+                return True
+        return False</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="gallery.Glob" href="#gallery.Glob">Glob</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="gallery.Or.evaluate"><code class="name flex">
+<span>def <span class="ident">evaluate</span></span>(<span>self, data)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def evaluate(self, data):
+    for test in self.tests:
+        if test.evaluate(data):
+            return True
+    return False</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="gallery.Regex"><code class="flex name class">
+<span>class <span class="ident">Regex</span></span>
+<span>(</span><span>pattern, flags=0)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Regex(object):
+
+    def __init__(self, pattern, flags=0):
+        self.expression = re.compile(pattern, flags)
+
+    def evaluate(self, data):
+        return self.expression.match(data) is not None</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="gallery.Regex.evaluate"><code class="name flex">
+<span>def <span class="ident">evaluate</span></span>(<span>self, data)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def evaluate(self, data):
+    return self.expression.match(data) is not None</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="gallery.Size"><code class="flex name class">
+<span>class <span class="ident">Size</span></span>
+<span>(</span><span>width, height)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Size(object):
+
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -950,24 +1019,50 @@ incrementally encoded images, result in completely broken output.</p></div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="gallery.evaluate_tests" href="#gallery.evaluate_tests">evaluate_tests</a></code></li>
 <li><code><a title="gallery.exif" href="#gallery.exif">exif</a></code></li>
 <li><code><a title="gallery.generate_identifier" href="#gallery.generate_identifier">generate_identifier</a></code></li>
 <li><code><a title="gallery.generate_thumbnail" href="#gallery.generate_thumbnail">generate_thumbnail</a></code></li>
 <li><code><a title="gallery.get_details" href="#gallery.get_details">get_details</a></code></li>
-<li><code><a title="gallery.get_ext" href="#gallery.get_ext">get_ext</a></code></li>
-<li><code><a title="gallery.get_image_data" href="#gallery.get_image_data">get_image_data</a></code></li>
-<li><code><a title="gallery.get_orientation" href="#gallery.get_orientation">get_orientation</a></code></li>
 <li><code><a title="gallery.get_size" href="#gallery.get_size">get_size</a></code></li>
 <li><code><a title="gallery.gifsicle_resize" href="#gallery.gifsicle_resize">gifsicle_resize</a></code></li>
 <li><code><a title="gallery.imagemagick_resize" href="#gallery.imagemagick_resize">imagemagick_resize</a></code></li>
 <li><code><a title="gallery.import_photo" href="#gallery.import_photo">import_photo</a></code></li>
 <li><code><a title="gallery.initialize_plugin" href="#gallery.initialize_plugin">initialize_plugin</a></code></li>
 <li><code><a title="gallery.load_image" href="#gallery.load_image">load_image</a></code></li>
-<li><code><a title="gallery.load_metadata" href="#gallery.load_metadata">load_metadata</a></code></li>
 <li><code><a title="gallery.metadata_for_media_file" href="#gallery.metadata_for_media_file">metadata_for_media_file</a></code></li>
 <li><code><a title="gallery.metadata_from_exif" href="#gallery.metadata_from_exif">metadata_from_exif</a></code></li>
 <li><code><a title="gallery.process_image" href="#gallery.process_image">process_image</a></code></li>
 <li><code><a title="gallery.resize" href="#gallery.resize">resize</a></code></li>
+<li><code><a title="gallery.safe_resize" href="#gallery.safe_resize">safe_resize</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="gallery.Equal" href="#gallery.Equal">Equal</a></code></h4>
+<ul class="">
+<li><code><a title="gallery.Equal.evaluate" href="#gallery.Equal.evaluate">evaluate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="gallery.Glob" href="#gallery.Glob">Glob</a></code></h4>
+</li>
+<li>
+<h4><code><a title="gallery.Or" href="#gallery.Or">Or</a></code></h4>
+<ul class="">
+<li><code><a title="gallery.Or.evaluate" href="#gallery.Or.evaluate">evaluate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="gallery.Regex" href="#gallery.Regex">Regex</a></code></h4>
+<ul class="">
+<li><code><a title="gallery.Regex.evaluate" href="#gallery.Regex.evaluate">evaluate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="gallery.Size" href="#gallery.Size">Size</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

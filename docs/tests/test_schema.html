@@ -133,6 +133,7 @@ class SchemaTestCase(unittest.TestCase):
         s = EXIFDate(Identity())
         self.assertEquals(s(&#34;2019:10:20 12:14:09.606-07:00&#34;), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
         self.assertEquals(s(&#34;2019:09:10 09:04:30&#34;), dateutil.parser.parse(&#34;2019-09-10 09:04:30&#34;))
+        self.assertIsNone(First(s, Default(None))(&#34;0000:00:00 00:00:00&#34;))
 
     def test_date_transform_with_first(self):
         s = First(EXIFDate(First(Key(&#34;date&#34;), Key(&#34;secondary_date&#34;))), Default(None))
@@ -265,6 +266,7 @@ not have a method with the specified name.</p></div>
         s = EXIFDate(Identity())
         self.assertEquals(s(&#34;2019:10:20 12:14:09.606-07:00&#34;), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
         self.assertEquals(s(&#34;2019:09:10 09:04:30&#34;), dateutil.parser.parse(&#34;2019-09-10 09:04:30&#34;))
+        self.assertIsNone(First(s, Default(None))(&#34;0000:00:00 00:00:00&#34;))
 
     def test_date_transform_with_first(self):
         s = First(EXIFDate(First(Key(&#34;date&#34;), Key(&#34;secondary_date&#34;))), Default(None))
@@ -421,7 +423,8 @@ not have a method with the specified name.</p></div>
 <pre><code class="python">def test_exif_date(self):
     s = EXIFDate(Identity())
     self.assertEquals(s(&#34;2019:10:20 12:14:09.606-07:00&#34;), dateutil.parser.parse(&#34;2019-10-20 12:14:09.606-07:00&#34;))
-    self.assertEquals(s(&#34;2019:09:10 09:04:30&#34;), dateutil.parser.parse(&#34;2019-09-10 09:04:30&#34;))</code></pre>
+    self.assertEquals(s(&#34;2019:09:10 09:04:30&#34;), dateutil.parser.parse(&#34;2019-09-10 09:04:30&#34;))
+    self.assertIsNone(First(s, Default(None))(&#34;0000:00:00 00:00:00&#34;))</code></pre>
 </details>
 </dd>
 <dt id="test_schema.SchemaTestCase.test_first_match_first"><code class="name flex">
