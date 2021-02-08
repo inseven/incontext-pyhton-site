@@ -83,7 +83,7 @@ METADATA_SCHEMA = Dictionary({
 
     &#34;title&#34;: First(Key(&#34;Title&#34;), Key(&#34;DisplayName&#34;), Key(&#34;ObjectName&#34;), Empty()),
     &#34;content&#34;: First(Key(&#34;ImageDescription&#34;), Key(&#34;Description&#34;), Key(&#34;ArtworkContentDescription&#34;), Default(None)),
-    &#34;date&#34;: First(EXIFDate(First(Key(&#34;DateTimeOriginal&#34;), Key(&#34;CreateDate&#34;), Key(&#34;ContentCreateDate&#34;), Key(&#34;CreationDate&#34;), Key(&#34;FileModifyDate&#34;))), Empty()),
+    &#34;date&#34;: First(EXIFDate(First(Key(&#34;DateTimeOriginal&#34;), Key(&#34;ContentCreateDate&#34;), Key(&#34;CreationDate&#34;))), Empty()),
     &#34;projection&#34;: First(Key(&#34;ProjectionType&#34;), Empty()),
     &#34;location&#34;: First(Dictionary({
         &#34;latitude&#34;: GPSCoordinate(Key(&#34;GPSLatitude&#34;)),
