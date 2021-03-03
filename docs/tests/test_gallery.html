@@ -63,9 +63,10 @@ import utils
 
 sys.path.append(os.path.join(paths.PLUGINS_DIR, &#34;handlers&#34;))
 
+import expression
 import gallery
 
-from gallery import Equal, Glob, Or, Regex
+from expression import And, Equal, Glob, Metadata, Or, Regex
 
 
 IMG_3857_HEIC = os.path.join(paths.TEST_DATA_DIRECTORY, &#34;gallery/IMG_3857.heic&#34;)
@@ -76,14 +77,43 @@ IMG_6218_TIFF = os.path.join(paths.TEST_DATA_DIRECTORY, &#34;gallery/IMG_6218.ti
 PREVIEW_GIF = os.path.join(paths.TEST_DATA_DIRECTORY, &#34;gallery/preview.gif&#34;)
 
 
+SITE_CONFIGURATION_WITH_IMAGE_HANDLER = {
+    &#34;config&#34;: {
+        &#34;title&#34;: &#34;Example Site&#34;,
+        &#34;url&#34;: &#34;https://example.com&#34;,
+    },
+    &#34;paths&#34;: [],
+    &#34;build_steps&#34;: [{
+        &#34;task&#34;: &#34;process_files&#34;,
+        &#34;args&#34;: {
+            &#34;handlers&#34;: [{
+                &#34;when&#34;: &#39;.*&#39;,
+                &#34;then&#34;: &#34;import_photo&#34;,
+                &#34;args&#34;: {
+                    &#34;category&#34;: &#34;photos&#34;,
+                }
+            }]
+        }
+    }]
+}
+
+
 class GalleryTestCase(unittest.TestCase):
 
     def test_regex(self):
+
+        self.assertEqual(Regex(r&#34;.*&#34;), Regex(r&#34;.*&#34;))
+        self.assertNotEqual(Regex(r&#34;.*&#34;), Regex(r&#34;.*&#34;, key=&#34;property&#34;))
+        self.assertEqual(Regex(r&#34;.*&#34;, key=&#34;property&#34;), Regex(r&#34;.*&#34;, key=&#34;property&#34;))
+        self.assertNotEqual(Regex(r&#34;.*&#34;), Regex(r&#34;^.*&#34;))
+
         self.assertTrue(Regex(r&#34;.*&#34;).evaluate(&#34;a&#34;))
         self.assertTrue(Regex(r&#34;hello&#34;).evaluate(&#34;hello&#34;))
         self.assertFalse(Regex(r&#34;hello&#34;).evaluate(&#34;goodbye&#34;))
         self.assertTrue(Regex(r&#34;hello&#34;).evaluate(&#34;hello world&#34;))
         self.assertFalse(Regex(r&#34;^hello$&#34;).evaluate(&#34;hello world&#34;))
+        self.assertTrue(Regex(r&#34;hello&#34;, key=&#34;property&#34;).evaluate({&#34;property&#34;: &#34;hello&#34;}))
+        self.assertFalse(Regex(r&#34;hello&#34;, key=&#34;property&#34;).evaluate({&#34;property&#34;: &#34;goodbye&#34;}))
 
     def test_equal(self):
         self.assertTrue(Equal(True).evaluate(True))
@@ -103,39 +133,47 @@ class GalleryTestCase(unittest.TestCase):
         self.assertTrue(Or(Equal(False), Equal(False)).evaluate(False))
 
     def test_glob(self):
-        self.assertTrue(Glob(&#34;*.jpeg&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-        self.assertFalse(Glob(&#34;*.tiff&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-        self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-        self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate(&#34;IMG_3875.tiff&#34;))
+        self.assertTrue(Glob(&#34;*.jpeg&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+        self.assertFalse(Glob(&#34;*.tiff&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+        self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+        self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.tiff&#34;}))
+        self.assertTrue(Glob(&#34;*.txt&#34;, key=&#34;source&#34;).evaluate({&#34;source&#34;: &#34;random.txt&#34;}))
+        self.assertFalse(Glob(&#34;*.ini&#34;, key=&#34;source&#34;).evaluate({&#34;source&#34;: &#34;random.txt&#34;}))
+
+    def test_glob_equality(self):
+        self.assertEqual(Glob(&#34;*&#34;), Glob(&#34;*&#34;))
+        self.assertNotEqual(Glob(&#34;*&#34;), Glob(&#34;*.jpeg&#34;))
+        self.assertNotEqual(Glob(&#34;*&#34;), Glob(&#34;*.{jpeg,heic}&#34;))
+        self.assertEqual(Glob(&#34;*.{jpeg,heic}&#34;), Glob(&#34;*.{jpeg,heic}&#34;))
 
     def test_evaluate_tests(self):
         tests = [
             (Glob(&#34;*.tiff&#34;), &#34;image/jpeg&#34;),
             (Glob(&#34;*&#34;), &#34;*&#34;),
         ]
-        self.assertEqual(gallery.evaluate_tests(tests, &#34;IMG_3875.jpeg&#34;), &#34;*&#34;)
-        self.assertEqual(gallery.evaluate_tests(tests, &#34;IMG_3875.tiff&#34;), &#34;image/jpeg&#34;)
+        self.assertEqual(gallery.evaluate_tests(tests, {&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}), &#34;*&#34;)
+        self.assertEqual(gallery.evaluate_tests(tests, {&#34;basename&#34;: &#34;IMG_3875.tiff&#34;}), &#34;image/jpeg&#34;)
 
     @common.with_temporary_directory
-    def test_resize_heic_with_format_change(self):
+    def test_resize_heic(self):
 
         basename = os.path.basename(IMG_3870_HEIC)
         size = (1600, None)
         gallery.resize(IMG_3870_HEIC, os.getcwd(), &#34;&#34;, basename, size, 1)
 
-        expected_basename = utils.replace_extension(basename, &#34;.jpg&#34;)
+        expected_basename = utils.replace_extension(basename, &#34;.heic&#34;)
         self.assertTrue(os.path.exists(expected_basename))
         output_size = gallery.get_size(expected_basename, 1)
         self.assertEqual(output_size[&#34;width&#34;], size[0])
 
     @common.with_temporary_directory
-    def test_resize_tiff_with_format_change(self):
+    def test_resize_tiff(self):
 
         basename = os.path.basename(IMG_6218_TIFF)
         size = (1600, None)
         gallery.resize(IMG_6218_TIFF, os.getcwd(), &#34;&#34;, basename, size, 1)
 
-        expected_basename = utils.replace_extension(basename, &#34;.jpg&#34;)
+        expected_basename = utils.replace_extension(basename, &#34;.tiff&#34;)
         self.assertTrue(os.path.exists(expected_basename))
         output_size = gallery.get_size(expected_basename, 1)
         self.assertEqual(output_size[&#34;width&#34;], size[0])
@@ -162,8 +200,362 @@ class GalleryTestCase(unittest.TestCase):
         output_size = gallery.get_size(basename, 1)
         self.assertEqual(output_size[&#34;width&#34;], size[0])
 
+    def test_parser_method(self):
+        self.assertEqual(
+            expression.parse_method(&#34;always()&#34;),
+            {&#34;method&#34;: &#34;always&#34;}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(&#39;*&#39;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*&#34;]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(&#39;*.{tiff,heic}&#39;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*.{tiff,heic}&#34;]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(\&#34;*\&#34;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*&#34;]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(1024)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [1024]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(1.5)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [1.5]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(a=&#39;b&#39;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: &#34;b&#34;}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(a=\&#34;b\&#34;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: &#34;b&#34;}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(a=12)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: 12}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(a=3.142)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: 3.142}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;metadata(Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+            {&#34;method&#34;: &#34;metadata&#34;, &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;metadata(&#39;cheese&#39;, Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+            {&#34;method&#34;: &#34;metadata&#34;, &#34;args&#34;: [&#34;cheese&#34;], &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;metadata(&#39;cheese&#39;, 42, Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+            {&#34;method&#34;: &#34;metadata&#34;, &#34;args&#34;: [&#34;cheese&#34;, 42], &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+        )
 
-        # TODO: Test TIFF and GIF conversion</code></pre>
+        self.assertEqual(
+            expression.parse_method(&#34;plugin([])&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[]]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin(1)&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [1]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin(&#39;Hello&#39;)&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [&#34;Hello&#34;]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin(13432.232)&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [13432.232]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin([13432.232])&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232]]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin([13432.232, 3434, &#39;Hi!&#39;])&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232, 3434, &#34;Hi!&#34;]]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin([13432.232, 3434, [&#39;Hi!&#39;, &#39;Goodbye&#39;]])&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232, 3434, [&#34;Hi!&#34;, &#34;Goodbye&#34;]]]}
+        )
+
+    def test_parser(self):
+        self.assertEqual(
+            expression.parse_structure(&#34;always(&#39;hello&#39;) and never(&#39;goodbye&#39;) or maybe()&#34;),
+            {
+                &#34;method&#34;: &#34;or&#34;,
+                &#34;args&#34;: [
+                    {
+                        &#34;method&#34;: &#34;and&#34;,
+                        &#34;args&#34;: [
+                            {
+                                &#34;method&#34;: &#34;always&#34;,
+                                &#34;args&#34;: [&#34;hello&#34;]
+                            },
+                            {
+                                &#34;method&#34;: &#34;never&#34;,
+                                &#34;args&#34;: [&#34;goodbye&#34;]
+                            }
+                        ]
+                    },
+                    {
+                        &#34;method&#34;: &#34;maybe&#34;
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(
+            expression.parse_structure(&#34;(always(&#39;hello&#39;) and never(&#39;goodbye&#39;)) or maybe()&#34;),
+            {
+                &#34;method&#34;: &#34;or&#34;,
+                &#34;args&#34;: [
+                    {
+                        &#34;method&#34;: &#34;and&#34;,
+                        &#34;args&#34;: [
+                            {
+                                &#34;method&#34;: &#34;always&#34;,
+                                &#34;args&#34;: [&#34;hello&#34;]
+                            },
+                            {
+                                &#34;method&#34;: &#34;never&#34;,
+                                &#34;args&#34;: [&#34;goodbye&#34;]
+                            }
+                        ]
+                    },
+                    {
+                        &#34;method&#34;: &#34;maybe&#34;
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(
+            expression.parse_structure(&#34;always(&#39;hello&#39;) and (never(&#39;goodbye&#39;) or maybe())&#34;),
+            {
+                &#34;method&#34;: &#34;and&#34;,
+                &#34;args&#34;: [
+                    {
+                        &#34;method&#34;: &#34;always&#34;,
+                        &#34;args&#34;: [&#34;hello&#34;]
+                    },
+                    {
+                        &#34;method&#34;: &#34;or&#34;,
+                        &#34;args&#34;: [
+                            {
+                                &#34;method&#34;: &#34;never&#34;,
+                                &#34;args&#34;: [&#34;goodbye&#34;]
+                            },
+                            {
+                                &#34;method&#34;: &#34;maybe&#34;,
+                            }
+                        ]
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(
+            expression.parse_condition(&#34;glob(&#39;*&#39;)&#34;),
+            Glob(&#34;*&#34;)
+        )
+
+        self.assertEqual(
+            expression.parse_condition(&#34;glob(&#39;*&#39;) and metadata(projection=&#39;equirectangular&#39;)&#34;),
+            And(
+                Glob(&#34;*&#34;),
+                Metadata(projection=&#34;equirectangular&#34;)
+            )
+        )
+
+    def test_transform_image_heic_default_configuration(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(IMG_3857_HEIC, &#34;content/image.heic&#34;)
+            site.build()
+            site.assertBuildFiles(
+                {
+                    &#34;image/thumbnail.jpg&#34;,
+                    &#34;image/image.jpg&#34;,
+                    &#34;image/index.html&#34;
+                }
+            )
+            site.assertMIMEType(&#34;build/files/image/image.jpg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/image.jpg&#34;, (1600, 2133))
+            site.assertMIMEType(&#34;build/files/image/thumbnail.jpg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/thumbnail.jpg&#34;, (480, 640))
+
+    def test_transform_image_jpeg_default_configuration(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(IMG_3870_JPEG, &#34;content/image.jpeg&#34;)
+            site.build()
+            site.assertBuildFiles(
+                {
+                    &#34;image/thumbnail.jpeg&#34;,
+                    &#34;image/image.jpeg&#34;,
+                    &#34;image/index.html&#34;
+                }
+            )
+            site.assertMIMEType(&#34;build/files/image/image.jpeg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/image.jpeg&#34;, (1600, 1200))
+            site.assertMIMEType(&#34;build/files/image/thumbnail.jpeg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/thumbnail.jpeg&#34;, (480, 360))
+
+    def test_transform_image_tiff_default_configuration(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(IMG_6218_TIFF, &#34;content/image.tiff&#34;)
+            site.build()
+            site.assertBuildFiles(
+                {
+                    &#34;image/thumbnail.jpg&#34;,
+                    &#34;image/image.jpg&#34;,
+                    &#34;image/index.html&#34;
+                }
+            )
+            site.assertMIMEType(&#34;build/files/image/image.jpg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/image.jpg&#34;, (1600, 1200))
+            site.assertMIMEType(&#34;build/files/image/thumbnail.jpg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/thumbnail.jpg&#34;, (480, 360))
+
+    def test_transform_image_gif_default_configuration(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(PREVIEW_GIF, &#34;content/image.gif&#34;)
+            site.assertImageSize(&#34;content/image.gif&#34;, (800, 520))
+            site.build()
+            site.assertBuildFiles(
+                {
+                    &#34;image/thumbnail.gif&#34;,
+                    &#34;image/image.gif&#34;,
+                    &#34;image/index.html&#34;
+                }
+            )
+            site.assertMIMEType(&#34;build/files/image/image.gif&#34;, &#34;image/gif&#34;)
+            site.assertImageSize(&#34;build/files/image/image.gif&#34;, (800, 520))  # Images shouldn&#39;t be get larger than the initial size.
+            site.assertMIMEType(&#34;build/files/image/thumbnail.gif&#34;, &#34;image/gif&#34;)
+            site.assertImageSize(&#34;build/files/image/thumbnail.gif&#34;, (480, 312))
+
+    def test_transform_image_jpeg_to_gif(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.add(&#34;media.yaml&#34;, {
+                &#34;profiles&#34;: {
+                    &#34;default&#34;: [{
+                        &#34;where&#34;: &#34;glob(&#39;*&#39;)&#34;,
+                        &#34;transforms&#34;: [
+                            &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/gif&#39;, sets=[&#39;preview&#39;])&#34;,
+                        ],
+                    }],
+                },
+            })
+            site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+            site.build()
+            site.assertBuildFiles({
+                &#34;image/preview.gif&#34;,
+                &#34;image/index.html&#34;
+            })
+            site.assertMIMEType(&#34;build/files/image/preview.gif&#34;, &#34;image/gif&#34;)
+            self.assertEqual(site.store.get(&#34;/image/&#34;)[&#39;preview&#39;], {
+                &#39;width&#39;: 100.0,
+                &#39;height&#39;: 133.0,
+                &#39;filename&#39;: &#39;image/preview.gif&#39;,
+                &#39;url&#39;: &#39;/image/preview.gif&#39;
+            })
+            site.assertImageSize(&#34;build/files/image/preview.gif&#34;, (100, 133))
+
+    def test_transform_image_gif_to_jpeg(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.add(&#34;media.yaml&#34;, {
+                &#34;profiles&#34;: {
+                    &#34;default&#34;: [{
+                        &#34;where&#34;: &#34;glob(&#39;*&#39;)&#34;,
+                        &#34;transforms&#34;: [
+                            &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/jpeg&#39;, sets=[&#39;preview&#39;])&#34;,
+                        ],
+                    }],
+                },
+            })
+            site.copy(PREVIEW_GIF, &#34;content/image.gif&#34;)
+            site.build()
+            site.assertBuildFiles({
+                &#34;image/preview.jpg&#34;,
+                &#34;image/index.html&#34;
+            })
+            site.assertMIMEType(&#34;build/files/image/preview.jpg&#34;, &#34;image/jpeg&#34;)
+            self.assertEqual(site.store.get(&#34;/image/&#34;)[&#39;preview&#39;], {
+                &#39;width&#39;: 100.0,
+                &#39;height&#39;: 65.0,
+                &#39;filename&#39;: &#39;image/preview.jpg&#39;,
+                &#39;url&#39;: &#39;/image/preview.jpg&#39;
+            })
+            site.assertImageSize(&#34;build/files/image/preview.jpg&#34;, (100, 65))
+
+    def test_transform_image_with_no_matching_transform(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.add(&#34;media.yaml&#34;, {
+                &#34;profiles&#34;: {
+                    &#34;default&#34;: [{
+                        &#34;where&#34;: &#34;glob(&#39;*.tiff&#39;)&#34;,
+                        &#34;transforms&#34;: [
+                            &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/jpeg&#39;, sets=[&#39;preview&#39;])&#34;,
+                        ],
+                    }],
+                },
+            })
+            site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+            with self.assertRaises(KeyError):
+                site.build()
+
+    def test_transform_image_with_no_transforms(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.add(&#34;media.yaml&#34;, {
+                &#34;profiles&#34;: {
+                    &#34;default&#34;: [],
+                },
+            })
+            site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+            with self.assertRaises(KeyError):
+                site.build()
+
+    def test_image_title_from_exif(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(IMG_6218_TIFF, &#34;content/image.tiff&#34;)
+            site.build()
+            site.assertExists(&#34;build/files/image/index.html&#34;)
+            site.assertFileContents(&#34;build/files/image/index.html&#34;, &#34;Theophany&#34;)
+
+
+# TODO: Test multiple images in a custom profile
+# TODO: Test custom handler plugins
+# TODO: Add end-to-end tests for metadata filtering
+# TODO: Test that regular pages generate thumbnails and they exist correctly in the metadata
+# TODO: Test default configuration
+# TODO: Add a test for a page with a thumbnail (as this invokes special magic)</code></pre>
 </details>
 </section>
 <section>
@@ -215,11 +607,19 @@ not have a method with the specified name.</p></div>
 <pre><code class="python">class GalleryTestCase(unittest.TestCase):
 
     def test_regex(self):
+
+        self.assertEqual(Regex(r&#34;.*&#34;), Regex(r&#34;.*&#34;))
+        self.assertNotEqual(Regex(r&#34;.*&#34;), Regex(r&#34;.*&#34;, key=&#34;property&#34;))
+        self.assertEqual(Regex(r&#34;.*&#34;, key=&#34;property&#34;), Regex(r&#34;.*&#34;, key=&#34;property&#34;))
+        self.assertNotEqual(Regex(r&#34;.*&#34;), Regex(r&#34;^.*&#34;))
+
         self.assertTrue(Regex(r&#34;.*&#34;).evaluate(&#34;a&#34;))
         self.assertTrue(Regex(r&#34;hello&#34;).evaluate(&#34;hello&#34;))
         self.assertFalse(Regex(r&#34;hello&#34;).evaluate(&#34;goodbye&#34;))
         self.assertTrue(Regex(r&#34;hello&#34;).evaluate(&#34;hello world&#34;))
         self.assertFalse(Regex(r&#34;^hello$&#34;).evaluate(&#34;hello world&#34;))
+        self.assertTrue(Regex(r&#34;hello&#34;, key=&#34;property&#34;).evaluate({&#34;property&#34;: &#34;hello&#34;}))
+        self.assertFalse(Regex(r&#34;hello&#34;, key=&#34;property&#34;).evaluate({&#34;property&#34;: &#34;goodbye&#34;}))
 
     def test_equal(self):
         self.assertTrue(Equal(True).evaluate(True))
@@ -239,39 +639,47 @@ not have a method with the specified name.</p></div>
         self.assertTrue(Or(Equal(False), Equal(False)).evaluate(False))
 
     def test_glob(self):
-        self.assertTrue(Glob(&#34;*.jpeg&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-        self.assertFalse(Glob(&#34;*.tiff&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-        self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-        self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate(&#34;IMG_3875.tiff&#34;))
+        self.assertTrue(Glob(&#34;*.jpeg&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+        self.assertFalse(Glob(&#34;*.tiff&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+        self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+        self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.tiff&#34;}))
+        self.assertTrue(Glob(&#34;*.txt&#34;, key=&#34;source&#34;).evaluate({&#34;source&#34;: &#34;random.txt&#34;}))
+        self.assertFalse(Glob(&#34;*.ini&#34;, key=&#34;source&#34;).evaluate({&#34;source&#34;: &#34;random.txt&#34;}))
+
+    def test_glob_equality(self):
+        self.assertEqual(Glob(&#34;*&#34;), Glob(&#34;*&#34;))
+        self.assertNotEqual(Glob(&#34;*&#34;), Glob(&#34;*.jpeg&#34;))
+        self.assertNotEqual(Glob(&#34;*&#34;), Glob(&#34;*.{jpeg,heic}&#34;))
+        self.assertEqual(Glob(&#34;*.{jpeg,heic}&#34;), Glob(&#34;*.{jpeg,heic}&#34;))
 
     def test_evaluate_tests(self):
         tests = [
             (Glob(&#34;*.tiff&#34;), &#34;image/jpeg&#34;),
             (Glob(&#34;*&#34;), &#34;*&#34;),
         ]
-        self.assertEqual(gallery.evaluate_tests(tests, &#34;IMG_3875.jpeg&#34;), &#34;*&#34;)
-        self.assertEqual(gallery.evaluate_tests(tests, &#34;IMG_3875.tiff&#34;), &#34;image/jpeg&#34;)
+        self.assertEqual(gallery.evaluate_tests(tests, {&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}), &#34;*&#34;)
+        self.assertEqual(gallery.evaluate_tests(tests, {&#34;basename&#34;: &#34;IMG_3875.tiff&#34;}), &#34;image/jpeg&#34;)
 
     @common.with_temporary_directory
-    def test_resize_heic_with_format_change(self):
+    def test_resize_heic(self):
 
         basename = os.path.basename(IMG_3870_HEIC)
         size = (1600, None)
         gallery.resize(IMG_3870_HEIC, os.getcwd(), &#34;&#34;, basename, size, 1)
 
-        expected_basename = utils.replace_extension(basename, &#34;.jpg&#34;)
+        expected_basename = utils.replace_extension(basename, &#34;.heic&#34;)
         self.assertTrue(os.path.exists(expected_basename))
         output_size = gallery.get_size(expected_basename, 1)
         self.assertEqual(output_size[&#34;width&#34;], size[0])
 
     @common.with_temporary_directory
-    def test_resize_tiff_with_format_change(self):
+    def test_resize_tiff(self):
 
         basename = os.path.basename(IMG_6218_TIFF)
         size = (1600, None)
         gallery.resize(IMG_6218_TIFF, os.getcwd(), &#34;&#34;, basename, size, 1)
 
-        expected_basename = utils.replace_extension(basename, &#34;.jpg&#34;)
+        expected_basename = utils.replace_extension(basename, &#34;.tiff&#34;)
         self.assertTrue(os.path.exists(expected_basename))
         output_size = gallery.get_size(expected_basename, 1)
         self.assertEqual(output_size[&#34;width&#34;], size[0])
@@ -296,7 +704,356 @@ not have a method with the specified name.</p></div>
 
         self.assertTrue(os.path.exists(utils.replace_extension(basename, &#34;.gif&#34;)))
         output_size = gallery.get_size(basename, 1)
-        self.assertEqual(output_size[&#34;width&#34;], size[0])</code></pre>
+        self.assertEqual(output_size[&#34;width&#34;], size[0])
+
+    def test_parser_method(self):
+        self.assertEqual(
+            expression.parse_method(&#34;always()&#34;),
+            {&#34;method&#34;: &#34;always&#34;}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(&#39;*&#39;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*&#34;]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(&#39;*.{tiff,heic}&#39;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*.{tiff,heic}&#34;]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(\&#34;*\&#34;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*&#34;]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(1024)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [1024]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(1.5)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [1.5]}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(a=&#39;b&#39;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: &#34;b&#34;}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(a=\&#34;b\&#34;)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: &#34;b&#34;}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(a=12)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: 12}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;glob(a=3.142)&#34;),
+            {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: 3.142}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;metadata(Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+            {&#34;method&#34;: &#34;metadata&#34;, &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;metadata(&#39;cheese&#39;, Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+            {&#34;method&#34;: &#34;metadata&#34;, &#34;args&#34;: [&#34;cheese&#34;], &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+        )
+        self.assertEqual(
+            expression.parse_method(&#34;metadata(&#39;cheese&#39;, 42, Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+            {&#34;method&#34;: &#34;metadata&#34;, &#34;args&#34;: [&#34;cheese&#34;, 42], &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin([])&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[]]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin(1)&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [1]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin(&#39;Hello&#39;)&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [&#34;Hello&#34;]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin(13432.232)&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [13432.232]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin([13432.232])&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232]]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin([13432.232, 3434, &#39;Hi!&#39;])&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232, 3434, &#34;Hi!&#34;]]}
+        )
+
+        self.assertEqual(
+            expression.parse_method(&#34;plugin([13432.232, 3434, [&#39;Hi!&#39;, &#39;Goodbye&#39;]])&#34;),
+            {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232, 3434, [&#34;Hi!&#34;, &#34;Goodbye&#34;]]]}
+        )
+
+    def test_parser(self):
+        self.assertEqual(
+            expression.parse_structure(&#34;always(&#39;hello&#39;) and never(&#39;goodbye&#39;) or maybe()&#34;),
+            {
+                &#34;method&#34;: &#34;or&#34;,
+                &#34;args&#34;: [
+                    {
+                        &#34;method&#34;: &#34;and&#34;,
+                        &#34;args&#34;: [
+                            {
+                                &#34;method&#34;: &#34;always&#34;,
+                                &#34;args&#34;: [&#34;hello&#34;]
+                            },
+                            {
+                                &#34;method&#34;: &#34;never&#34;,
+                                &#34;args&#34;: [&#34;goodbye&#34;]
+                            }
+                        ]
+                    },
+                    {
+                        &#34;method&#34;: &#34;maybe&#34;
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(
+            expression.parse_structure(&#34;(always(&#39;hello&#39;) and never(&#39;goodbye&#39;)) or maybe()&#34;),
+            {
+                &#34;method&#34;: &#34;or&#34;,
+                &#34;args&#34;: [
+                    {
+                        &#34;method&#34;: &#34;and&#34;,
+                        &#34;args&#34;: [
+                            {
+                                &#34;method&#34;: &#34;always&#34;,
+                                &#34;args&#34;: [&#34;hello&#34;]
+                            },
+                            {
+                                &#34;method&#34;: &#34;never&#34;,
+                                &#34;args&#34;: [&#34;goodbye&#34;]
+                            }
+                        ]
+                    },
+                    {
+                        &#34;method&#34;: &#34;maybe&#34;
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(
+            expression.parse_structure(&#34;always(&#39;hello&#39;) and (never(&#39;goodbye&#39;) or maybe())&#34;),
+            {
+                &#34;method&#34;: &#34;and&#34;,
+                &#34;args&#34;: [
+                    {
+                        &#34;method&#34;: &#34;always&#34;,
+                        &#34;args&#34;: [&#34;hello&#34;]
+                    },
+                    {
+                        &#34;method&#34;: &#34;or&#34;,
+                        &#34;args&#34;: [
+                            {
+                                &#34;method&#34;: &#34;never&#34;,
+                                &#34;args&#34;: [&#34;goodbye&#34;]
+                            },
+                            {
+                                &#34;method&#34;: &#34;maybe&#34;,
+                            }
+                        ]
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(
+            expression.parse_condition(&#34;glob(&#39;*&#39;)&#34;),
+            Glob(&#34;*&#34;)
+        )
+
+        self.assertEqual(
+            expression.parse_condition(&#34;glob(&#39;*&#39;) and metadata(projection=&#39;equirectangular&#39;)&#34;),
+            And(
+                Glob(&#34;*&#34;),
+                Metadata(projection=&#34;equirectangular&#34;)
+            )
+        )
+
+    def test_transform_image_heic_default_configuration(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(IMG_3857_HEIC, &#34;content/image.heic&#34;)
+            site.build()
+            site.assertBuildFiles(
+                {
+                    &#34;image/thumbnail.jpg&#34;,
+                    &#34;image/image.jpg&#34;,
+                    &#34;image/index.html&#34;
+                }
+            )
+            site.assertMIMEType(&#34;build/files/image/image.jpg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/image.jpg&#34;, (1600, 2133))
+            site.assertMIMEType(&#34;build/files/image/thumbnail.jpg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/thumbnail.jpg&#34;, (480, 640))
+
+    def test_transform_image_jpeg_default_configuration(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(IMG_3870_JPEG, &#34;content/image.jpeg&#34;)
+            site.build()
+            site.assertBuildFiles(
+                {
+                    &#34;image/thumbnail.jpeg&#34;,
+                    &#34;image/image.jpeg&#34;,
+                    &#34;image/index.html&#34;
+                }
+            )
+            site.assertMIMEType(&#34;build/files/image/image.jpeg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/image.jpeg&#34;, (1600, 1200))
+            site.assertMIMEType(&#34;build/files/image/thumbnail.jpeg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/thumbnail.jpeg&#34;, (480, 360))
+
+    def test_transform_image_tiff_default_configuration(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(IMG_6218_TIFF, &#34;content/image.tiff&#34;)
+            site.build()
+            site.assertBuildFiles(
+                {
+                    &#34;image/thumbnail.jpg&#34;,
+                    &#34;image/image.jpg&#34;,
+                    &#34;image/index.html&#34;
+                }
+            )
+            site.assertMIMEType(&#34;build/files/image/image.jpg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/image.jpg&#34;, (1600, 1200))
+            site.assertMIMEType(&#34;build/files/image/thumbnail.jpg&#34;, &#34;image/jpeg&#34;)
+            site.assertImageSize(&#34;build/files/image/thumbnail.jpg&#34;, (480, 360))
+
+    def test_transform_image_gif_default_configuration(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(PREVIEW_GIF, &#34;content/image.gif&#34;)
+            site.assertImageSize(&#34;content/image.gif&#34;, (800, 520))
+            site.build()
+            site.assertBuildFiles(
+                {
+                    &#34;image/thumbnail.gif&#34;,
+                    &#34;image/image.gif&#34;,
+                    &#34;image/index.html&#34;
+                }
+            )
+            site.assertMIMEType(&#34;build/files/image/image.gif&#34;, &#34;image/gif&#34;)
+            site.assertImageSize(&#34;build/files/image/image.gif&#34;, (800, 520))  # Images shouldn&#39;t be get larger than the initial size.
+            site.assertMIMEType(&#34;build/files/image/thumbnail.gif&#34;, &#34;image/gif&#34;)
+            site.assertImageSize(&#34;build/files/image/thumbnail.gif&#34;, (480, 312))
+
+    def test_transform_image_jpeg_to_gif(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.add(&#34;media.yaml&#34;, {
+                &#34;profiles&#34;: {
+                    &#34;default&#34;: [{
+                        &#34;where&#34;: &#34;glob(&#39;*&#39;)&#34;,
+                        &#34;transforms&#34;: [
+                            &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/gif&#39;, sets=[&#39;preview&#39;])&#34;,
+                        ],
+                    }],
+                },
+            })
+            site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+            site.build()
+            site.assertBuildFiles({
+                &#34;image/preview.gif&#34;,
+                &#34;image/index.html&#34;
+            })
+            site.assertMIMEType(&#34;build/files/image/preview.gif&#34;, &#34;image/gif&#34;)
+            self.assertEqual(site.store.get(&#34;/image/&#34;)[&#39;preview&#39;], {
+                &#39;width&#39;: 100.0,
+                &#39;height&#39;: 133.0,
+                &#39;filename&#39;: &#39;image/preview.gif&#39;,
+                &#39;url&#39;: &#39;/image/preview.gif&#39;
+            })
+            site.assertImageSize(&#34;build/files/image/preview.gif&#34;, (100, 133))
+
+    def test_transform_image_gif_to_jpeg(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.add(&#34;media.yaml&#34;, {
+                &#34;profiles&#34;: {
+                    &#34;default&#34;: [{
+                        &#34;where&#34;: &#34;glob(&#39;*&#39;)&#34;,
+                        &#34;transforms&#34;: [
+                            &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/jpeg&#39;, sets=[&#39;preview&#39;])&#34;,
+                        ],
+                    }],
+                },
+            })
+            site.copy(PREVIEW_GIF, &#34;content/image.gif&#34;)
+            site.build()
+            site.assertBuildFiles({
+                &#34;image/preview.jpg&#34;,
+                &#34;image/index.html&#34;
+            })
+            site.assertMIMEType(&#34;build/files/image/preview.jpg&#34;, &#34;image/jpeg&#34;)
+            self.assertEqual(site.store.get(&#34;/image/&#34;)[&#39;preview&#39;], {
+                &#39;width&#39;: 100.0,
+                &#39;height&#39;: 65.0,
+                &#39;filename&#39;: &#39;image/preview.jpg&#39;,
+                &#39;url&#39;: &#39;/image/preview.jpg&#39;
+            })
+            site.assertImageSize(&#34;build/files/image/preview.jpg&#34;, (100, 65))
+
+    def test_transform_image_with_no_matching_transform(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.add(&#34;media.yaml&#34;, {
+                &#34;profiles&#34;: {
+                    &#34;default&#34;: [{
+                        &#34;where&#34;: &#34;glob(&#39;*.tiff&#39;)&#34;,
+                        &#34;transforms&#34;: [
+                            &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/jpeg&#39;, sets=[&#39;preview&#39;])&#34;,
+                        ],
+                    }],
+                },
+            })
+            site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+            with self.assertRaises(KeyError):
+                site.build()
+
+    def test_transform_image_with_no_transforms(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.add(&#34;media.yaml&#34;, {
+                &#34;profiles&#34;: {
+                    &#34;default&#34;: [],
+                },
+            })
+            site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+            with self.assertRaises(KeyError):
+                site.build()
+
+    def test_image_title_from_exif(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}&#34;)
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+            site.copy(IMG_6218_TIFF, &#34;content/image.tiff&#34;)
+            site.build()
+            site.assertExists(&#34;build/files/image/index.html&#34;)
+            site.assertFileContents(&#34;build/files/image/index.html&#34;, &#34;Theophany&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -338,8 +1095,8 @@ not have a method with the specified name.</p></div>
         (Glob(&#34;*.tiff&#34;), &#34;image/jpeg&#34;),
         (Glob(&#34;*&#34;), &#34;*&#34;),
     ]
-    self.assertEqual(gallery.evaluate_tests(tests, &#34;IMG_3875.jpeg&#34;), &#34;*&#34;)
-    self.assertEqual(gallery.evaluate_tests(tests, &#34;IMG_3875.tiff&#34;), &#34;image/jpeg&#34;)</code></pre>
+    self.assertEqual(gallery.evaluate_tests(tests, {&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}), &#34;*&#34;)
+    self.assertEqual(gallery.evaluate_tests(tests, {&#34;basename&#34;: &#34;IMG_3875.tiff&#34;}), &#34;image/jpeg&#34;)</code></pre>
 </details>
 </dd>
 <dt id="test_gallery.GalleryTestCase.test_glob"><code class="name flex">
@@ -352,10 +1109,47 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_glob(self):
-    self.assertTrue(Glob(&#34;*.jpeg&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-    self.assertFalse(Glob(&#34;*.tiff&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-    self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate(&#34;IMG_3875.jpeg&#34;))
-    self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate(&#34;IMG_3875.tiff&#34;))</code></pre>
+    self.assertTrue(Glob(&#34;*.jpeg&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+    self.assertFalse(Glob(&#34;*.tiff&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+    self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.jpeg&#34;}))
+    self.assertTrue(Glob(&#34;*.{jpeg,tiff}&#34;).evaluate({&#34;basename&#34;: &#34;IMG_3875.tiff&#34;}))
+    self.assertTrue(Glob(&#34;*.txt&#34;, key=&#34;source&#34;).evaluate({&#34;source&#34;: &#34;random.txt&#34;}))
+    self.assertFalse(Glob(&#34;*.ini&#34;, key=&#34;source&#34;).evaluate({&#34;source&#34;: &#34;random.txt&#34;}))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_glob_equality"><code class="name flex">
+<span>def <span class="ident">test_glob_equality</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_glob_equality(self):
+    self.assertEqual(Glob(&#34;*&#34;), Glob(&#34;*&#34;))
+    self.assertNotEqual(Glob(&#34;*&#34;), Glob(&#34;*.jpeg&#34;))
+    self.assertNotEqual(Glob(&#34;*&#34;), Glob(&#34;*.{jpeg,heic}&#34;))
+    self.assertEqual(Glob(&#34;*.{jpeg,heic}&#34;), Glob(&#34;*.{jpeg,heic}&#34;))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_image_title_from_exif"><code class="name flex">
+<span>def <span class="ident">test_image_title_from_exif</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_image_title_from_exif(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.copy(IMG_6218_TIFF, &#34;content/image.tiff&#34;)
+        site.build()
+        site.assertExists(&#34;build/files/image/index.html&#34;)
+        site.assertFileContents(&#34;build/files/image/index.html&#34;, &#34;Theophany&#34;)</code></pre>
 </details>
 </dd>
 <dt id="test_gallery.GalleryTestCase.test_or"><code class="name flex">
@@ -375,6 +1169,204 @@ not have a method with the specified name.</p></div>
     self.assertTrue(Or(Equal(False), Equal(False)).evaluate(False))</code></pre>
 </details>
 </dd>
+<dt id="test_gallery.GalleryTestCase.test_parser"><code class="name flex">
+<span>def <span class="ident">test_parser</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_parser(self):
+    self.assertEqual(
+        expression.parse_structure(&#34;always(&#39;hello&#39;) and never(&#39;goodbye&#39;) or maybe()&#34;),
+        {
+            &#34;method&#34;: &#34;or&#34;,
+            &#34;args&#34;: [
+                {
+                    &#34;method&#34;: &#34;and&#34;,
+                    &#34;args&#34;: [
+                        {
+                            &#34;method&#34;: &#34;always&#34;,
+                            &#34;args&#34;: [&#34;hello&#34;]
+                        },
+                        {
+                            &#34;method&#34;: &#34;never&#34;,
+                            &#34;args&#34;: [&#34;goodbye&#34;]
+                        }
+                    ]
+                },
+                {
+                    &#34;method&#34;: &#34;maybe&#34;
+                }
+            ]
+        }
+    )
+
+    self.assertEqual(
+        expression.parse_structure(&#34;(always(&#39;hello&#39;) and never(&#39;goodbye&#39;)) or maybe()&#34;),
+        {
+            &#34;method&#34;: &#34;or&#34;,
+            &#34;args&#34;: [
+                {
+                    &#34;method&#34;: &#34;and&#34;,
+                    &#34;args&#34;: [
+                        {
+                            &#34;method&#34;: &#34;always&#34;,
+                            &#34;args&#34;: [&#34;hello&#34;]
+                        },
+                        {
+                            &#34;method&#34;: &#34;never&#34;,
+                            &#34;args&#34;: [&#34;goodbye&#34;]
+                        }
+                    ]
+                },
+                {
+                    &#34;method&#34;: &#34;maybe&#34;
+                }
+            ]
+        }
+    )
+
+    self.assertEqual(
+        expression.parse_structure(&#34;always(&#39;hello&#39;) and (never(&#39;goodbye&#39;) or maybe())&#34;),
+        {
+            &#34;method&#34;: &#34;and&#34;,
+            &#34;args&#34;: [
+                {
+                    &#34;method&#34;: &#34;always&#34;,
+                    &#34;args&#34;: [&#34;hello&#34;]
+                },
+                {
+                    &#34;method&#34;: &#34;or&#34;,
+                    &#34;args&#34;: [
+                        {
+                            &#34;method&#34;: &#34;never&#34;,
+                            &#34;args&#34;: [&#34;goodbye&#34;]
+                        },
+                        {
+                            &#34;method&#34;: &#34;maybe&#34;,
+                        }
+                    ]
+                }
+            ]
+        }
+    )
+
+    self.assertEqual(
+        expression.parse_condition(&#34;glob(&#39;*&#39;)&#34;),
+        Glob(&#34;*&#34;)
+    )
+
+    self.assertEqual(
+        expression.parse_condition(&#34;glob(&#39;*&#39;) and metadata(projection=&#39;equirectangular&#39;)&#34;),
+        And(
+            Glob(&#34;*&#34;),
+            Metadata(projection=&#34;equirectangular&#34;)
+        )
+    )</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_parser_method"><code class="name flex">
+<span>def <span class="ident">test_parser_method</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_parser_method(self):
+    self.assertEqual(
+        expression.parse_method(&#34;always()&#34;),
+        {&#34;method&#34;: &#34;always&#34;}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(&#39;*&#39;)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*&#34;]}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(&#39;*.{tiff,heic}&#39;)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*.{tiff,heic}&#34;]}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(\&#34;*\&#34;)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [&#34;*&#34;]}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(1024)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [1024]}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(1.5)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;args&#34;: [1.5]}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(a=&#39;b&#39;)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: &#34;b&#34;}}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(a=\&#34;b\&#34;)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: &#34;b&#34;}}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(a=12)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: 12}}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;glob(a=3.142)&#34;),
+        {&#34;method&#34;: &#34;glob&#34;, &#34;kwargs&#34;: {&#34;a&#34;: 3.142}}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;metadata(Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+        {&#34;method&#34;: &#34;metadata&#34;, &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;metadata(&#39;cheese&#39;, Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+        {&#34;method&#34;: &#34;metadata&#34;, &#34;args&#34;: [&#34;cheese&#34;], &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+    )
+    self.assertEqual(
+        expression.parse_method(&#34;metadata(&#39;cheese&#39;, 42, Projection=&#39;equirectangular&#39;, input=&#39;Cheese&#39;)&#34;),
+        {&#34;method&#34;: &#34;metadata&#34;, &#34;args&#34;: [&#34;cheese&#34;, 42], &#34;kwargs&#34;: {&#34;Projection&#34;: &#34;equirectangular&#34;, &#34;input&#34;: &#34;Cheese&#34;}}
+    )
+
+    self.assertEqual(
+        expression.parse_method(&#34;plugin([])&#34;),
+        {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[]]}
+    )
+
+    self.assertEqual(
+        expression.parse_method(&#34;plugin(1)&#34;),
+        {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [1]}
+    )
+
+    self.assertEqual(
+        expression.parse_method(&#34;plugin(&#39;Hello&#39;)&#34;),
+        {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [&#34;Hello&#34;]}
+    )
+
+    self.assertEqual(
+        expression.parse_method(&#34;plugin(13432.232)&#34;),
+        {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [13432.232]}
+    )
+
+    self.assertEqual(
+        expression.parse_method(&#34;plugin([13432.232])&#34;),
+        {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232]]}
+    )
+
+    self.assertEqual(
+        expression.parse_method(&#34;plugin([13432.232, 3434, &#39;Hi!&#39;])&#34;),
+        {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232, 3434, &#34;Hi!&#34;]]}
+    )
+
+    self.assertEqual(
+        expression.parse_method(&#34;plugin([13432.232, 3434, [&#39;Hi!&#39;, &#39;Goodbye&#39;]])&#34;),
+        {&#34;method&#34;: &#34;plugin&#34;, &#34;args&#34;: [[13432.232, 3434, [&#34;Hi!&#34;, &#34;Goodbye&#34;]]]}
+    )</code></pre>
+</details>
+</dd>
 <dt id="test_gallery.GalleryTestCase.test_regex"><code class="name flex">
 <span>def <span class="ident">test_regex</span></span>(<span>self)</span>
 </code></dt>
@@ -385,11 +1377,19 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_regex(self):
+
+    self.assertEqual(Regex(r&#34;.*&#34;), Regex(r&#34;.*&#34;))
+    self.assertNotEqual(Regex(r&#34;.*&#34;), Regex(r&#34;.*&#34;, key=&#34;property&#34;))
+    self.assertEqual(Regex(r&#34;.*&#34;, key=&#34;property&#34;), Regex(r&#34;.*&#34;, key=&#34;property&#34;))
+    self.assertNotEqual(Regex(r&#34;.*&#34;), Regex(r&#34;^.*&#34;))
+
     self.assertTrue(Regex(r&#34;.*&#34;).evaluate(&#34;a&#34;))
     self.assertTrue(Regex(r&#34;hello&#34;).evaluate(&#34;hello&#34;))
     self.assertFalse(Regex(r&#34;hello&#34;).evaluate(&#34;goodbye&#34;))
     self.assertTrue(Regex(r&#34;hello&#34;).evaluate(&#34;hello world&#34;))
-    self.assertFalse(Regex(r&#34;^hello$&#34;).evaluate(&#34;hello world&#34;))</code></pre>
+    self.assertFalse(Regex(r&#34;^hello$&#34;).evaluate(&#34;hello world&#34;))
+    self.assertTrue(Regex(r&#34;hello&#34;, key=&#34;property&#34;).evaluate({&#34;property&#34;: &#34;hello&#34;}))
+    self.assertFalse(Regex(r&#34;hello&#34;, key=&#34;property&#34;).evaluate({&#34;property&#34;: &#34;goodbye&#34;}))</code></pre>
 </details>
 </dd>
 <dt id="test_gallery.GalleryTestCase.test_resize_gif"><code class="name flex">
@@ -413,8 +1413,8 @@ def test_resize_gif(self):
     self.assertEqual(output_size[&#34;width&#34;], size[0])</code></pre>
 </details>
 </dd>
-<dt id="test_gallery.GalleryTestCase.test_resize_heic_with_format_change"><code class="name flex">
-<span>def <span class="ident">test_resize_heic_with_format_change</span></span>(<span>self)</span>
+<dt id="test_gallery.GalleryTestCase.test_resize_heic"><code class="name flex">
+<span>def <span class="ident">test_resize_heic</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -423,13 +1423,13 @@ def test_resize_gif(self):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@common.with_temporary_directory
-def test_resize_heic_with_format_change(self):
+def test_resize_heic(self):
 
     basename = os.path.basename(IMG_3870_HEIC)
     size = (1600, None)
     gallery.resize(IMG_3870_HEIC, os.getcwd(), &#34;&#34;, basename, size, 1)
 
-    expected_basename = utils.replace_extension(basename, &#34;.jpg&#34;)
+    expected_basename = utils.replace_extension(basename, &#34;.heic&#34;)
     self.assertTrue(os.path.exists(expected_basename))
     output_size = gallery.get_size(expected_basename, 1)
     self.assertEqual(output_size[&#34;width&#34;], size[0])</code></pre>
@@ -456,8 +1456,8 @@ def test_resize_jpeg(self):
     self.assertEqual(output_size[&#34;width&#34;], size[0])</code></pre>
 </details>
 </dd>
-<dt id="test_gallery.GalleryTestCase.test_resize_tiff_with_format_change"><code class="name flex">
-<span>def <span class="ident">test_resize_tiff_with_format_change</span></span>(<span>self)</span>
+<dt id="test_gallery.GalleryTestCase.test_resize_tiff"><code class="name flex">
+<span>def <span class="ident">test_resize_tiff</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -466,16 +1466,258 @@ def test_resize_jpeg(self):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@common.with_temporary_directory
-def test_resize_tiff_with_format_change(self):
+def test_resize_tiff(self):
 
     basename = os.path.basename(IMG_6218_TIFF)
     size = (1600, None)
     gallery.resize(IMG_6218_TIFF, os.getcwd(), &#34;&#34;, basename, size, 1)
 
-    expected_basename = utils.replace_extension(basename, &#34;.jpg&#34;)
+    expected_basename = utils.replace_extension(basename, &#34;.tiff&#34;)
     self.assertTrue(os.path.exists(expected_basename))
     output_size = gallery.get_size(expected_basename, 1)
     self.assertEqual(output_size[&#34;width&#34;], size[0])</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_transform_image_gif_default_configuration"><code class="name flex">
+<span>def <span class="ident">test_transform_image_gif_default_configuration</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_transform_image_gif_default_configuration(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.copy(PREVIEW_GIF, &#34;content/image.gif&#34;)
+        site.assertImageSize(&#34;content/image.gif&#34;, (800, 520))
+        site.build()
+        site.assertBuildFiles(
+            {
+                &#34;image/thumbnail.gif&#34;,
+                &#34;image/image.gif&#34;,
+                &#34;image/index.html&#34;
+            }
+        )
+        site.assertMIMEType(&#34;build/files/image/image.gif&#34;, &#34;image/gif&#34;)
+        site.assertImageSize(&#34;build/files/image/image.gif&#34;, (800, 520))  # Images shouldn&#39;t be get larger than the initial size.
+        site.assertMIMEType(&#34;build/files/image/thumbnail.gif&#34;, &#34;image/gif&#34;)
+        site.assertImageSize(&#34;build/files/image/thumbnail.gif&#34;, (480, 312))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_transform_image_gif_to_jpeg"><code class="name flex">
+<span>def <span class="ident">test_transform_image_gif_to_jpeg</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_transform_image_gif_to_jpeg(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.add(&#34;media.yaml&#34;, {
+            &#34;profiles&#34;: {
+                &#34;default&#34;: [{
+                    &#34;where&#34;: &#34;glob(&#39;*&#39;)&#34;,
+                    &#34;transforms&#34;: [
+                        &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/jpeg&#39;, sets=[&#39;preview&#39;])&#34;,
+                    ],
+                }],
+            },
+        })
+        site.copy(PREVIEW_GIF, &#34;content/image.gif&#34;)
+        site.build()
+        site.assertBuildFiles({
+            &#34;image/preview.jpg&#34;,
+            &#34;image/index.html&#34;
+        })
+        site.assertMIMEType(&#34;build/files/image/preview.jpg&#34;, &#34;image/jpeg&#34;)
+        self.assertEqual(site.store.get(&#34;/image/&#34;)[&#39;preview&#39;], {
+            &#39;width&#39;: 100.0,
+            &#39;height&#39;: 65.0,
+            &#39;filename&#39;: &#39;image/preview.jpg&#39;,
+            &#39;url&#39;: &#39;/image/preview.jpg&#39;
+        })
+        site.assertImageSize(&#34;build/files/image/preview.jpg&#34;, (100, 65))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_transform_image_heic_default_configuration"><code class="name flex">
+<span>def <span class="ident">test_transform_image_heic_default_configuration</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_transform_image_heic_default_configuration(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.copy(IMG_3857_HEIC, &#34;content/image.heic&#34;)
+        site.build()
+        site.assertBuildFiles(
+            {
+                &#34;image/thumbnail.jpg&#34;,
+                &#34;image/image.jpg&#34;,
+                &#34;image/index.html&#34;
+            }
+        )
+        site.assertMIMEType(&#34;build/files/image/image.jpg&#34;, &#34;image/jpeg&#34;)
+        site.assertImageSize(&#34;build/files/image/image.jpg&#34;, (1600, 2133))
+        site.assertMIMEType(&#34;build/files/image/thumbnail.jpg&#34;, &#34;image/jpeg&#34;)
+        site.assertImageSize(&#34;build/files/image/thumbnail.jpg&#34;, (480, 640))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_transform_image_jpeg_default_configuration"><code class="name flex">
+<span>def <span class="ident">test_transform_image_jpeg_default_configuration</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_transform_image_jpeg_default_configuration(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.copy(IMG_3870_JPEG, &#34;content/image.jpeg&#34;)
+        site.build()
+        site.assertBuildFiles(
+            {
+                &#34;image/thumbnail.jpeg&#34;,
+                &#34;image/image.jpeg&#34;,
+                &#34;image/index.html&#34;
+            }
+        )
+        site.assertMIMEType(&#34;build/files/image/image.jpeg&#34;, &#34;image/jpeg&#34;)
+        site.assertImageSize(&#34;build/files/image/image.jpeg&#34;, (1600, 1200))
+        site.assertMIMEType(&#34;build/files/image/thumbnail.jpeg&#34;, &#34;image/jpeg&#34;)
+        site.assertImageSize(&#34;build/files/image/thumbnail.jpeg&#34;, (480, 360))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_transform_image_jpeg_to_gif"><code class="name flex">
+<span>def <span class="ident">test_transform_image_jpeg_to_gif</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_transform_image_jpeg_to_gif(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.add(&#34;media.yaml&#34;, {
+            &#34;profiles&#34;: {
+                &#34;default&#34;: [{
+                    &#34;where&#34;: &#34;glob(&#39;*&#39;)&#34;,
+                    &#34;transforms&#34;: [
+                        &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/gif&#39;, sets=[&#39;preview&#39;])&#34;,
+                    ],
+                }],
+            },
+        })
+        site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+        site.build()
+        site.assertBuildFiles({
+            &#34;image/preview.gif&#34;,
+            &#34;image/index.html&#34;
+        })
+        site.assertMIMEType(&#34;build/files/image/preview.gif&#34;, &#34;image/gif&#34;)
+        self.assertEqual(site.store.get(&#34;/image/&#34;)[&#39;preview&#39;], {
+            &#39;width&#39;: 100.0,
+            &#39;height&#39;: 133.0,
+            &#39;filename&#39;: &#39;image/preview.gif&#39;,
+            &#39;url&#39;: &#39;/image/preview.gif&#39;
+        })
+        site.assertImageSize(&#34;build/files/image/preview.gif&#34;, (100, 133))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_transform_image_tiff_default_configuration"><code class="name flex">
+<span>def <span class="ident">test_transform_image_tiff_default_configuration</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_transform_image_tiff_default_configuration(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.copy(IMG_6218_TIFF, &#34;content/image.tiff&#34;)
+        site.build()
+        site.assertBuildFiles(
+            {
+                &#34;image/thumbnail.jpg&#34;,
+                &#34;image/image.jpg&#34;,
+                &#34;image/index.html&#34;
+            }
+        )
+        site.assertMIMEType(&#34;build/files/image/image.jpg&#34;, &#34;image/jpeg&#34;)
+        site.assertImageSize(&#34;build/files/image/image.jpg&#34;, (1600, 1200))
+        site.assertMIMEType(&#34;build/files/image/thumbnail.jpg&#34;, &#34;image/jpeg&#34;)
+        site.assertImageSize(&#34;build/files/image/thumbnail.jpg&#34;, (480, 360))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_transform_image_with_no_matching_transform"><code class="name flex">
+<span>def <span class="ident">test_transform_image_with_no_matching_transform</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_transform_image_with_no_matching_transform(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.add(&#34;media.yaml&#34;, {
+            &#34;profiles&#34;: {
+                &#34;default&#34;: [{
+                    &#34;where&#34;: &#34;glob(&#39;*.tiff&#39;)&#34;,
+                    &#34;transforms&#34;: [
+                        &#34;resize(&#39;preview&#39;, width=100, format=&#39;image/jpeg&#39;, sets=[&#39;preview&#39;])&#34;,
+                    ],
+                }],
+            },
+        })
+        site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+        with self.assertRaises(KeyError):
+            site.build()</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_transform_image_with_no_transforms"><code class="name flex">
+<span>def <span class="ident">test_transform_image_with_no_transforms</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_transform_image_with_no_transforms(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;templates/photo.html&#34;, &#34;{{ page.title }}\n&#34;)
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_IMAGE_HANDLER)
+        site.add(&#34;media.yaml&#34;, {
+            &#34;profiles&#34;: {
+                &#34;default&#34;: [],
+            },
+        })
+        site.copy(IMG_3864_JPEG, &#34;content/image.jpeg&#34;)
+        with self.assertRaises(KeyError):
+            site.build()</code></pre>
 </details>
 </dd>
 </dl>
@@ -497,12 +1739,24 @@ def test_resize_tiff_with_format_change(self):
 <li><code><a title="test_gallery.GalleryTestCase.test_equal" href="#test_gallery.GalleryTestCase.test_equal">test_equal</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_evaluate_tests" href="#test_gallery.GalleryTestCase.test_evaluate_tests">test_evaluate_tests</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_glob" href="#test_gallery.GalleryTestCase.test_glob">test_glob</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_glob_equality" href="#test_gallery.GalleryTestCase.test_glob_equality">test_glob_equality</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_image_title_from_exif" href="#test_gallery.GalleryTestCase.test_image_title_from_exif">test_image_title_from_exif</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_or" href="#test_gallery.GalleryTestCase.test_or">test_or</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_parser" href="#test_gallery.GalleryTestCase.test_parser">test_parser</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_parser_method" href="#test_gallery.GalleryTestCase.test_parser_method">test_parser_method</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_regex" href="#test_gallery.GalleryTestCase.test_regex">test_regex</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_resize_gif" href="#test_gallery.GalleryTestCase.test_resize_gif">test_resize_gif</a></code></li>
-<li><code><a title="test_gallery.GalleryTestCase.test_resize_heic_with_format_change" href="#test_gallery.GalleryTestCase.test_resize_heic_with_format_change">test_resize_heic_with_format_change</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_resize_heic" href="#test_gallery.GalleryTestCase.test_resize_heic">test_resize_heic</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_resize_jpeg" href="#test_gallery.GalleryTestCase.test_resize_jpeg">test_resize_jpeg</a></code></li>
-<li><code><a title="test_gallery.GalleryTestCase.test_resize_tiff_with_format_change" href="#test_gallery.GalleryTestCase.test_resize_tiff_with_format_change">test_resize_tiff_with_format_change</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_resize_tiff" href="#test_gallery.GalleryTestCase.test_resize_tiff">test_resize_tiff</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_transform_image_gif_default_configuration" href="#test_gallery.GalleryTestCase.test_transform_image_gif_default_configuration">test_transform_image_gif_default_configuration</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_transform_image_gif_to_jpeg" href="#test_gallery.GalleryTestCase.test_transform_image_gif_to_jpeg">test_transform_image_gif_to_jpeg</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_transform_image_heic_default_configuration" href="#test_gallery.GalleryTestCase.test_transform_image_heic_default_configuration">test_transform_image_heic_default_configuration</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_transform_image_jpeg_default_configuration" href="#test_gallery.GalleryTestCase.test_transform_image_jpeg_default_configuration">test_transform_image_jpeg_default_configuration</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_transform_image_jpeg_to_gif" href="#test_gallery.GalleryTestCase.test_transform_image_jpeg_to_gif">test_transform_image_jpeg_to_gif</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_transform_image_tiff_default_configuration" href="#test_gallery.GalleryTestCase.test_transform_image_tiff_default_configuration">test_transform_image_tiff_default_configuration</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_transform_image_with_no_matching_transform" href="#test_gallery.GalleryTestCase.test_transform_image_with_no_matching_transform">test_transform_image_with_no_matching_transform</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_transform_image_with_no_transforms" href="#test_gallery.GalleryTestCase.test_transform_image_with_no_transforms">test_transform_image_with_no_transforms</a></code></li>
 </ul>
 </li>
 </ul>
