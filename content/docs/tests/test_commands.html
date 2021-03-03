@@ -70,22 +70,20 @@ class CommandsTestCase(unittest.TestCase):
             self.assertTrue(os.path.isdir(os.path.join(site.path, &#34;templates&#34;)))
 
     def test_build_and_clean_empty_site(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {},
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
                         &#34;handlers&#34;: [],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
+                }],
+            })
             site.assertNotExists(&#34;build&#34;)
             site.build()
             site.assertIsDir(&#34;build&#34;)
@@ -96,35 +94,30 @@ class CommandsTestCase(unittest.TestCase):
         with tempfile.TemporaryDirectory() as path:
             self.assertEqual(len(utils.find(path)), 0)
             common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-            self.assertEqual(len(utils.find(path)), 30)
+            self.assertEqual(len(utils.find(path)), 31)
 
     def test_add_draft_and_publish_with_build(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {
-                &#34;drafts&#34;: &#34;content/drafts&#34;,
-                &#34;posts&#34;: &#34;content/posts&#34;,
-            },
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {
+                    &#34;drafts&#34;: &#34;content/drafts&#34;,
+                    &#34;posts&#34;: &#34;content/posts&#34;,
+                },
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
-                        &#34;handlers&#34;: [
-                            {
-                                &#34;when&#34;: &#34;(.*/)?.*\.markdown&#34;,
-                                &#34;then&#34;: &#34;import_markdown&#34;,
-                            }
-                        ],
+                        &#34;handlers&#34;: [{
+                            &#34;when&#34;: &#34;(.*/)?.*\.markdown&#34;,
+                            &#34;then&#34;: &#34;import_markdown&#34;,
+                        }],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
-            with open(os.path.join(site.path, &#34;templates&#34;, &#34;post.html&#34;), &#34;w&#34;) as fh:
-                fh.write(&#34;{{ page.title }}\n&#34;)
+                }],
+            })
+            site.add(&#34;templates/post.html&#34;, &#34;{{ page.title }}\n&#34;)
             site.assertNotExists(&#34;build&#34;)
             site.run([&#34;add&#34;, &#34;draft&#34;, &#34;Cheese is wonderful&#34;])
             site.assertExists(&#34;content/drafts/cheese-is-wonderful/index.markdown&#34;)
@@ -140,27 +133,23 @@ class CommandsTestCase(unittest.TestCase):
             site.assertExists(f&#34;build/files/posts/{today}-cheese-is-wonderful/index.html&#34;)
 
     def test_copy_file_regex_syntax(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {},
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
-                        &#34;handlers&#34;: [
-                            {
-                                &#34;when&#34;: &#34;(.*/)?.*\.txt&#34;,
-                                &#34;then&#34;: &#34;copy_file&#34;,
-                            }
-                        ],
+                        &#34;handlers&#34;: [{
+                            &#34;when&#34;: &#34;(.*/)?.*\.txt&#34;,
+                            &#34;then&#34;: &#34;copy_file&#34;,
+                        }],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
+                }],
+            })
             site.touch(&#34;content/foo.txt&#34;)
             site.touch(&#34;content/example.markdown&#34;)
             site.build()
@@ -168,30 +157,26 @@ class CommandsTestCase(unittest.TestCase):
             site.assertNotExists(&#34;build/files/example.markdown&#34;)
 
     def test_copy_file_multiple_regex_syntax(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {},
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
-                        &#34;handlers&#34;: [
-                            {
-                                &#34;when&#34;: [
-                                    &#34;.*\.txt&#34;,
-                                    &#34;.*\.jpeg&#34;,
-                                ],
-                                &#34;then&#34;: &#34;copy_file&#34;,
-                            }
-                        ],
+                        &#34;handlers&#34;: [{
+                            &#34;when&#34;: [
+                                &#34;.*\.txt&#34;,
+                                &#34;.*\.jpeg&#34;,
+                            ],
+                            &#34;then&#34;: &#34;copy_file&#34;,
+                        }],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
+                }],
+            })
             site.touch(&#34;content/foo.txt&#34;)
             site.touch(&#34;content/example.markdown&#34;)
             site.touch(&#34;content/image.jpeg&#34;)
@@ -201,35 +186,30 @@ class CommandsTestCase(unittest.TestCase):
             site.assertNotExists(&#34;build/files/example.markdown&#34;)
 
     def test_ignore(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {},
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
-                        &#34;handlers&#34;: [
-                            {
-                                &#34;when&#34;: [
-                                    &#34;.*\.txt&#34;,
-                                ],
-                                &#34;then&#34;: &#34;ignore&#34;,
-                            },
-                            {
-                                &#34;when&#34;: [
-                                    &#34;.*\.txt&#34;,
-                                ],
-                                &#34;then&#34;: &#34;copy_file&#34;,
-                            }
-                        ],
+                        &#34;handlers&#34;: [{
+                            &#34;when&#34;: [
+                                &#34;.*\.txt&#34;,
+                            ],
+                            &#34;then&#34;: &#34;ignore&#34;,
+                        }, {
+                            &#34;when&#34;: [
+                                &#34;.*\.txt&#34;,
+                            ],
+                            &#34;then&#34;: &#34;copy_file&#34;,
+                        }],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
+                }],
+            })
             site.touch(&#34;content/foo.txt&#34;)
             site.build()
             site.assertNotExists(&#34;build/files/foo.txt&#34;)
@@ -301,22 +281,20 @@ not have a method with the specified name.</p></div>
             self.assertTrue(os.path.isdir(os.path.join(site.path, &#34;templates&#34;)))
 
     def test_build_and_clean_empty_site(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {},
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
                         &#34;handlers&#34;: [],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
+                }],
+            })
             site.assertNotExists(&#34;build&#34;)
             site.build()
             site.assertIsDir(&#34;build&#34;)
@@ -327,35 +305,30 @@ not have a method with the specified name.</p></div>
         with tempfile.TemporaryDirectory() as path:
             self.assertEqual(len(utils.find(path)), 0)
             common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-            self.assertEqual(len(utils.find(path)), 30)
+            self.assertEqual(len(utils.find(path)), 31)
 
     def test_add_draft_and_publish_with_build(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {
-                &#34;drafts&#34;: &#34;content/drafts&#34;,
-                &#34;posts&#34;: &#34;content/posts&#34;,
-            },
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {
+                    &#34;drafts&#34;: &#34;content/drafts&#34;,
+                    &#34;posts&#34;: &#34;content/posts&#34;,
+                },
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
-                        &#34;handlers&#34;: [
-                            {
-                                &#34;when&#34;: &#34;(.*/)?.*\.markdown&#34;,
-                                &#34;then&#34;: &#34;import_markdown&#34;,
-                            }
-                        ],
+                        &#34;handlers&#34;: [{
+                            &#34;when&#34;: &#34;(.*/)?.*\.markdown&#34;,
+                            &#34;then&#34;: &#34;import_markdown&#34;,
+                        }],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
-            with open(os.path.join(site.path, &#34;templates&#34;, &#34;post.html&#34;), &#34;w&#34;) as fh:
-                fh.write(&#34;{{ page.title }}\n&#34;)
+                }],
+            })
+            site.add(&#34;templates/post.html&#34;, &#34;{{ page.title }}\n&#34;)
             site.assertNotExists(&#34;build&#34;)
             site.run([&#34;add&#34;, &#34;draft&#34;, &#34;Cheese is wonderful&#34;])
             site.assertExists(&#34;content/drafts/cheese-is-wonderful/index.markdown&#34;)
@@ -371,27 +344,23 @@ not have a method with the specified name.</p></div>
             site.assertExists(f&#34;build/files/posts/{today}-cheese-is-wonderful/index.html&#34;)
 
     def test_copy_file_regex_syntax(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {},
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
-                        &#34;handlers&#34;: [
-                            {
-                                &#34;when&#34;: &#34;(.*/)?.*\.txt&#34;,
-                                &#34;then&#34;: &#34;copy_file&#34;,
-                            }
-                        ],
+                        &#34;handlers&#34;: [{
+                            &#34;when&#34;: &#34;(.*/)?.*\.txt&#34;,
+                            &#34;then&#34;: &#34;copy_file&#34;,
+                        }],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
+                }],
+            })
             site.touch(&#34;content/foo.txt&#34;)
             site.touch(&#34;content/example.markdown&#34;)
             site.build()
@@ -399,30 +368,26 @@ not have a method with the specified name.</p></div>
             site.assertNotExists(&#34;build/files/example.markdown&#34;)
 
     def test_copy_file_multiple_regex_syntax(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {},
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
-                        &#34;handlers&#34;: [
-                            {
-                                &#34;when&#34;: [
-                                    &#34;.*\.txt&#34;,
-                                    &#34;.*\.jpeg&#34;,
-                                ],
-                                &#34;then&#34;: &#34;copy_file&#34;,
-                            }
-                        ],
+                        &#34;handlers&#34;: [{
+                            &#34;when&#34;: [
+                                &#34;.*\.txt&#34;,
+                                &#34;.*\.jpeg&#34;,
+                            ],
+                            &#34;then&#34;: &#34;copy_file&#34;,
+                        }],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
+                }],
+            })
             site.touch(&#34;content/foo.txt&#34;)
             site.touch(&#34;content/example.markdown&#34;)
             site.touch(&#34;content/image.jpeg&#34;)
@@ -432,35 +397,30 @@ not have a method with the specified name.</p></div>
             site.assertNotExists(&#34;build/files/example.markdown&#34;)
 
     def test_ignore(self):
-        configuration = {
-            &#34;config&#34;: {
-                &#34;title&#34;: &#34;Example Site&#34;,
-                &#34;url&#34;: &#34;https://example.com&#34;
-            },
-            &#34;paths&#34;: {},
-            &#34;build_steps&#34;: [
-                {
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [{
                     &#34;task&#34;: &#34;process_files&#34;,
                     &#34;args&#34;: {
-                        &#34;handlers&#34;: [
-                            {
-                                &#34;when&#34;: [
-                                    &#34;.*\.txt&#34;,
-                                ],
-                                &#34;then&#34;: &#34;ignore&#34;,
-                            },
-                            {
-                                &#34;when&#34;: [
-                                    &#34;.*\.txt&#34;,
-                                ],
-                                &#34;then&#34;: &#34;copy_file&#34;,
-                            }
-                        ],
+                        &#34;handlers&#34;: [{
+                            &#34;when&#34;: [
+                                &#34;.*\.txt&#34;,
+                            ],
+                            &#34;then&#34;: &#34;ignore&#34;,
+                        }, {
+                            &#34;when&#34;: [
+                                &#34;.*\.txt&#34;,
+                            ],
+                            &#34;then&#34;: &#34;copy_file&#34;,
+                        }],
                     }
-                },
-            ],
-        }
-        with common.TemporarySite(self, configuration=configuration) as site:
+                }],
+            })
             site.touch(&#34;content/foo.txt&#34;)
             site.build()
             site.assertNotExists(&#34;build/files/foo.txt&#34;)
@@ -491,32 +451,27 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_add_draft_and_publish_with_build(self):
-    configuration = {
-        &#34;config&#34;: {
-            &#34;title&#34;: &#34;Example Site&#34;,
-            &#34;url&#34;: &#34;https://example.com&#34;
-        },
-        &#34;paths&#34;: {
-            &#34;drafts&#34;: &#34;content/drafts&#34;,
-            &#34;posts&#34;: &#34;content/posts&#34;,
-        },
-        &#34;build_steps&#34;: [
-            {
+    with common.TemporarySite(self) as site:
+        site.add(&#34;site.yaml&#34;, {
+            &#34;config&#34;: {
+                &#34;title&#34;: &#34;Example Site&#34;,
+                &#34;url&#34;: &#34;https://example.com&#34;
+            },
+            &#34;paths&#34;: {
+                &#34;drafts&#34;: &#34;content/drafts&#34;,
+                &#34;posts&#34;: &#34;content/posts&#34;,
+            },
+            &#34;build_steps&#34;: [{
                 &#34;task&#34;: &#34;process_files&#34;,
                 &#34;args&#34;: {
-                    &#34;handlers&#34;: [
-                        {
-                            &#34;when&#34;: &#34;(.*/)?.*\.markdown&#34;,
-                            &#34;then&#34;: &#34;import_markdown&#34;,
-                        }
-                    ],
+                    &#34;handlers&#34;: [{
+                        &#34;when&#34;: &#34;(.*/)?.*\.markdown&#34;,
+                        &#34;then&#34;: &#34;import_markdown&#34;,
+                    }],
                 }
-            },
-        ],
-    }
-    with common.TemporarySite(self, configuration=configuration) as site:
-        with open(os.path.join(site.path, &#34;templates&#34;, &#34;post.html&#34;), &#34;w&#34;) as fh:
-            fh.write(&#34;{{ page.title }}\n&#34;)
+            }],
+        })
+        site.add(&#34;templates/post.html&#34;, &#34;{{ page.title }}\n&#34;)
         site.assertNotExists(&#34;build&#34;)
         site.run([&#34;add&#34;, &#34;draft&#34;, &#34;Cheese is wonderful&#34;])
         site.assertExists(&#34;content/drafts/cheese-is-wonderful/index.markdown&#34;)
@@ -542,22 +497,20 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_build_and_clean_empty_site(self):
-    configuration = {
-        &#34;config&#34;: {
-            &#34;title&#34;: &#34;Example Site&#34;,
-            &#34;url&#34;: &#34;https://example.com&#34;
-        },
-        &#34;paths&#34;: {},
-        &#34;build_steps&#34;: [
-            {
+    with common.TemporarySite(self) as site:
+        site.add(&#34;site.yaml&#34;, {
+            &#34;config&#34;: {
+                &#34;title&#34;: &#34;Example Site&#34;,
+                &#34;url&#34;: &#34;https://example.com&#34;
+            },
+            &#34;paths&#34;: {},
+            &#34;build_steps&#34;: [{
                 &#34;task&#34;: &#34;process_files&#34;,
                 &#34;args&#34;: {
                     &#34;handlers&#34;: [],
                 }
-            },
-        ],
-    }
-    with common.TemporarySite(self, configuration=configuration) as site:
+            }],
+        })
         site.assertNotExists(&#34;build&#34;)
         site.build()
         site.assertIsDir(&#34;build&#34;)
@@ -578,7 +531,7 @@ not have a method with the specified name.</p></div>
     with tempfile.TemporaryDirectory() as path:
         self.assertEqual(len(utils.find(path)), 0)
         common.run_incontext([&#34;build-documentation&#34;, path], plugins_directory=paths.PLUGINS_DIR)
-        self.assertEqual(len(utils.find(path)), 30)</code></pre>
+        self.assertEqual(len(utils.find(path)), 31)</code></pre>
 </details>
 </dd>
 <dt id="test_commands.CommandsTestCase.test_copy_file_multiple_regex_syntax"><code class="name flex">
@@ -591,30 +544,26 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_copy_file_multiple_regex_syntax(self):
-    configuration = {
-        &#34;config&#34;: {
-            &#34;title&#34;: &#34;Example Site&#34;,
-            &#34;url&#34;: &#34;https://example.com&#34;
-        },
-        &#34;paths&#34;: {},
-        &#34;build_steps&#34;: [
-            {
+    with common.TemporarySite(self) as site:
+        site.add(&#34;site.yaml&#34;, {
+            &#34;config&#34;: {
+                &#34;title&#34;: &#34;Example Site&#34;,
+                &#34;url&#34;: &#34;https://example.com&#34;
+            },
+            &#34;paths&#34;: {},
+            &#34;build_steps&#34;: [{
                 &#34;task&#34;: &#34;process_files&#34;,
                 &#34;args&#34;: {
-                    &#34;handlers&#34;: [
-                        {
-                            &#34;when&#34;: [
-                                &#34;.*\.txt&#34;,
-                                &#34;.*\.jpeg&#34;,
-                            ],
-                            &#34;then&#34;: &#34;copy_file&#34;,
-                        }
-                    ],
+                    &#34;handlers&#34;: [{
+                        &#34;when&#34;: [
+                            &#34;.*\.txt&#34;,
+                            &#34;.*\.jpeg&#34;,
+                        ],
+                        &#34;then&#34;: &#34;copy_file&#34;,
+                    }],
                 }
-            },
-        ],
-    }
-    with common.TemporarySite(self, configuration=configuration) as site:
+            }],
+        })
         site.touch(&#34;content/foo.txt&#34;)
         site.touch(&#34;content/example.markdown&#34;)
         site.touch(&#34;content/image.jpeg&#34;)
@@ -634,27 +583,23 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_copy_file_regex_syntax(self):
-    configuration = {
-        &#34;config&#34;: {
-            &#34;title&#34;: &#34;Example Site&#34;,
-            &#34;url&#34;: &#34;https://example.com&#34;
-        },
-        &#34;paths&#34;: {},
-        &#34;build_steps&#34;: [
-            {
+    with common.TemporarySite(self) as site:
+        site.add(&#34;site.yaml&#34;, {
+            &#34;config&#34;: {
+                &#34;title&#34;: &#34;Example Site&#34;,
+                &#34;url&#34;: &#34;https://example.com&#34;
+            },
+            &#34;paths&#34;: {},
+            &#34;build_steps&#34;: [{
                 &#34;task&#34;: &#34;process_files&#34;,
                 &#34;args&#34;: {
-                    &#34;handlers&#34;: [
-                        {
-                            &#34;when&#34;: &#34;(.*/)?.*\.txt&#34;,
-                            &#34;then&#34;: &#34;copy_file&#34;,
-                        }
-                    ],
+                    &#34;handlers&#34;: [{
+                        &#34;when&#34;: &#34;(.*/)?.*\.txt&#34;,
+                        &#34;then&#34;: &#34;copy_file&#34;,
+                    }],
                 }
-            },
-        ],
-    }
-    with common.TemporarySite(self, configuration=configuration) as site:
+            }],
+        })
         site.touch(&#34;content/foo.txt&#34;)
         site.touch(&#34;content/example.markdown&#34;)
         site.build()
@@ -689,35 +634,30 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_ignore(self):
-    configuration = {
-        &#34;config&#34;: {
-            &#34;title&#34;: &#34;Example Site&#34;,
-            &#34;url&#34;: &#34;https://example.com&#34;
-        },
-        &#34;paths&#34;: {},
-        &#34;build_steps&#34;: [
-            {
+    with common.TemporarySite(self) as site:
+        site.add(&#34;site.yaml&#34;, {
+            &#34;config&#34;: {
+                &#34;title&#34;: &#34;Example Site&#34;,
+                &#34;url&#34;: &#34;https://example.com&#34;
+            },
+            &#34;paths&#34;: {},
+            &#34;build_steps&#34;: [{
                 &#34;task&#34;: &#34;process_files&#34;,
                 &#34;args&#34;: {
-                    &#34;handlers&#34;: [
-                        {
-                            &#34;when&#34;: [
-                                &#34;.*\.txt&#34;,
-                            ],
-                            &#34;then&#34;: &#34;ignore&#34;,
-                        },
-                        {
-                            &#34;when&#34;: [
-                                &#34;.*\.txt&#34;,
-                            ],
-                            &#34;then&#34;: &#34;copy_file&#34;,
-                        }
-                    ],
+                    &#34;handlers&#34;: [{
+                        &#34;when&#34;: [
+                            &#34;.*\.txt&#34;,
+                        ],
+                        &#34;then&#34;: &#34;ignore&#34;,
+                    }, {
+                        &#34;when&#34;: [
+                            &#34;.*\.txt&#34;,
+                        ],
+                        &#34;then&#34;: &#34;copy_file&#34;,
+                    }],
                 }
-            },
-        ],
-    }
-    with common.TemporarySite(self, configuration=configuration) as site:
+            }],
+        })
         site.touch(&#34;content/foo.txt&#34;)
         site.build()
         site.assertNotExists(&#34;build/files/foo.txt&#34;)</code></pre>

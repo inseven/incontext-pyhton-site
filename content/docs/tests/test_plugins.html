@@ -63,18 +63,17 @@ class PluginsTestCase(unittest.TestCase):
 
     def test_expected_plugins(self):
         instance = incontext.InContext(plugins_directory=paths.PLUGINS_DIR)
-        self.assertIsInstance(instance.plugins, incontext._Plugins)
-        self.assertEqual(set(instance.plugins.plugins(incontext.PLUGIN_TYPE_COMMAND).keys()),
-                             {
-                                 &#34;add&#34;,
-                                 &#34;build&#34;,
-                                 &#34;build-documentation&#34;,
-                                 &#34;clean&#34;,
-                                 &#34;new&#34;,
-                                 &#34;publish&#34;,
-                                 &#34;tests&#34;,
-                                 &#34;watch&#34;,
-                             })</code></pre>
+        self.assertEqual(set(instance.plugins(incontext.PLUGIN_TYPE_COMMAND).keys()),
+                         {
+                             &#34;add&#34;,
+                             &#34;build&#34;,
+                             &#34;build-documentation&#34;,
+                             &#34;clean&#34;,
+                             &#34;new&#34;,
+                             &#34;publish&#34;,
+                             &#34;tests&#34;,
+                             &#34;watch&#34;,
+                         })</code></pre>
 </details>
 </section>
 <section>
@@ -127,18 +126,17 @@ not have a method with the specified name.</p></div>
 
     def test_expected_plugins(self):
         instance = incontext.InContext(plugins_directory=paths.PLUGINS_DIR)
-        self.assertIsInstance(instance.plugins, incontext._Plugins)
-        self.assertEqual(set(instance.plugins.plugins(incontext.PLUGIN_TYPE_COMMAND).keys()),
-                             {
-                                 &#34;add&#34;,
-                                 &#34;build&#34;,
-                                 &#34;build-documentation&#34;,
-                                 &#34;clean&#34;,
-                                 &#34;new&#34;,
-                                 &#34;publish&#34;,
-                                 &#34;tests&#34;,
-                                 &#34;watch&#34;,
-                             })</code></pre>
+        self.assertEqual(set(instance.plugins(incontext.PLUGIN_TYPE_COMMAND).keys()),
+                         {
+                             &#34;add&#34;,
+                             &#34;build&#34;,
+                             &#34;build-documentation&#34;,
+                             &#34;clean&#34;,
+                             &#34;new&#34;,
+                             &#34;publish&#34;,
+                             &#34;tests&#34;,
+                             &#34;watch&#34;,
+                         })</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -157,18 +155,17 @@ not have a method with the specified name.</p></div>
 </summary>
 <pre><code class="python">def test_expected_plugins(self):
     instance = incontext.InContext(plugins_directory=paths.PLUGINS_DIR)
-    self.assertIsInstance(instance.plugins, incontext._Plugins)
-    self.assertEqual(set(instance.plugins.plugins(incontext.PLUGIN_TYPE_COMMAND).keys()),
-                         {
-                             &#34;add&#34;,
-                             &#34;build&#34;,
-                             &#34;build-documentation&#34;,
-                             &#34;clean&#34;,
-                             &#34;new&#34;,
-                             &#34;publish&#34;,
-                             &#34;tests&#34;,
-                             &#34;watch&#34;,
-                         })</code></pre>
+    self.assertEqual(set(instance.plugins(incontext.PLUGIN_TYPE_COMMAND).keys()),
+                     {
+                         &#34;add&#34;,
+                         &#34;build&#34;,
+                         &#34;build-documentation&#34;,
+                         &#34;clean&#34;,
+                         &#34;new&#34;,
+                         &#34;publish&#34;,
+                         &#34;tests&#34;,
+                         &#34;watch&#34;,
+                     })</code></pre>
 </details>
 </dd>
 </dl>
