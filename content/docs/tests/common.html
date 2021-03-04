@@ -75,6 +75,9 @@ class Site(object):
         with utils.Chdir(self.path):
             run_incontext(args, plugins_directory=paths.PLUGINS_DIR)
 
+    def incontext(self):
+        return incontext.InContext(plugins_directory=paths.PLUGINS_DIR)
+
     @property
     def store(self):
         if self._store is None:
@@ -86,6 +89,9 @@ class Site(object):
 
     def clean(self):
         self.run([&#34;clean&#34;])
+
+    def makedirs(self, path):
+        utils.makedirs(os.path.join(self.path, path))
 
     def touch(self, path):
         utils.touch(os.path.join(self.temporary_directory.name, path))
@@ -166,8 +172,8 @@ class TemporarySite(Site):
             self.add(&#34;site.yaml&#34;, self.configuration)
 
         # Create the required directories.
-        utils.makedirs(os.path.join(self.temporary_directory.name, &#34;content&#34;))
-        utils.makedirs(os.path.join(self.temporary_directory.name, &#34;templates&#34;))
+        self.makedirs(&#34;content&#34;)
+        self.makedirs(&#34;templates&#34;)
 
         os.chdir(self.temporary_directory.name)
         return self
@@ -246,6 +252,9 @@ def run_incontext(args, plugins_directory=None):
         with utils.Chdir(self.path):
             run_incontext(args, plugins_directory=paths.PLUGINS_DIR)
 
+    def incontext(self):
+        return incontext.InContext(plugins_directory=paths.PLUGINS_DIR)
+
     @property
     def store(self):
         if self._store is None:
@@ -257,6 +266,9 @@ def run_incontext(args, plugins_directory=None):
 
     def clean(self):
         self.run([&#34;clean&#34;])
+
+    def makedirs(self, path):
+        utils.makedirs(os.path.join(self.path, path))
 
     def touch(self, path):
         utils.touch(os.path.join(self.temporary_directory.name, path))
@@ -506,6 +518,32 @@ def store(self):
     shutil.copy(source, os.path.join(self.path, path))</code></pre>
 </details>
 </dd>
+<dt id="common.Site.incontext"><code class="name flex">
+<span>def <span class="ident">incontext</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def incontext(self):
+    return incontext.InContext(plugins_directory=paths.PLUGINS_DIR)</code></pre>
+</details>
+</dd>
+<dt id="common.Site.makedirs"><code class="name flex">
+<span>def <span class="ident">makedirs</span></span>(<span>self, path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def makedirs(self, path):
+    utils.makedirs(os.path.join(self.path, path))</code></pre>
+</details>
+</dd>
 <dt id="common.Site.run"><code class="name flex">
 <span>def <span class="ident">run</span></span>(<span>self, args)</span>
 </code></dt>
@@ -564,8 +602,8 @@ def store(self):
             self.add(&#34;site.yaml&#34;, self.configuration)
 
         # Create the required directories.
-        utils.makedirs(os.path.join(self.temporary_directory.name, &#34;content&#34;))
-        utils.makedirs(os.path.join(self.temporary_directory.name, &#34;templates&#34;))
+        self.makedirs(&#34;content&#34;)
+        self.makedirs(&#34;templates&#34;)
 
         os.chdir(self.temporary_directory.name)
         return self
@@ -611,6 +649,8 @@ def store(self):
 <li><code><a title="common.Site.build" href="#common.Site.build">build</a></code></li>
 <li><code><a title="common.Site.clean" href="#common.Site.clean">clean</a></code></li>
 <li><code><a title="common.Site.copy" href="#common.Site.copy">copy</a></code></li>
+<li><code><a title="common.Site.incontext" href="#common.Site.incontext">incontext</a></code></li>
+<li><code><a title="common.Site.makedirs" href="#common.Site.makedirs">makedirs</a></code></li>
 <li><code><a title="common.Site.run" href="#common.Site.run">run</a></code></li>
 <li><code><a title="common.Site.store" href="#common.Site.store">store</a></code></li>
 <li><code><a title="common.Site.touch" href="#common.Site.touch">touch</a></code></li>
