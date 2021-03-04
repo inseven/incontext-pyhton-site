@@ -214,6 +214,77 @@ class CommandsTestCase(unittest.TestCase):
             site.build()
             site.assertNotExists(&#34;build/files/foo.txt&#34;)
 
+    def test_loads_empty_site_plugin(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/example.py&#34;, &#34;&#34;&#34;
+
+def initialize_plugin(incontext):
+    pass
+
+&#34;&#34;&#34;)
+            site.build()
+
+    def test_fail_to_load_invalid_site_plugin(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/example.py&#34;, &#34;&#34;&#34;
+
+def initialize_plugin(incontext):
+    raise AssertionError(&#34;Boom!&#34;)
+
+&#34;&#34;&#34;)
+            with self.assertRaises(AssertionError):
+                site.build()
+
+    # TODO: Test the decorator-based API for registering commands from site-plugins #117
+    #       https://github.com/inseven/incontext/issues/117
+    def test_site_plugin_with_additional_command(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/test_command.py&#34;, &#34;&#34;&#34;
+
+import logging
+
+import incontext
+
+
+def initialize_plugin(incontext):
+    incontext.add_command(&#34;new-command&#34;, command_new_command)
+
+
+def command_new_command(incontext, parser):
+    def new_command(options):
+        logging.info(&#34;success!&#34;)
+    return new_command
+
+&#34;&#34;&#34;)
+            site.run([&#34;new-command&#34;])
+
     @common.with_temporary_directory
     def test_new_site(self):
         common.run_incontext([&#34;new&#34;, &#34;example&#34;], plugins_directory=paths.PLUGINS_DIR)
@@ -425,6 +496,77 @@ not have a method with the specified name.</p></div>
             site.build()
             site.assertNotExists(&#34;build/files/foo.txt&#34;)
 
+    def test_loads_empty_site_plugin(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/example.py&#34;, &#34;&#34;&#34;
+
+def initialize_plugin(incontext):
+    pass
+
+&#34;&#34;&#34;)
+            site.build()
+
+    def test_fail_to_load_invalid_site_plugin(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/example.py&#34;, &#34;&#34;&#34;
+
+def initialize_plugin(incontext):
+    raise AssertionError(&#34;Boom!&#34;)
+
+&#34;&#34;&#34;)
+            with self.assertRaises(AssertionError):
+                site.build()
+
+    # TODO: Test the decorator-based API for registering commands from site-plugins #117
+    #       https://github.com/inseven/incontext/issues/117
+    def test_site_plugin_with_additional_command(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/test_command.py&#34;, &#34;&#34;&#34;
+
+import logging
+
+import incontext
+
+
+def initialize_plugin(incontext):
+    incontext.add_command(&#34;new-command&#34;, command_new_command)
+
+
+def command_new_command(incontext, parser):
+    def new_command(options):
+        logging.info(&#34;success!&#34;)
+    return new_command
+
+&#34;&#34;&#34;)
+            site.run([&#34;new-command&#34;])
+
     @common.with_temporary_directory
     def test_new_site(self):
         common.run_incontext([&#34;new&#34;, &#34;example&#34;], plugins_directory=paths.PLUGINS_DIR)
@@ -624,6 +766,36 @@ not have a method with the specified name.</p></div>
         self.assertTrue(os.path.isdir(os.path.join(site.path, &#34;templates&#34;)))</code></pre>
 </details>
 </dd>
+<dt id="test_commands.CommandsTestCase.test_fail_to_load_invalid_site_plugin"><code class="name flex">
+<span>def <span class="ident">test_fail_to_load_invalid_site_plugin</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def test_fail_to_load_invalid_site_plugin(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/example.py&#34;, &#34;&#34;&#34;
+
+def initialize_plugin(incontext):
+    raise AssertionError(&#34;Boom!&#34;)
+
+&#34;&#34;&#34;)
+            with self.assertRaises(AssertionError):
+                site.build()</code></pre>
+</details>
+</dd>
 <dt id="test_commands.CommandsTestCase.test_ignore"><code class="name flex">
 <span>def <span class="ident">test_ignore</span></span>(<span>self)</span>
 </code></dt>
@@ -663,6 +835,35 @@ not have a method with the specified name.</p></div>
         site.assertNotExists(&#34;build/files/foo.txt&#34;)</code></pre>
 </details>
 </dd>
+<dt id="test_commands.CommandsTestCase.test_loads_empty_site_plugin"><code class="name flex">
+<span>def <span class="ident">test_loads_empty_site_plugin</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def test_loads_empty_site_plugin(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/example.py&#34;, &#34;&#34;&#34;
+
+def initialize_plugin(incontext):
+    pass
+
+&#34;&#34;&#34;)
+            site.build()</code></pre>
+</details>
+</dd>
 <dt id="test_commands.CommandsTestCase.test_new_site"><code class="name flex">
 <span>def <span class="ident">test_new_site</span></span>(<span>self)</span>
 </code></dt>
@@ -681,6 +882,46 @@ def test_new_site(self):
     site.assertNotExists(&#34;.github&#34;)
     site.build()
     site.assertExists(&#34;build/files/index.html&#34;)</code></pre>
+</details>
+</dd>
+<dt id="test_commands.CommandsTestCase.test_site_plugin_with_additional_command"><code class="name flex">
+<span>def <span class="ident">test_site_plugin_with_additional_command</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def test_site_plugin_with_additional_command(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, {
+                &#34;config&#34;: {
+                    &#34;title&#34;: &#34;Example Site&#34;,
+                    &#34;url&#34;: &#34;https://example.com&#34;
+                },
+                &#34;paths&#34;: {},
+                &#34;build_steps&#34;: [],
+            })
+            site.makedirs(&#34;plugins&#34;)
+            site.add(&#34;plugins/test_command.py&#34;, &#34;&#34;&#34;
+
+import logging
+
+import incontext
+
+
+def initialize_plugin(incontext):
+    incontext.add_command(&#34;new-command&#34;, command_new_command)
+
+
+def command_new_command(incontext, parser):
+    def new_command(options):
+        logging.info(&#34;success!&#34;)
+    return new_command
+
+&#34;&#34;&#34;)
+            site.run([&#34;new-command&#34;])</code></pre>
 </details>
 </dd>
 </dl>
@@ -705,8 +946,11 @@ def test_new_site(self):
 <li><code><a title="test_commands.CommandsTestCase.test_copy_file_multiple_regex_syntax" href="#test_commands.CommandsTestCase.test_copy_file_multiple_regex_syntax">test_copy_file_multiple_regex_syntax</a></code></li>
 <li><code><a title="test_commands.CommandsTestCase.test_copy_file_regex_syntax" href="#test_commands.CommandsTestCase.test_copy_file_regex_syntax">test_copy_file_regex_syntax</a></code></li>
 <li><code><a title="test_commands.CommandsTestCase.test_create_test_site" href="#test_commands.CommandsTestCase.test_create_test_site">test_create_test_site</a></code></li>
+<li><code><a title="test_commands.CommandsTestCase.test_fail_to_load_invalid_site_plugin" href="#test_commands.CommandsTestCase.test_fail_to_load_invalid_site_plugin">test_fail_to_load_invalid_site_plugin</a></code></li>
 <li><code><a title="test_commands.CommandsTestCase.test_ignore" href="#test_commands.CommandsTestCase.test_ignore">test_ignore</a></code></li>
+<li><code><a title="test_commands.CommandsTestCase.test_loads_empty_site_plugin" href="#test_commands.CommandsTestCase.test_loads_empty_site_plugin">test_loads_empty_site_plugin</a></code></li>
 <li><code><a title="test_commands.CommandsTestCase.test_new_site" href="#test_commands.CommandsTestCase.test_new_site">test_new_site</a></code></li>
+<li><code><a title="test_commands.CommandsTestCase.test_site_plugin_with_additional_command" href="#test_commands.CommandsTestCase.test_site_plugin_with_additional_command">test_site_plugin_with_additional_command</a></code></li>
 </ul>
 </li>
 </ul>

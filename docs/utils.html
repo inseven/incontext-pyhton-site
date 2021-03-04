@@ -46,13 +46,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import importlib
 import hashlib
+import logging
 import os
 import pathlib
 import re
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 
 
@@ -244,7 +247,36 @@ def create_animated_thumbnail(input, output):
 
 def replace_extension(path, extension):
     root, ext = os.path.splitext(path)
-    return root + extension</code></pre>
+    return root + extension
+
+
+def load_plugins(path):
+    &#34;&#34;&#34;
+    Recursively load all the files ending in &#39;.py&#39; in the directory, `path`.
+
+    If this method is called more than once we ensure modules match those on disk by using importlib.reload if the
+    module is already loaded. This is to avoid aggressive caching causing problems (importlib.import_module will not
+    reload a module if it has changed on disk, or if it&#39;s path is different, so long as it has the same relative
+    identifier / module name).
+
+    This reload behaviour is required predominantly when under test, since the same instance can be used to run more
+    than one command across multiple sites. It may also be necessary in the future if we wish to script multiple
+    InContext commands.
+    &#34;&#34;&#34;
+    sys.path.append(path)
+    plugins = {}
+    for plugin in find_files(path, [&#34;.py&#34;]):
+        plugin = os.path.join(*plugin)
+        (module, _) = os.path.splitext(os.path.relpath(plugin, path))
+        module = module.replace(&#34;/&#34;, &#34;.&#34;)
+        try:
+            importlib.reload(sys.modules[module])
+            logging.debug(&#34;Reloaded &#39;%s&#39;...&#34;, module)
+        except KeyError:
+            logging.debug(&#34;Importing &#39;%s&#39;...&#34;, module)
+            importlib.import_module(module)
+        plugins[module] = sys.modules[module]
+    return plugins</code></pre>
 </details>
 </section>
 <section>
@@ -351,6 +383,51 @@ def replace_extension(path, extension):
         else:
             raise AssertionError(&#34;Unsupported type %s&#34;, type(item))
     return m.hexdigest()</code></pre>
+</details>
+</dd>
+<dt id="utils.load_plugins"><code class="name flex">
+<span>def <span class="ident">load_plugins</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Recursively load all the files ending in '.py' in the directory, <code>path</code>.</p>
+<p>If this method is called more than once we ensure modules match those on disk by using importlib.reload if the
+module is already loaded. This is to avoid aggressive caching causing problems (importlib.import_module will not
+reload a module if it has changed on disk, or if it's path is different, so long as it has the same relative
+identifier / module name).</p>
+<p>This reload behaviour is required predominantly when under test, since the same instance can be used to run more
+than one command across multiple sites. It may also be necessary in the future if we wish to script multiple
+InContext commands.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_plugins(path):
+    &#34;&#34;&#34;
+    Recursively load all the files ending in &#39;.py&#39; in the directory, `path`.
+
+    If this method is called more than once we ensure modules match those on disk by using importlib.reload if the
+    module is already loaded. This is to avoid aggressive caching causing problems (importlib.import_module will not
+    reload a module if it has changed on disk, or if it&#39;s path is different, so long as it has the same relative
+    identifier / module name).
+
+    This reload behaviour is required predominantly when under test, since the same instance can be used to run more
+    than one command across multiple sites. It may also be necessary in the future if we wish to script multiple
+    InContext commands.
+    &#34;&#34;&#34;
+    sys.path.append(path)
+    plugins = {}
+    for plugin in find_files(path, [&#34;.py&#34;]):
+        plugin = os.path.join(*plugin)
+        (module, _) = os.path.splitext(os.path.relpath(plugin, path))
+        module = module.replace(&#34;/&#34;, &#34;.&#34;)
+        try:
+            importlib.reload(sys.modules[module])
+            logging.debug(&#34;Reloaded &#39;%s&#39;...&#34;, module)
+        except KeyError:
+            logging.debug(&#34;Importing &#39;%s&#39;...&#34;, module)
+            importlib.import_module(module)
+        plugins[module] = sys.modules[module]
+    return plugins</code></pre>
 </details>
 </dd>
 <dt id="utils.makedirs"><code class="name flex">
@@ -678,6 +755,7 @@ and Markdown. This class provides a lightweight solution.</p></div>
 <li><code><a title="utils.find" href="#utils.find">find</a></code></li>
 <li><code><a title="utils.find_files" href="#utils.find_files">find_files</a></code></li>
 <li><code><a title="utils.hash_items" href="#utils.hash_items">hash_items</a></code></li>
+<li><code><a title="utils.load_plugins" href="#utils.load_plugins">load_plugins</a></code></li>
 <li><code><a title="utils.makedirs" href="#utils.makedirs">makedirs</a></code></li>
 <li><code><a title="utils.matches_types" href="#utils.matches_types">matches_types</a></code></li>
 <li><code><a title="utils.replace_extension" href="#utils.replace_extension">replace_extension</a></code></li>

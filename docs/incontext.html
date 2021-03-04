@@ -50,8 +50,8 @@
 
 import argparse
 import collections
+import copy
 import glob
-import importlib
 import logging
 import os
 import sys
@@ -199,37 +199,27 @@ class InContext(object):
         @param plugins_directory: Path to the plugins directory.
         @type plugins_directory: str
         &#34;&#34;&#34;
-        self.plugins_directory = os.path.abspath(plugins_directory)
         self.handlers = {}
         self.tasks = {}
         self.environment = {}
-        self.parser = None
-        self.subparsers = []
+        self.arguments = []
         self.configuration_providers = {}
         self.configuration = Configuration()
-        self._plugins = _PLUGINS
+        self._plugins = copy.deepcopy(_PLUGINS)
+        self._loaded_plugin_directories = {}
+
+        # Load and initialize the plugins.
+        self.load_plugins(os.path.abspath(plugins_directory))
+
+    def load_plugins(self, directory):
         &#34;&#34;&#34;
-        Returns the registered plugins stored in a `_Plugins` instance.
+        Load and initialize the plugins in a given directory, adding them to the incontext instance.
         &#34;&#34;&#34;
-
-        # Load the plugins.
-        sys.path.append(self.plugins_directory)
-        plugins = {}
-        for plugin in utils.find_files(self.plugins_directory, [&#34;.py&#34;]):
-            plugin = os.path.join(*plugin)
-            (module, _) = os.path.splitext(os.path.relpath(plugin, self.plugins_directory))
-            module = module.replace(&#34;/&#34;, &#34;.&#34;)
-            logging.debug(&#34;Importing &#39;%s&#39;...&#34;, module)
-            plugins[module] = importlib.import_module(module)
-
-        # Create the argument parser.
-        self.parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, description=&#34;Generate website.&#34;)
-        self.parser.add_argument(&#39;--site&#39;, &#39;-s&#39;, default=os.getcwd(), help=&#34;path to the root of the site&#34;)
-        self.parser.add_argument(&#39;--verbose&#39;, &#39;-v&#39;, action=&#39;store_true&#39;, default=False, help=&#34;show verbose output&#34;)
-        self.parser.add_argument(&#39;--volume&#39;, action=&#39;append&#39;, help=&#34;mount an additional volume in the Docker container&#34;)
-        self.subparsers = self.parser.add_subparsers(help=&#34;command to run&#34;)
-
-        # Initialize the plugins.
+        directory = os.path.abspath(directory)
+        if directory in self._loaded_plugin_directories:
+            return
+        self._loaded_plugin_directories[directory] = True
+        plugins = utils.load_plugins(directory)
         for plugin_name, plugin_instance in plugins.items():
 
             # Load the classic method-based plugins.
@@ -281,7 +271,7 @@ class InContext(object):
         Primarily intended to be used by configuration providers to allow them to specify a path to a configuration
         file, or configuration override.
         &#34;&#34;&#34;
-        self.parser.add_argument(*args, **kwargs)
+        self.arguments.append(Argument(*args, **kwargs))
 
     def add_command(self, name, function, help=&#34;&#34;):
         &#34;&#34;&#34;
@@ -349,19 +339,57 @@ class InContext(object):
         &#34;&#34;&#34;
         return self.handlers[name]
 
+    def parser(self, add_subparsers=True):
+        &#34;&#34;&#34;
+        Return a parser, configured with the currently loaded plugins.
+        &#34;&#34;&#34;
+        # Create the argument parser.
+        parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, add_help=False, description=&#34;Generate website.&#34;)
+        parser.add_argument(&#39;--help&#39;, &#39;-h&#39;, default=False, action=&#39;store_true&#39;, help=&#34;show this help message and exit&#34;)
+        parser.add_argument(&#39;--site&#39;, &#39;-s&#39;, default=os.getcwd(), help=&#34;path to the root of the site&#34;)
+        parser.add_argument(&#39;--verbose&#39;, &#39;-v&#39;, action=&#39;store_true&#39;, default=False, help=&#34;show verbose output&#34;)
+        parser.add_argument(&#39;--volume&#39;, action=&#39;append&#39;, help=&#34;mount an additional volume in the Docker container&#34;)
+
+        # Add the top-level arguments.
+        for argument in self.arguments:
+            parser.add_argument(*(argument.args), **(argument.kwargs))
+
+        # Prepare the commands for running (if requested).
+        if add_subparsers:
+            subparsers = parser.add_subparsers(help=&#34;command to run&#34;)
+            for command_plugin in self._plugins.plugins(PLUGIN_TYPE_COMMAND).values():
+                subparser = subparsers.add_parser(command_plugin.name, help=command_plugin.help)
+                fn = command_plugin.configure(self, subparser)
+                subparser.set_defaults(fn=fn)
+
+        return parser
+
     def run(self, args=None):
         &#34;&#34;&#34;
         Parse the command line arguments and execute the requested command.
         &#34;&#34;&#34;
 
-        # Prepare the commands for running.
-        for command_plugin in self._plugins.plugins(PLUGIN_TYPE_COMMAND).values():
-            parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
-            fn = command_plugin.configure(self, parser)
-            parser.set_defaults(fn=fn)
+        # Parse the top-level arguments, ignoring unknown arguments.
+        parser = self.parser(add_subparsers=False)
+        options, unknown = parser.parse_known_args(args)
 
-        # Parse the arguments.
-        options = self.parser.parse_args(args)
+        # Check to see if there are any site-local plugins.
+        plugins_directory = os.path.join(os.path.abspath(options.site), &#34;plugins&#34;)
+        if os.path.exists(plugins_directory):
+            logging.debug(&#34;Loading site plugins...&#34;)
+            self.load_plugins(plugins_directory)
+
+        # Re-parse the arguments, along with the sub-commands / sub-parsers.
+        logging.debug(&#34;Re-processing arguments with sub-commands...&#34;)
+        parser = self.parser()
+        options = parser.parse_args(args)
+
+        # Explicit handling of the help functionality.
+        if options.help:
+            parser.print_help()
+            exit(1)
+
+        # Handle the arguments, running the command if specified.
         for name, configuration_provider in self.configuration_providers.items():
             self.configuration.add(name, configuration_provider(self, options))
         if &#39;fn&#39; not in options:
@@ -531,37 +559,27 @@ if __name__ == &#34;__main__&#34;:
         @param plugins_directory: Path to the plugins directory.
         @type plugins_directory: str
         &#34;&#34;&#34;
-        self.plugins_directory = os.path.abspath(plugins_directory)
         self.handlers = {}
         self.tasks = {}
         self.environment = {}
-        self.parser = None
-        self.subparsers = []
+        self.arguments = []
         self.configuration_providers = {}
         self.configuration = Configuration()
-        self._plugins = _PLUGINS
+        self._plugins = copy.deepcopy(_PLUGINS)
+        self._loaded_plugin_directories = {}
+
+        # Load and initialize the plugins.
+        self.load_plugins(os.path.abspath(plugins_directory))
+
+    def load_plugins(self, directory):
         &#34;&#34;&#34;
-        Returns the registered plugins stored in a `_Plugins` instance.
+        Load and initialize the plugins in a given directory, adding them to the incontext instance.
         &#34;&#34;&#34;
-
-        # Load the plugins.
-        sys.path.append(self.plugins_directory)
-        plugins = {}
-        for plugin in utils.find_files(self.plugins_directory, [&#34;.py&#34;]):
-            plugin = os.path.join(*plugin)
-            (module, _) = os.path.splitext(os.path.relpath(plugin, self.plugins_directory))
-            module = module.replace(&#34;/&#34;, &#34;.&#34;)
-            logging.debug(&#34;Importing &#39;%s&#39;...&#34;, module)
-            plugins[module] = importlib.import_module(module)
-
-        # Create the argument parser.
-        self.parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, description=&#34;Generate website.&#34;)
-        self.parser.add_argument(&#39;--site&#39;, &#39;-s&#39;, default=os.getcwd(), help=&#34;path to the root of the site&#34;)
-        self.parser.add_argument(&#39;--verbose&#39;, &#39;-v&#39;, action=&#39;store_true&#39;, default=False, help=&#34;show verbose output&#34;)
-        self.parser.add_argument(&#39;--volume&#39;, action=&#39;append&#39;, help=&#34;mount an additional volume in the Docker container&#34;)
-        self.subparsers = self.parser.add_subparsers(help=&#34;command to run&#34;)
-
-        # Initialize the plugins.
+        directory = os.path.abspath(directory)
+        if directory in self._loaded_plugin_directories:
+            return
+        self._loaded_plugin_directories[directory] = True
+        plugins = utils.load_plugins(directory)
         for plugin_name, plugin_instance in plugins.items():
 
             # Load the classic method-based plugins.
@@ -613,7 +631,7 @@ if __name__ == &#34;__main__&#34;:
         Primarily intended to be used by configuration providers to allow them to specify a path to a configuration
         file, or configuration override.
         &#34;&#34;&#34;
-        self.parser.add_argument(*args, **kwargs)
+        self.arguments.append(Argument(*args, **kwargs))
 
     def add_command(self, name, function, help=&#34;&#34;):
         &#34;&#34;&#34;
@@ -681,19 +699,57 @@ if __name__ == &#34;__main__&#34;:
         &#34;&#34;&#34;
         return self.handlers[name]
 
+    def parser(self, add_subparsers=True):
+        &#34;&#34;&#34;
+        Return a parser, configured with the currently loaded plugins.
+        &#34;&#34;&#34;
+        # Create the argument parser.
+        parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, add_help=False, description=&#34;Generate website.&#34;)
+        parser.add_argument(&#39;--help&#39;, &#39;-h&#39;, default=False, action=&#39;store_true&#39;, help=&#34;show this help message and exit&#34;)
+        parser.add_argument(&#39;--site&#39;, &#39;-s&#39;, default=os.getcwd(), help=&#34;path to the root of the site&#34;)
+        parser.add_argument(&#39;--verbose&#39;, &#39;-v&#39;, action=&#39;store_true&#39;, default=False, help=&#34;show verbose output&#34;)
+        parser.add_argument(&#39;--volume&#39;, action=&#39;append&#39;, help=&#34;mount an additional volume in the Docker container&#34;)
+
+        # Add the top-level arguments.
+        for argument in self.arguments:
+            parser.add_argument(*(argument.args), **(argument.kwargs))
+
+        # Prepare the commands for running (if requested).
+        if add_subparsers:
+            subparsers = parser.add_subparsers(help=&#34;command to run&#34;)
+            for command_plugin in self._plugins.plugins(PLUGIN_TYPE_COMMAND).values():
+                subparser = subparsers.add_parser(command_plugin.name, help=command_plugin.help)
+                fn = command_plugin.configure(self, subparser)
+                subparser.set_defaults(fn=fn)
+
+        return parser
+
     def run(self, args=None):
         &#34;&#34;&#34;
         Parse the command line arguments and execute the requested command.
         &#34;&#34;&#34;
 
-        # Prepare the commands for running.
-        for command_plugin in self._plugins.plugins(PLUGIN_TYPE_COMMAND).values():
-            parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
-            fn = command_plugin.configure(self, parser)
-            parser.set_defaults(fn=fn)
+        # Parse the top-level arguments, ignoring unknown arguments.
+        parser = self.parser(add_subparsers=False)
+        options, unknown = parser.parse_known_args(args)
 
-        # Parse the arguments.
-        options = self.parser.parse_args(args)
+        # Check to see if there are any site-local plugins.
+        plugins_directory = os.path.join(os.path.abspath(options.site), &#34;plugins&#34;)
+        if os.path.exists(plugins_directory):
+            logging.debug(&#34;Loading site plugins...&#34;)
+            self.load_plugins(plugins_directory)
+
+        # Re-parse the arguments, along with the sub-commands / sub-parsers.
+        logging.debug(&#34;Re-processing arguments with sub-commands...&#34;)
+        parser = self.parser()
+        options = parser.parse_args(args)
+
+        # Explicit handling of the help functionality.
+        if options.help:
+            parser.print_help()
+            exit(1)
+
+        # Handle the arguments, running the command if specified.
         for name, configuration_provider in self.configuration_providers.items():
             self.configuration.add(name, configuration_provider(self, options))
         if &#39;fn&#39; not in options:
@@ -751,7 +807,7 @@ file, or configuration override.</p></div>
     Primarily intended to be used by configuration providers to allow them to specify a path to a configuration
     file, or configuration override.
     &#34;&#34;&#34;
-    self.parser.add_argument(*args, **kwargs)</code></pre>
+    self.arguments.append(Argument(*args, **kwargs))</code></pre>
 </details>
 </dd>
 <dt id="incontext.InContext.add_command"><code class="name flex">
@@ -917,6 +973,72 @@ example, the image handling plugin makes use of this to allow other plugins to r
     return self.tasks[name]</code></pre>
 </details>
 </dd>
+<dt id="incontext.InContext.load_plugins"><code class="name flex">
+<span>def <span class="ident">load_plugins</span></span>(<span>self, directory)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load and initialize the plugins in a given directory, adding them to the incontext instance.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_plugins(self, directory):
+    &#34;&#34;&#34;
+    Load and initialize the plugins in a given directory, adding them to the incontext instance.
+    &#34;&#34;&#34;
+    directory = os.path.abspath(directory)
+    if directory in self._loaded_plugin_directories:
+        return
+    self._loaded_plugin_directories[directory] = True
+    plugins = utils.load_plugins(directory)
+    for plugin_name, plugin_instance in plugins.items():
+
+        # Load the classic method-based plugins.
+        if hasattr(plugin_instance, &#39;initialize_plugin&#39;):
+            logging.debug(&#34;Initializing legacy plugin &#39;%s&#39;...&#34;, plugin_name)
+            plugin_instance.initialize_plugin(self)
+
+        # Load the decorator-based plugins by copying in their &#39;global&#39; state.
+        if hasattr(plugin_instance, &#39;incontext&#39;):
+            logging.debug(&#34;Initializing plugin &#39;%s&#39;...&#34;, plugin_name)
+            self._plugins.extend(plugin_instance.incontext._PLUGINS)</code></pre>
+</details>
+</dd>
+<dt id="incontext.InContext.parser"><code class="name flex">
+<span>def <span class="ident">parser</span></span>(<span>self, add_subparsers=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a parser, configured with the currently loaded plugins.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def parser(self, add_subparsers=True):
+    &#34;&#34;&#34;
+    Return a parser, configured with the currently loaded plugins.
+    &#34;&#34;&#34;
+    # Create the argument parser.
+    parser = argparse.ArgumentParser(prog=&#34;incontext&#34;, add_help=False, description=&#34;Generate website.&#34;)
+    parser.add_argument(&#39;--help&#39;, &#39;-h&#39;, default=False, action=&#39;store_true&#39;, help=&#34;show this help message and exit&#34;)
+    parser.add_argument(&#39;--site&#39;, &#39;-s&#39;, default=os.getcwd(), help=&#34;path to the root of the site&#34;)
+    parser.add_argument(&#39;--verbose&#39;, &#39;-v&#39;, action=&#39;store_true&#39;, default=False, help=&#34;show verbose output&#34;)
+    parser.add_argument(&#39;--volume&#39;, action=&#39;append&#39;, help=&#34;mount an additional volume in the Docker container&#34;)
+
+    # Add the top-level arguments.
+    for argument in self.arguments:
+        parser.add_argument(*(argument.args), **(argument.kwargs))
+
+    # Prepare the commands for running (if requested).
+    if add_subparsers:
+        subparsers = parser.add_subparsers(help=&#34;command to run&#34;)
+        for command_plugin in self._plugins.plugins(PLUGIN_TYPE_COMMAND).values():
+            subparser = subparsers.add_parser(command_plugin.name, help=command_plugin.help)
+            fn = command_plugin.configure(self, subparser)
+            subparser.set_defaults(fn=fn)
+
+    return parser</code></pre>
+</details>
+</dd>
 <dt id="incontext.InContext.plugin"><code class="name flex">
 <span>def <span class="ident">plugin</span></span>(<span>self, domain, name)</span>
 </code></dt>
@@ -963,14 +1085,27 @@ example, the image handling plugin makes use of this to allow other plugins to r
     Parse the command line arguments and execute the requested command.
     &#34;&#34;&#34;
 
-    # Prepare the commands for running.
-    for command_plugin in self._plugins.plugins(PLUGIN_TYPE_COMMAND).values():
-        parser = self.subparsers.add_parser(command_plugin.name, help=command_plugin.help)
-        fn = command_plugin.configure(self, parser)
-        parser.set_defaults(fn=fn)
+    # Parse the top-level arguments, ignoring unknown arguments.
+    parser = self.parser(add_subparsers=False)
+    options, unknown = parser.parse_known_args(args)
 
-    # Parse the arguments.
-    options = self.parser.parse_args(args)
+    # Check to see if there are any site-local plugins.
+    plugins_directory = os.path.join(os.path.abspath(options.site), &#34;plugins&#34;)
+    if os.path.exists(plugins_directory):
+        logging.debug(&#34;Loading site plugins...&#34;)
+        self.load_plugins(plugins_directory)
+
+    # Re-parse the arguments, along with the sub-commands / sub-parsers.
+    logging.debug(&#34;Re-processing arguments with sub-commands...&#34;)
+    parser = self.parser()
+    options = parser.parse_args(args)
+
+    # Explicit handling of the help functionality.
+    if options.help:
+        parser.print_help()
+        exit(1)
+
+    # Handle the arguments, running the command if specified.
     for name, configuration_provider in self.configuration_providers.items():
         self.configuration.add(name, configuration_provider(self, options))
     if &#39;fn&#39; not in options:
@@ -1036,6 +1171,8 @@ example, the image handling plugin makes use of this to allow other plugins to r
 <li><code><a title="incontext.InContext.context_functions" href="#incontext.InContext.context_functions">context_functions</a></code></li>
 <li><code><a title="incontext.InContext.get_handler" href="#incontext.InContext.get_handler">get_handler</a></code></li>
 <li><code><a title="incontext.InContext.get_task" href="#incontext.InContext.get_task">get_task</a></code></li>
+<li><code><a title="incontext.InContext.load_plugins" href="#incontext.InContext.load_plugins">load_plugins</a></code></li>
+<li><code><a title="incontext.InContext.parser" href="#incontext.InContext.parser">parser</a></code></li>
 <li><code><a title="incontext.InContext.plugin" href="#incontext.InContext.plugin">plugin</a></code></li>
 <li><code><a title="incontext.InContext.plugins" href="#incontext.InContext.plugins">plugins</a></code></li>
 <li><code><a title="incontext.InContext.run" href="#incontext.InContext.run">run</a></code></li>
