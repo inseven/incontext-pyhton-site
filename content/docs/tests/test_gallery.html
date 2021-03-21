@@ -98,6 +98,30 @@ SITE_CONFIGURATION_WITH_IMAGE_HANDLER = {
 }
 
 
+SITE_CONFIGURATION_WITH_COMMON_HANDLERS = {
+    &#34;config&#34;: {
+        &#34;title&#34;: &#34;Example Site&#34;,
+        &#34;url&#34;: &#34;https://example.com&#34;,
+    },
+    &#34;paths&#34;: [],
+    &#34;build_steps&#34;: [{
+        &#34;task&#34;: &#34;process_files&#34;,
+        &#34;args&#34;: {
+            &#34;handlers&#34;: [{
+                &#34;when&#34;: &#39;.*\.(jpeg|jpg|png|tiff|)&#39;,
+                &#34;then&#34;: &#34;import_photo&#34;,
+                &#34;args&#34;: {
+                    &#34;category&#34;: &#34;photos&#34;,
+                }
+            }, {
+                &#34;when&#34;: &#34;(.*/)?.*\.markdown&#34;,
+                &#34;then&#34;: &#34;import_markdown&#34;,
+            }]
+        }
+    }]
+}
+
+
 class GalleryTestCase(unittest.TestCase):
 
     def test_regex(self):
@@ -549,7 +573,56 @@ class GalleryTestCase(unittest.TestCase):
             site.assertExists(&#34;build/files/image/index.html&#34;)
             site.assertFileContents(&#34;build/files/image/index.html&#34;, &#34;Theophany&#34;)
 
+    def test_relative_img_src_rewrite(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+            site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+            site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+            site.makedirs(&#34;content/gallery&#34;)
+            site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+            site.add(&#34;content/gallery/index.markdown&#34;, &#39;&lt;img src=&#34;image.jpeg&#34;&gt;&#39;)
+            site.build()
+            site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+            site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/index.html&#34;)
+            site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34; srcset&gt;&lt;/p&gt;\n&#39;)
 
+    def test_relative_picture_source_srcset_rewrite(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+            site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+            site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+            site.makedirs(&#34;content/gallery&#34;)
+            site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+            site.add(&#34;content/gallery/index.markdown&#34;, &#39;&lt;picture&gt;&lt;source srcset=&#34;image.jpeg&#34; media=&#34;(prefers-color-scheme: dark)&#34; /&gt;&lt;source srcset=&#34;image.jpeg&#34; media=&#34;(prefers-color-scheme: light), (prefers-color-scheme: no-preference)&#34; /&gt;&lt;img src=&#34;image.jpeg&#34; loading=&#34;lazy&#34; /&gt;&lt;/picture&gt;&#39;)
+            site.build()
+            site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+            site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/index.html&#34;)
+            site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;picture&gt;&lt;source srcset=&#34;/gallery/image/image.jpeg&#34; media=&#34;(prefers-color-scheme: dark)&#34;&gt;&lt;/source&gt;&lt;source srcset=&#34;/gallery/image/image.jpeg&#34; media=&#34;(prefers-color-scheme: light), (prefers-color-scheme: no-preference)&#34;&gt;&lt;/source&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34; loading=&#34;lazy&#34; srcset&gt;&lt;/picture&gt;&lt;/p&gt;\n&#39;)
+
+    def test_relative_markdown_image_rewrite(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+            site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+            site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+            site.add(&#34;templates/image.html&#34;, &#39;&lt;img src=&#34;{{ image.image.url }}&#34;&gt;&#39;)
+            site.makedirs(&#34;content/gallery&#34;)
+            site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+            site.add(&#34;content/gallery/index.markdown&#34;, &#39;![](image.jpeg)&#39;)
+            site.build()
+            site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+            site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/index.html&#34;)
+            site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34;&gt;&lt;/p&gt;\n&#39;)
+
+# TODO: Check that images that don&#39;t exist don&#39;t break renders (in both regular tags and todos)
+# TODO: Test that thumbnails have been created
+# TODO: Test that absolute path image URLs are not incorrectly fixed up
+# TODO: Test that full URLs are not fixed up
 # TODO: Test multiple images in a custom profile
 # TODO: Test custom handler plugins
 # TODO: Add end-to-end tests for metadata filtering
@@ -1053,7 +1126,53 @@ not have a method with the specified name.</p></div>
             site.copy(IMG_6218_TIFF, &#34;content/image.tiff&#34;)
             site.build()
             site.assertExists(&#34;build/files/image/index.html&#34;)
-            site.assertFileContents(&#34;build/files/image/index.html&#34;, &#34;Theophany&#34;)</code></pre>
+            site.assertFileContents(&#34;build/files/image/index.html&#34;, &#34;Theophany&#34;)
+
+    def test_relative_img_src_rewrite(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+            site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+            site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+            site.makedirs(&#34;content/gallery&#34;)
+            site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+            site.add(&#34;content/gallery/index.markdown&#34;, &#39;&lt;img src=&#34;image.jpeg&#34;&gt;&#39;)
+            site.build()
+            site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+            site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/index.html&#34;)
+            site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34; srcset&gt;&lt;/p&gt;\n&#39;)
+
+    def test_relative_picture_source_srcset_rewrite(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+            site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+            site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+            site.makedirs(&#34;content/gallery&#34;)
+            site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+            site.add(&#34;content/gallery/index.markdown&#34;, &#39;&lt;picture&gt;&lt;source srcset=&#34;image.jpeg&#34; media=&#34;(prefers-color-scheme: dark)&#34; /&gt;&lt;source srcset=&#34;image.jpeg&#34; media=&#34;(prefers-color-scheme: light), (prefers-color-scheme: no-preference)&#34; /&gt;&lt;img src=&#34;image.jpeg&#34; loading=&#34;lazy&#34; /&gt;&lt;/picture&gt;&#39;)
+            site.build()
+            site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+            site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/index.html&#34;)
+            site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;picture&gt;&lt;source srcset=&#34;/gallery/image/image.jpeg&#34; media=&#34;(prefers-color-scheme: dark)&#34;&gt;&lt;/source&gt;&lt;source srcset=&#34;/gallery/image/image.jpeg&#34; media=&#34;(prefers-color-scheme: light), (prefers-color-scheme: no-preference)&#34;&gt;&lt;/source&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34; loading=&#34;lazy&#34; srcset&gt;&lt;/picture&gt;&lt;/p&gt;\n&#39;)
+
+    def test_relative_markdown_image_rewrite(self):
+        with common.TemporarySite(self) as site:
+            site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+            site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+            site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+            site.add(&#34;templates/image.html&#34;, &#39;&lt;img src=&#34;{{ image.image.url }}&#34;&gt;&#39;)
+            site.makedirs(&#34;content/gallery&#34;)
+            site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+            site.add(&#34;content/gallery/index.markdown&#34;, &#39;![](image.jpeg)&#39;)
+            site.build()
+            site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+            site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+            site.assertExists(&#34;build/files/gallery/index.html&#34;)
+            site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34;&gt;&lt;/p&gt;\n&#39;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1390,6 +1509,82 @@ not have a method with the specified name.</p></div>
     self.assertFalse(Regex(r&#34;^hello$&#34;).evaluate(&#34;hello world&#34;))
     self.assertTrue(Regex(r&#34;hello&#34;, key=&#34;property&#34;).evaluate({&#34;property&#34;: &#34;hello&#34;}))
     self.assertFalse(Regex(r&#34;hello&#34;, key=&#34;property&#34;).evaluate({&#34;property&#34;: &#34;goodbye&#34;}))</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_relative_img_src_rewrite"><code class="name flex">
+<span>def <span class="ident">test_relative_img_src_rewrite</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_relative_img_src_rewrite(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+        site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+        site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+        site.makedirs(&#34;content/gallery&#34;)
+        site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+        site.add(&#34;content/gallery/index.markdown&#34;, &#39;&lt;img src=&#34;image.jpeg&#34;&gt;&#39;)
+        site.build()
+        site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+        site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+        site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+        site.assertExists(&#34;build/files/gallery/index.html&#34;)
+        site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34; srcset&gt;&lt;/p&gt;\n&#39;)</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_relative_markdown_image_rewrite"><code class="name flex">
+<span>def <span class="ident">test_relative_markdown_image_rewrite</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_relative_markdown_image_rewrite(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+        site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+        site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+        site.add(&#34;templates/image.html&#34;, &#39;&lt;img src=&#34;{{ image.image.url }}&#34;&gt;&#39;)
+        site.makedirs(&#34;content/gallery&#34;)
+        site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+        site.add(&#34;content/gallery/index.markdown&#34;, &#39;![](image.jpeg)&#39;)
+        site.build()
+        site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+        site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+        site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+        site.assertExists(&#34;build/files/gallery/index.html&#34;)
+        site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34;&gt;&lt;/p&gt;\n&#39;)</code></pre>
+</details>
+</dd>
+<dt id="test_gallery.GalleryTestCase.test_relative_picture_source_srcset_rewrite"><code class="name flex">
+<span>def <span class="ident">test_relative_picture_source_srcset_rewrite</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_relative_picture_source_srcset_rewrite(self):
+    with common.TemporarySite(self) as site:
+        site.add(&#34;site.yaml&#34;, SITE_CONFIGURATION_WITH_COMMON_HANDLERS)
+        site.add(&#34;templates/photo.html&#34;, &#39;{{ page.title }}&#39;)
+        site.add(&#34;templates/post.html&#34;, &#39;{{ page.html | safe }}&#39;)
+        site.makedirs(&#34;content/gallery&#34;)
+        site.copy(IMG_3864_JPEG, &#34;content/gallery/image.jpeg&#34;)
+        site.add(&#34;content/gallery/index.markdown&#34;, &#39;&lt;picture&gt;&lt;source srcset=&#34;image.jpeg&#34; media=&#34;(prefers-color-scheme: dark)&#34; /&gt;&lt;source srcset=&#34;image.jpeg&#34; media=&#34;(prefers-color-scheme: light), (prefers-color-scheme: no-preference)&#34; /&gt;&lt;img src=&#34;image.jpeg&#34; loading=&#34;lazy&#34; /&gt;&lt;/picture&gt;&#39;)
+        site.build()
+        site.assertExists(&#34;build/files/gallery/image/index.html&#34;)
+        site.assertExists(&#34;build/files/gallery/image/image.jpeg&#34;)
+        site.assertExists(&#34;build/files/gallery/image/thumbnail.jpeg&#34;)
+        site.assertExists(&#34;build/files/gallery/index.html&#34;)
+        site.assertFileContents(&#34;build/files/gallery/index.html&#34;, &#39;&lt;p&gt;&lt;picture&gt;&lt;source srcset=&#34;/gallery/image/image.jpeg&#34; media=&#34;(prefers-color-scheme: dark)&#34;&gt;&lt;/source&gt;&lt;source srcset=&#34;/gallery/image/image.jpeg&#34; media=&#34;(prefers-color-scheme: light), (prefers-color-scheme: no-preference)&#34;&gt;&lt;/source&gt;&lt;img src=&#34;/gallery/image/image.jpeg&#34; loading=&#34;lazy&#34; srcset&gt;&lt;/picture&gt;&lt;/p&gt;\n&#39;)</code></pre>
 </details>
 </dd>
 <dt id="test_gallery.GalleryTestCase.test_resize_gif"><code class="name flex">
@@ -1745,6 +1940,9 @@ def test_resize_tiff(self):
 <li><code><a title="test_gallery.GalleryTestCase.test_parser" href="#test_gallery.GalleryTestCase.test_parser">test_parser</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_parser_method" href="#test_gallery.GalleryTestCase.test_parser_method">test_parser_method</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_regex" href="#test_gallery.GalleryTestCase.test_regex">test_regex</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_relative_img_src_rewrite" href="#test_gallery.GalleryTestCase.test_relative_img_src_rewrite">test_relative_img_src_rewrite</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_relative_markdown_image_rewrite" href="#test_gallery.GalleryTestCase.test_relative_markdown_image_rewrite">test_relative_markdown_image_rewrite</a></code></li>
+<li><code><a title="test_gallery.GalleryTestCase.test_relative_picture_source_srcset_rewrite" href="#test_gallery.GalleryTestCase.test_relative_picture_source_srcset_rewrite">test_relative_picture_source_srcset_rewrite</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_resize_gif" href="#test_gallery.GalleryTestCase.test_resize_gif">test_resize_gif</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_resize_heic" href="#test_gallery.GalleryTestCase.test_resize_heic">test_resize_heic</a></code></li>
 <li><code><a title="test_gallery.GalleryTestCase.test_resize_jpeg" href="#test_gallery.GalleryTestCase.test_resize_jpeg">test_resize_jpeg</a></code></li>
