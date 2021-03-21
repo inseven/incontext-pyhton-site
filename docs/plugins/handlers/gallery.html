@@ -83,13 +83,13 @@ DEFAULT_CONFIGURATION = {
             &#34;where&#34;: &#34;glob(&#39;*.{heic,tiff}&#39;)&#34;,
             &#34;transforms&#34;: [
                 &#34;resize(&#39;image&#39;, width=1600, format=&#39;image/jpeg&#39;, sets=[&#39;image&#39;, &#39;previews&#39;])&#34;,
-                &#34;resize(&#39;thumbnail&#39;, width=480, format=&#39;image/jpeg&#39;, sets=[&#39;image&#39;, &#39;previews&#39;])&#34;,
+                &#34;resize(&#39;thumbnail&#39;, width=480, format=&#39;image/jpeg&#39;, sets=[&#39;thumbnail&#39;, &#39;previews&#39;])&#34;,
             ],
         }, {
             &#34;where&#34;: &#34;glob(&#39;*&#39;)&#34;,
             &#34;transforms&#34;: [
                 &#34;resize(&#39;image&#39;, width=1600, sets=[&#39;image&#39;, &#39;previews&#39;])&#34;,
-                &#34;resize(&#39;thumbnail&#39;, width=480, sets=[&#39;image&#39;, &#39;previews&#39;])&#34;,
+                &#34;resize(&#39;thumbnail&#39;, width=480, sets=[&#39;thumbnail&#39;, &#39;previews&#39;])&#34;,
             ],
         }],
     },

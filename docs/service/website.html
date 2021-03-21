@@ -188,6 +188,8 @@ class Site(object):
         except KeyError:
             return None
 
+    # TODO: Dependencies are not tracked for included image files.
+
     def __getitem__(self, key):
         return self.config[key]
 
@@ -498,13 +500,22 @@ def fixup_relative_url(url, page_path):
     return url
 
 
-def fixup_relative_srcset(srcset, page_path):
+def fixup_relative_image_srcset(srcset, page_path):
     if srcset is None:
         return None
     srcs = [re.split(&#34;\s+&#34;, src) for src in re.split(&#39;\s*,\s*&#39;, srcset)]
     for src in srcs:
-        src[0] = fixup_relative_url(src[0], page_path)
+        src[0] = fixup_relative_image_url(src[0], page_path)
     return &#34;, &#34;.join([&#34; &#34;.join(src) for src in srcs])
+
+
+def fixup_relative_image_url(url, page_path):
+    o = urllib.parse.urlparse(url)
+    if o.scheme == &#39;&#39; and o.netloc == &#39;&#39; and not o.path.startswith(&#39;/&#39;) and not url.startswith(&#39;#&#39;):
+        path = os.path.join(os.path.dirname(page_path), o.path)
+        image = app.jinja_env.store.getall(path=path)[0]
+        return image[&#34;image&#34;][&#34;url&#34;]
+    return url
 
 
 def markdown(page):
@@ -541,8 +552,11 @@ def markdown(page):
                 parent.insert(parent.index(image) + 1, replacement_image)
                 parent.remove(image)
             else:
-                image.set(&#39;src&#39;, fixup_relative_url(src, page[&#34;path&#34;]))
-                image.set(&#39;srcset&#39;, fixup_relative_srcset(image.get(&#39;srcset&#39;), page[&#34;path&#34;]))
+                image.set(&#39;src&#39;, fixup_relative_image_url(src, page[&#34;path&#34;]))
+                image.set(&#39;srcset&#39;, fixup_relative_image_srcset(image.get(&#39;srcset&#39;), page[&#34;path&#34;]))
+        for source in document.xpath(&#34;//picture/source&#34;):
+            srcset = source.get(&#39;srcset&#39;)
+            source.set(&#39;srcset&#39;, fixup_relative_image_url(srcset, page[&#34;path&#34;]))
         for anchor in document.xpath(&#34;//a&#34;):
             anchor.set(&#39;href&#39;, fixup_relative_url(anchor.get(&#39;href&#39;), page[&#34;path&#34;]))
         results = lxml.html.tostring(document, method=&#39;html&#39;, encoding=&#39;unicode&#39;)
@@ -692,8 +706,8 @@ def documents(path=&#34;&#34;):
     return content</code></pre>
 </details>
 </dd>
-<dt id="website.fixup_relative_srcset"><code class="name flex">
-<span>def <span class="ident">fixup_relative_srcset</span></span>(<span>srcset, page_path)</span>
+<dt id="website.fixup_relative_image_srcset"><code class="name flex">
+<span>def <span class="ident">fixup_relative_image_srcset</span></span>(<span>srcset, page_path)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -701,13 +715,31 @@ def documents(path=&#34;&#34;):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def fixup_relative_srcset(srcset, page_path):
+<pre><code class="python">def fixup_relative_image_srcset(srcset, page_path):
     if srcset is None:
         return None
     srcs = [re.split(&#34;\s+&#34;, src) for src in re.split(&#39;\s*,\s*&#39;, srcset)]
     for src in srcs:
-        src[0] = fixup_relative_url(src[0], page_path)
+        src[0] = fixup_relative_image_url(src[0], page_path)
     return &#34;, &#34;.join([&#34; &#34;.join(src) for src in srcs])</code></pre>
+</details>
+</dd>
+<dt id="website.fixup_relative_image_url"><code class="name flex">
+<span>def <span class="ident">fixup_relative_image_url</span></span>(<span>url, page_path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fixup_relative_image_url(url, page_path):
+    o = urllib.parse.urlparse(url)
+    if o.scheme == &#39;&#39; and o.netloc == &#39;&#39; and not o.path.startswith(&#39;/&#39;) and not url.startswith(&#39;#&#39;):
+        path = os.path.join(os.path.dirname(page_path), o.path)
+        image = app.jinja_env.store.getall(path=path)[0]
+        return image[&#34;image&#34;][&#34;url&#34;]
+    return url</code></pre>
 </details>
 </dd>
 <dt id="website.fixup_relative_url"><code class="name flex">
@@ -822,8 +854,11 @@ def documents(path=&#34;&#34;):
                 parent.insert(parent.index(image) + 1, replacement_image)
                 parent.remove(image)
             else:
-                image.set(&#39;src&#39;, fixup_relative_url(src, page[&#34;path&#34;]))
-                image.set(&#39;srcset&#39;, fixup_relative_srcset(image.get(&#39;srcset&#39;), page[&#34;path&#34;]))
+                image.set(&#39;src&#39;, fixup_relative_image_url(src, page[&#34;path&#34;]))
+                image.set(&#39;srcset&#39;, fixup_relative_image_srcset(image.get(&#39;srcset&#39;), page[&#34;path&#34;]))
+        for source in document.xpath(&#34;//picture/source&#34;):
+            srcset = source.get(&#39;srcset&#39;)
+            source.set(&#39;srcset&#39;, fixup_relative_image_url(srcset, page[&#34;path&#34;]))
         for anchor in document.xpath(&#34;//a&#34;):
             anchor.set(&#39;href&#39;, fixup_relative_url(anchor.get(&#39;href&#39;), page[&#34;path&#34;]))
         results = lxml.html.tostring(document, method=&#39;html&#39;, encoding=&#39;unicode&#39;)
@@ -1536,6 +1571,8 @@ unchanged if the corresponding attribute is :obj:<code>None</code>.</p></div>
         except KeyError:
             return None
 
+    # TODO: Dependencies are not tracked for included image files.
+
     def __getitem__(self, key):
         return self.config[key]
 
@@ -1655,7 +1692,8 @@ def last_modified(self):
 <li><code><a title="website.documents" href="#website.documents">documents</a></code></li>
 <li><code><a title="website.filter_base64" href="#website.filter_base64">filter_base64</a></code></li>
 <li><code><a title="website.filter_render_template" href="#website.filter_render_template">filter_render_template</a></code></li>
-<li><code><a title="website.fixup_relative_srcset" href="#website.fixup_relative_srcset">fixup_relative_srcset</a></code></li>
+<li><code><a title="website.fixup_relative_image_srcset" href="#website.fixup_relative_image_srcset">fixup_relative_image_srcset</a></code></li>
+<li><code><a title="website.fixup_relative_image_url" href="#website.fixup_relative_image_url">fixup_relative_image_url</a></code></li>
 <li><code><a title="website.fixup_relative_url" href="#website.fixup_relative_url">fixup_relative_url</a></code></li>
 <li><code><a title="website.get_document" href="#website.get_document">get_document</a></code></li>
 <li><code><a title="website.initialize" href="#website.initialize">initialize</a></code></li>
