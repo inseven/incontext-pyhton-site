@@ -218,6 +218,9 @@ def safe_command(command):
 
 
 def safe_basename(title):
+    import unidecode
+    title = unidecode.unidecode(title)
+    title = re.sub(r&#34;[&#39;’]&#34;, &#34;&#34;, title)
     title = re.sub(r&#34;[^a-z0-9]+&#34;, &#34; &#34;, title.lower())
     title = re.sub(r&#34;\W+&#34;, &#34;-&#34;, title.strip())
     return title
@@ -505,6 +508,9 @@ InContext commands.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def safe_basename(title):
+    import unidecode
+    title = unidecode.unidecode(title)
+    title = re.sub(r&#34;[&#39;’]&#34;, &#34;&#34;, title)
     title = re.sub(r&#34;[^a-z0-9]+&#34;, &#34; &#34;, title.lower())
     title = re.sub(r&#34;\W+&#34;, &#34;-&#34;, title.strip())
     return title</code></pre>
